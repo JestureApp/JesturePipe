@@ -1,5 +1,5 @@
 
-#include "absl/flags/flag.h"
+// #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
 #include "mediapipe/framework/calculator_framework.h"
 #include "mediapipe/framework/port/status.h"
@@ -9,26 +9,67 @@
 #include "mediapipe/framework/port/opencv_highgui_inc.h"
 #include "mediapipe/framework/port/opencv_imgproc_inc.h"
 #include "mediapipe/framework/port/opencv_video_inc.h"
+#include "jesturepipe/graphs/hand_tracking_desktop_live.h"
 
+constexpr char kInputStream[] = "input_video";
+constexpr char kOutputStream[] = "output_video";
+constexpr char kWindowName[] = "MediaPipe";
 
 absl::Status RunGraph() {
-    absl::string_view filename; // TODO: set this to the path of the graph binary
-    std::string graph_config_contents;
+    mediapipe::CalculatorGraph graph;
+    MP_RETURN_IF_ERROR(jesturepipe::hand_tracking_desktop_live_graph(&graph));
 
-    MP_RETURN_IF_ERROR(mediapipe::file::GetContents(filename, &graph_config_contents));
+    cv::VideoCapture capture;
+    capture.open(2);
 
-    mediapipe::CalculatorGraphConfig config;
+    RET_CHECK(capture.isOpened());
 
-    if (!config.ParseFromArray(graph_config_contents.c_str(), graph_config_contents.size())) {
-        // TODO: more useful error type
-        return absl::AbortedError("Failed to parse graph config contents");
+    cv::namedWindow(kWindowName, 1);
+
+    ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller, graph.AddOutputStreamPoller(kOutputStream));
+
+    MP_RETURN_IF_ERROR(graph.StartRun({}));
+
+    while(true) {
+        cv::Mat camera_frame_raw;
+        capture >> camera_frame_raw;
+
+        if (camera_frame_raw.empty()) continue;
+
+        cv::Mat camera_frame;
+        cv::cvtColor(camera_frame_raw, camera_frame, cv::COLOR_BGR2RGB);
+        cv::flip(camera_frame, camera_frame, /*flipcode=HORIZONTAL*/ 1);
+
+        auto input_frame = absl::make_unique<mediapipe::ImageFrame>(
+            mediapipe::ImageFormat::SRGB, camera_frame.cols, camera_frame.rows,
+            mediapipe::ImageFrame::kDefaultAlignmentBoundary);
+
+        cv::Mat input_frame_mat = mediapipe::formats::MatView(input_frame.get());
+        camera_frame.copyTo(input_frame_mat);
+
+        size_t frame_timestamp = (double)cv::getTickCount() / (double)cv::getTickFrequency() * 1e6;
+
+        MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+            kInputStream, 
+            mediapipe::Adopt(input_frame.release()).At(mediapipe::Timestamp(frame_timestamp))
+        ));
+
+        mediapipe::Packet packet;
+        if (! poller.Next(&packet)) break;
+        auto& output_frame = packet.Get<mediapipe::ImageFrame>();
+
+        cv::Mat output_frame_mat = mediapipe::formats::MatView(&output_frame);
+        cv::cvtColor(output_frame_mat, output_frame_mat, cv::COLOR_RGB2BGR);
+
+        cv::imshow(kWindowName, output_frame_mat);
+        const int pressed_key = cv::waitKey(5);
+
+        if (pressed_key >= 0 && pressed_key != 255) break;
     }
 
-    mediapipe::CalculatorGraph graph;
-    
-    MP_RETURN_IF_ERROR(graph.Initialize(config));
+    MP_RETURN_IF_ERROR(graph.CloseInputStream(kInputStream));
 
-    return absl::OkStatus();
+    return graph.WaitUntilDone();
 }
 
 int main(int argc, char** argv) {
