@@ -2,7 +2,8 @@ common --experimental_repo_remote_exec
 
 build --define MEDIAPIPE_DISABLE_GPU=1
 
-build --jobs 128
+build --local_ram_resources=HOST_RAM*.5
+build --local_cpu_resources=HOST_CPUS*.5
 build --enable_platform_specific_config
 
 build:linux --cxxopt=-std=c++17

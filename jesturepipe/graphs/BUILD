@@ -11,5 +11,9 @@ cc_library(
         "@mediapipe//mediapipe/framework/port:status",
         "@mediapipe//mediapipe/framework/port:file_helpers",
         "@mediapipe//mediapipe/graphs/hand_tracking:desktop_tflite_calculators",
-    ]
+        "@bazel_tools//tools/cpp/runfiles",
+    ],
+    data = [
+        "@mediapipe//mediapipe/graphs/hand_tracking:hand_tracking_desktop_live_binary_graph",
+    ],
 )

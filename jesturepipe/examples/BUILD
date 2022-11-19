@@ -24,5 +24,5 @@ cc_binary(
         "@mediapipe//mediapipe/framework/formats:image_frame",
         "@mediapipe//mediapipe/framework/formats:image_frame_opencv",
         "@com_google_absl//absl/flags:parse",
-    ]
+    ],
 )

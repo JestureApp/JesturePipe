@@ -15,9 +15,9 @@ constexpr char kInputStream[] = "input_video";
 constexpr char kOutputStream[] = "output_video";
 constexpr char kWindowName[] = "MediaPipe";
 
-absl::Status RunGraph() {
+absl::Status RunGraph(const std::string& arg0) {
     mediapipe::CalculatorGraph graph;
-    MP_RETURN_IF_ERROR(jesturepipe::hand_tracking_desktop_live_graph(&graph));
+    MP_RETURN_IF_ERROR(jesturepipe::hand_tracking_desktop_live_graph(arg0, &graph));
 
     cv::VideoCapture capture;
     capture.open(2);
@@ -74,7 +74,7 @@ absl::Status RunGraph() {
 
 int main(int argc, char** argv) {
     google::InitGoogleLogging(argv[0]);
-    absl::Status status = RunGraph();
+    absl::Status status = RunGraph(argv[0]);
     
     if (!status.ok()) {
         LOG(ERROR) << status.message();
