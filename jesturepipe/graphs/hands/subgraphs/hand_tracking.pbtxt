@@ -42,7 +42,7 @@ output_stream: "HAND_ROIS_FROM_LANDMARKS:hand_rects"
 output_stream: "HAND_ROIS_FROM_PALM_DETECTIONS:hand_rects_from_detections"
 
 ################################################################################
-## Graphs
+## Graph
 ################################################################################
 
 node {

@@ -1,0 +1,30 @@
+# Graph that takes a image frame and produces palm detections.
+
+type: "PalmDetector"
+
+################################################################################
+# Configuration (Input Side Packets)
+################################################################################
+
+# Complexity of the palm detection model: 0 or 1.
+# 0: Fast, low accuracy.
+# 1: Slow, high accuracy.
+# (int)
+input_side_packet: "MODEL_COMPLEXITY:model_complexity"
+
+################################################################################
+# Inputs
+################################################################################
+
+# The image frame to find hand landmarks in. (ImageFrame)
+input_stream: "IMAGE:frame"
+
+################################################################################
+# Outputs
+################################################################################
+
+output_stream: "DETECTIONS:detections"
+
+################################################################################
+# Graph
+################################################################################

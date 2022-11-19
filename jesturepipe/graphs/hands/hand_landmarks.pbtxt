@@ -1,0 +1,60 @@
+# Graph that takes a image frame a poduces hand(s) landmarks as well as ROIs 
+# (Regions of Interest) for the hand(s) and the palm(s).
+
+type: "HandLandmarkDetector"
+
+################################################################################
+# Configuration (Input side packets)
+################################################################################
+
+# Maximum number of hands to detect/track. (int)
+input_side_packet: "NUM_HANDS:num_hands"
+
+# Complexity of the hand landmark and palm detection models: 0 or 1.
+# 0: Fast, low accuracy.
+# 1: Slow, high accuracy.
+# (int)
+input_side_packet: "MODEL_COMPLEXITY:model_complexity"
+
+################################################################################
+# Inputs
+################################################################################
+
+# The image frame to find hand landmarks in. (ImageFrame)
+input_stream: "IMAGE:frame"
+
+################################################################################
+# Outputs
+################################################################################
+
+# A collection of hand landmarks for each hand detected. (std::vector<NormalizedLandmarkList>)
+output_stream: "LANDMARKS:hand_landmarks"
+
+################################################################################
+# Graph
+################################################################################
+
+# [frame] --{ImagePropertiesCalculator}--> [frame_size]
+
+# [frame]               -------------{PalmDetector}-------------> [palm_detections_raw]
+# [palm_detections_raw] --{ClipDetectionsVectorSizeCalculator}--> [palm_detections]
+
+node {
+    calculator: "ImagePropertiesCalculator"
+    input_stream: "IMAGE:frame"
+    output_stream: "SIZE:frame_size"
+}
+
+node {
+    calculator: "PalmDetector",
+    input_side_packet: "MODEL_COMPLEXITY:model_complexity",
+    input_stream: "IMAGE:frame",
+    output_stream: "DETECTIONS:palm_detections_raw"
+}
+
+node {
+    calculator: "ClipDetectionsVectorSizeCalculator",
+    input_side_packet: "MAX_SIZE:num_hands",
+    input_stream: "DETECTIONS:palm_detections_raw",
+    output_stream: "DETECTIONS:palm_detections"
+}
