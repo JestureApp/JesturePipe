@@ -1,7 +1,7 @@
 # Graph that takes a image frame a poduces hand(s) landmarks as well as ROIs 
 # (Regions of Interest) for the hand(s) and the palm(s).
 
-type: "HandLandmarkDetector"
+type: "HandLandmarks"
 
 ################################################################################
 # Configuration (Input side packets)
@@ -10,11 +10,11 @@ type: "HandLandmarkDetector"
 # Maximum number of hands to detect/track. (int)
 input_side_packet: "NUM_HANDS:num_hands"
 
-# Complexity of the hand landmark and palm detection models: 0 or 1.
-# 0: Fast, low accuracy.
-# 1: Slow, high accuracy.
-# (int)
-input_side_packet: "MODEL_COMPLEXITY:model_complexity"
+# Path to the palm detection model.
+input_side_packet: "PALM_MODEL_PATH:palm_model_path"
+
+# Path to the hand landmark model.
+input_side_packet: "LANDMARK_MODEL_PATH:landmark_model_path"
 
 ################################################################################
 # Inputs
@@ -28,33 +28,122 @@ input_stream: "IMAGE:frame"
 ################################################################################
 
 # A collection of hand landmarks for each hand detected. (std::vector<NormalizedLandmarkList>)
-output_stream: "LANDMARKS:hand_landmarks"
+output_stream: "LANDMARKS:multi_hand_landmarks"
+
+# Regions of interest calculated based on landmarks. (std::vector<NormalizedRect>)
+output_stream: "HAND_ROIS:hand_rects"
 
 ################################################################################
 # Graph
 ################################################################################
 
-# [frame] --{ImagePropertiesCalculator}--> [frame_size]
+# The following diagram gives an overview of the structure of the graph, but it
+# does hide some details, so please see the actual definitions below for more
+# information.
+# 
+#    frame
+#      │
+#      ├────────────────┬──────────────┐
+#      │                │              │
+#      ▼                ▼              │
+# ┌──────────┐   ┌─────────────┐       │
+# │Properties│   │Palm Detector│       │
+# └────┬─────┘   └──────┬──────┘       │
+#      │                │              │
+#  frame_size    palm_detections       │
+#      │                │              │
+#      │                ▼              │
+#      │       ┌──────────────────┐    │
+#      │       │For each Detection│    │
+#      │       └────────┬─────────┘    │
+#      │                │              │
+#      │          palm_detection       │
+#      │                │              │
+#      │                ▼              │
+#      │        ┌────────────────┐     │
+#      ├───────►│Detection to ROI│     │
+#      │        └───────┬────────┘     │
+#      │                │              │
+#      │            hand_rect          │
+#      │                │              │   ┌───────┐
+#      │                ├─────────────────►│Collect├──►hand_rects
+#      │                │              │   └───────┘                      
+#      │                ▼              │
+#      │     ┌──────────────────────┐  │
+#      └────►│Hand Landmark Detector│◄─┘
+#            └──────────┬───────────┘
+#                       │
+#                  hand_landmarks
+#                       │                  ┌───────┐
+#                       └─────────────────►│Collect├──►multi_hand_landmarks
+#                                          └───────┘
+# Generated using https://asciiflow.com/
 
-# [frame]               -------------{PalmDetector}-------------> [palm_detections_raw]
-# [palm_detections_raw] --{ClipDetectionsVectorSizeCalculator}--> [palm_detections]
 
+# Gets the image frame size.
 node {
     calculator: "ImagePropertiesCalculator"
     input_stream: "IMAGE:frame"
     output_stream: "SIZE:frame_size"
 }
 
+# Detects the palm(s) in the image frame.
 node {
-    calculator: "PalmDetector",
-    input_side_packet: "MODEL_COMPLEXITY:model_complexity",
-    input_stream: "IMAGE:frame",
+    calculator: "PalmDetector"
+    input_side_packet: "MODEL_PATH:palm_model_path"
+    input_stream: "IMAGE:frame"
     output_stream: "DETECTIONS:palm_detections_raw"
 }
 
+# Ensures there are no more than NUM_HANDS palm detections.
 node {
-    calculator: "ClipDetectionsVectorSizeCalculator",
-    input_side_packet: "MAX_SIZE:num_hands",
-    input_stream: "DETECTIONS:palm_detections_raw",
-    output_stream: "DETECTIONS:palm_detections"
+    calculator: "ClipDetectionVectorSizeCalculator"
+    # Clip vector to be no larger than this.
+    input_side_packet: "num_hands"
+    input_stream: "palm_detections_raw"
+    output_stream: "palm_detections"
+}
+
+# Breaks palm_dections into indivual palm_dection(s).
+node {
+    calculator: "BeginLoopDetectionCalculator"
+    input_stream: "ITERABLE:palm_detections"
+    input_stream: "CLONE:0:frame_size"
+    input_stream: "CLONE:1:frame"
+    output_stream: "ITEM:palm_detection"
+    output_stream: "CLONE:0:frame_size_for_palm_detection"
+    output_stream: "CLONE:1:frame_for_landmarks"
+    output_stream: "BATCH_END:palm_detections_ts"
+}
+
+# Calculates the ROI for the palm.
+node {
+    calculator: "PalmDetectionDetectionToRoi"
+    input_stream: "DETECTION:palm_detection"
+    input_stream: "IMAGE_SIZE:frame_size_for_palm_detection"
+    output_stream: "ROI:hand_rect"
+}
+
+# Detect hand landmarks for the specific hand rect.
+node {
+    calculator: "HandLandmarkDetector"
+    input_side_packet: "MODEL_PATH:landmark_model_path"
+    input_stream: "IMAGE:frame_for_landmarks"
+    input_stream: "ROI:hand_rect"
+    output_stream: "LANDMARKS:single_hand_landmarks"
+}
+
+# Collects ROIs for all palms.
+node {
+    calculator: "EndLoopNormalizedRectCalculator"
+    input_stream: "ITEM:hand_rect"
+    input_stream: "BATCH_END:palm_detections_ts"
+    output_stream: "ITERABLE:hand_rects"
+}
+
+node {
+    calculator: "EndLoopNormalizedLandmarkListVectorCalculator"
+    input_stream: "ITEM:single_hand_landmarks"
+    input_stream: "BATCH_END:palm_detections_ts"
+    output_stream: "ITERABLE:multi_hand_landmarks"
 }

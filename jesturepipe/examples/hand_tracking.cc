@@ -9,7 +9,7 @@
 #include "mediapipe/framework/port/opencv_highgui_inc.h"
 #include "mediapipe/framework/port/opencv_imgproc_inc.h"
 #include "mediapipe/framework/port/opencv_video_inc.h"
-#include "jesturepipe/graphs/hand_tracking_desktop_live.h"
+#include "jesturepipe/graphs/hands_demo.h"
 
 constexpr char kInputStream[] = "input_video";
 constexpr char kOutputStream[] = "output_video";
@@ -20,7 +20,7 @@ absl::Status RunGraph(const std::string& arg0) {
     MP_RETURN_IF_ERROR(jesturepipe::hand_tracking_desktop_live_graph(arg0, &graph));
 
     cv::VideoCapture capture;
-    capture.open(2);
+    capture.open(0);
 
     RET_CHECK(capture.isOpened());
 

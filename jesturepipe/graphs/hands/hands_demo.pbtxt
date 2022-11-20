@@ -1,0 +1,54 @@
+# A demo graph for hand landmark detection
+
+################################################################################
+# Configuration (Input side packets)
+################################################################################
+
+input_side_packet: "PALM_MODEL_PATH:palm_model_path"
+input_side_packet: "LANDMARK_MODEL_PATH:landmark_model_path"
+
+################################################################################
+# Inputs
+################################################################################
+
+input_stream: "input_video"
+
+################################################################################
+# Outputs
+################################################################################
+
+output_stream: "output_video"
+
+################################################################################
+# Graph
+################################################################################
+
+# Generates a side packet NUM_HANDS which is used to configure the maximum number
+# hands to detect.
+node {
+    calculator: "ConstantSidePacketCalculator"
+    output_side_packet: "PACKET:num_hands"
+    node_options: {
+        [type.googleapis.com/mediapipe.ConstantSidePacketCalculatorOptions]: {
+            packet { int_value: 2 }
+        }
+    }
+}
+
+# Detect the landmarks for the hands
+node {
+    calculator: "HandLandmarks"
+    input_side_packet: "NUM_HANDS:num_hands"
+    input_side_packet: "PALM_MODEL_PATH:palm_model_path"
+    input_side_packet: "LANDMARK_MODEL_PATH:landmark_model_path"
+    input_stream: "IMAGE:input_video"
+    output_stream: "LANDMARKS:multi_hand_landmarks"
+    # output_stream: "HANDS_ROIS:hand_rects"
+}
+
+node {
+    calculator: "HandsRenderer"
+    input_stream: "IMAGE:input_video"
+    input_stream: "LANDMARKS:multi_hand_landmarks"
+    output_stream: "IMAGE:output_video"
+}

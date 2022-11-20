@@ -5,12 +5,19 @@ package(default_visibility = ["//visibility:public"])
 
 
 cc_library(
-    name = "hand_tracking_desktop_live",
-    srcs = ["hand_tracking_desktop_live.cc"],
-    hdrs = ["hand_tracking_desktop_live.h"],
+    name = "hands_demo",
+    srcs = ["hands_demo.cc"],
+    hdrs = ["hands_demo.h"],
     deps = [
         "@mediapipe//mediapipe/framework:calculator_framework",
         "@mediapipe//mediapipe/framework/port:status",
-        "//jesturepipe/graphs/hands:hands_binary_graph",
+        "@bazel_tools//tools/cpp/runfiles",
+        
+        "//jesturepipe/graphs/hands:hands_demo_binary_graph",
+        "//jesturepipe/graphs/hands:hands_calculators",
+    ],
+    data = [
+        "@mediapipe//mediapipe/modules/hand_landmark:hand_landmark_full.tflite",
+        "@mediapipe//mediapipe/modules/palm_detection:palm_detection_full.tflite",
     ],
 )

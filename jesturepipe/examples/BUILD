@@ -14,7 +14,7 @@ cc_binary(
     name = "hand_tracking",
     srcs = ["hand_tracking.cc"],
     deps = [
-        "//jesturepipe/graphs:hand_tracking_desktop_live",
+        "//jesturepipe/graphs:hands_demo",
         "@mediapipe//mediapipe/framework:calculator_framework",
         "@mediapipe//mediapipe/framework/port:parse_text_proto",
         "@mediapipe//mediapipe/framework/port:status",

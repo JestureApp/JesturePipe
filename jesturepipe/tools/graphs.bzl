@@ -34,6 +34,8 @@ def jesture_binary_graph(name, short_name, graph = None, deps = None):
 
     encode_as_c_string = "@mediapipe//mediapipe/framework/tool:encode_as_c_string"
 
+    # https://bazel.build/reference/be/general#genrule
+    # echo "foo" > foo.txt
     native.genrule(
         name = name + "_header",
         srcs = [bin_graph_output_name],
