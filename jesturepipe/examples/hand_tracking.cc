@@ -9,7 +9,7 @@
 #include "mediapipe/framework/port/opencv_highgui_inc.h"
 #include "mediapipe/framework/port/opencv_imgproc_inc.h"
 #include "mediapipe/framework/port/opencv_video_inc.h"
-#include "jesturepipe/graphs/hands_demo.h"
+#include "jesturepipe/graphs/hands/hands_demo.h"
 
 constexpr char kInputStream[] = "input_video";
 constexpr char kOutputStream[] = "output_video";
