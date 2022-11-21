@@ -36,9 +36,9 @@ mediapipe_simple_subgraph(
 )
 
 mediapipe_simple_subgraph(
-    name = "hand_landmarks_graph",
-    graph = "hand_landmarks.pbtxt",
-    register_as = "HandLandmarks",
+    name = "hands_graph",
+    graph = "hands.pbtxt",
+    register_as = "Hands",
     deps = [
         "//jesturepipe/graphs/hands/hand_landmarks:hand_landmark_detector_graph",
         "//jesturepipe/graphs/hands/hand_landmarks:palm_detector_graph",
@@ -55,7 +55,7 @@ jesture_binary_graph(
         "@mediapipe//mediapipe/calculators/core:constant_side_packet_calculator",
         
         ":hands_renderer_graph",
-        ":hand_landmarks_graph",
+        ":hands_graph",
         ":hands_calculators",
     ]
 )

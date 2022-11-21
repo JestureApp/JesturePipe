@@ -37,7 +37,7 @@ node {
 
 # Detect the landmarks for the hands
 node {
-    calculator: "HandLandmarks"
+    calculator: "Hands"
     input_side_packet: "NUM_HANDS:num_hands"
     input_side_packet: "PALM_MODEL_PATH:palm_model_path"
     input_side_packet: "LANDMARK_MODEL_PATH:landmark_model_path"
