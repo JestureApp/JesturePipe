@@ -16,26 +16,18 @@ bazel_skylib_workspace()
 load("@bazel_skylib//lib:versions.bzl", "versions")
 versions.check(minimum_bazel_version = "5.0.0")
 
-# local_repository(
-#   name = "rules_jesture",
-#   path = "../rules_jesture",
-# )
-
-git_repository(
-    name = "rules_jesture",
-    branch = "v0.0.1",
-    remote = "git@capstone-cs.eng.utah.edu:jesture/rules_jesture.git"
-)
-
-load("@rules_jesture//:deps.bzl", "jesture_dependencies")
-jesture_dependencies()
+load("//:deps.bzl", "jesturepipe_respositories")
+jesturepipe_respositories()
 
 # Necessary to break these up or else tensorflow setup will fail
-load("@rules_jesture//:setup0.bzl", "jesture_setup0")
-jesture_setup0()
+load("@org_tensorflow//tensorflow:workspace3.bzl", "tf_workspace3")
+load("@rules_foreign_cc//:workspace_definitions.bzl", "rules_foreign_cc_dependencies")
+tf_workspace3()
 
-load("@rules_jesture//:setup1.bzl", "jesture_setup1")
-jesture_setup1()
+rules_foreign_cc_dependencies()
+
+load("@org_tensorflow//tensorflow:workspace2.bzl", "tf_workspace2")
+tf_workspace2()
 
 # Hedron's Compile Commands Extractor for Bazel
 # https://github.com/hedronvision/bazel-compile-commands-extractor

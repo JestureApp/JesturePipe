@@ -114,5 +114,7 @@ cc_library(
     data = [
         "@mediapipe//mediapipe/modules/hand_landmark:hand_landmark_full.tflite",
         "@mediapipe//mediapipe/modules/palm_detection:palm_detection_full.tflite",
+        "@mediapipe//mediapipe/modules/hand_landmark:hand_landmark_lite.tflite",
+        "@mediapipe//mediapipe/modules/palm_detection:palm_detection_lite.tflite",
     ],
 )

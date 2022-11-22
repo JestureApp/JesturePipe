@@ -15,8 +15,10 @@ absl::Status hand_tracking_desktop_live_graph(
         return absl::NotFoundError(error);
     }
 
-    std::string palm_model_path = runfiles->Rlocation("mediapipe/mediapipe/modules/palm_detection/palm_detection_full.tflite");
-    std::string hand_model_path = runfiles->Rlocation("mediapipe/mediapipe/modules/hand_landmark/hand_landmark_full.tflite");
+    std::string palm_model_path = runfiles->Rlocation("mediapipe/mediapipe/modules/palm_detection/palm_detection_lite.tflite");
+    std::string hand_model_path = runfiles->Rlocation("mediapipe/mediapipe/modules/hand_landmark/hand_landmark_lite.tflite");
+    // std::string palm_model_path = runfiles->Rlocation("mediapipe/mediapipe/modules/palm_detection/palm_detection_full.tflite");
+    // std::string hand_model_path = runfiles->Rlocation("mediapipe/mediapipe/modules/hand_landmark/hand_landmark_full.tflite");
 
     mediapipe::CalculatorGraphConfig config;
 
