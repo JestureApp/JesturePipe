@@ -76,11 +76,15 @@ mediapipe_simple_subgraph(
         ":hand_landmark_detector_graph",
         ":palm_detector_graph",
         "@mediapipe//mediapipe/modules/hand_landmark:palm_detection_detection_to_roi",
+        "@mediapipe//mediapipe/modules/hand_landmark:hand_landmark_landmarks_to_roi",
 
         "@mediapipe//mediapipe/calculators/core:clip_vector_size_calculator", 
         "@mediapipe//mediapipe/calculators/core:begin_loop_calculator", 
         "@mediapipe//mediapipe/calculators/core:end_loop_calculator", 
+        "@mediapipe//mediapipe/calculators/core:previous_loopback_calculator",
         "@mediapipe//mediapipe/calculators/image:image_properties_calculator",
+        "@mediapipe//mediapipe/calculators/util:association_calculator",
+        "@mediapipe//mediapipe/calculators/util:association_norm_rect_calculator",
     ]
 )
 

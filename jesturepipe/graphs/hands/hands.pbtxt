@@ -109,10 +109,8 @@ node {
     calculator: "BeginLoopDetectionCalculator"
     input_stream: "ITERABLE:palm_detections"
     input_stream: "CLONE:0:frame_size"
-    input_stream: "CLONE:1:frame"
     output_stream: "ITEM:palm_detection"
     output_stream: "CLONE:0:frame_size_for_palm_detection"
-    output_stream: "CLONE:1:frame_for_landmarks"
     output_stream: "BATCH_END:palm_detections_ts"
 }
 
@@ -124,26 +122,74 @@ node {
     output_stream: "ROI:hand_rect"
 }
 
-# Detect hand landmarks for the specific hand rect.
-node {
-    calculator: "HandLandmarkDetector"
-    input_side_packet: "MODEL_PATH:landmark_model_path"
-    input_stream: "IMAGE:frame_for_landmarks"
-    input_stream: "ROI:hand_rect"
-    output_stream: "LANDMARKS:single_hand_landmarks"
-}
-
 # Collects ROIs for all palms.
 node {
     calculator: "EndLoopNormalizedRectCalculator"
     input_stream: "ITEM:hand_rect"
     input_stream: "BATCH_END:palm_detections_ts"
-    output_stream: "ITERABLE:hand_rects"
+    output_stream: "ITERABLE:hand_rects_from_palm_detections"
+}
+
+node {
+    calculator: "AssociationNormRectCalculator"
+    input_stream: "hand_rects_from_palm_detections"
+    input_stream: "prev_hand_rects_from_landmarks"
+    output_stream: "hand_rects"
+    options: {
+        [mediapipe.AssociationCalculatorOptions.ext] {
+            min_similarity_threshold: 0.5
+        }
+    }
+}
+
+node {
+    calculator: "BeginLoopNormalizedRectCalculator"
+    input_stream: "ITERABLE:hand_rects"
+    input_stream: "CLONE:0:frame"
+    input_stream: "CLONE:1:frame_size"
+    output_stream: "ITEM:single_hand_rect"
+    output_stream: "CLONE:0:frame_for_landmarks"
+    output_stream: "CLONE:1:frame_size_for_landmarks"
+    output_stream: "BATCH_END:hand_rects_ts"
+}
+
+# Detect hand landmarks for the specific hand rect.
+node {
+    calculator: "HandLandmarkDetector"
+    input_side_packet: "MODEL_PATH:landmark_model_path"
+    input_stream: "IMAGE:frame_for_landmarks"
+    input_stream: "ROI:single_hand_rect"
+    output_stream: "LANDMARKS:single_hand_landmarks"
+}
+
+node {
+    calculator: "HandLandmarkLandmarksToRoi"
+    input_stream: "IMAGE_SIZE:frame_size_for_landmarks"
+    input_stream: "LANDMARKS:single_hand_landmarks"
+    output_stream: "ROI:single_hand_rect_from_landmarks"
 }
 
 node {
     calculator: "EndLoopNormalizedLandmarkListVectorCalculator"
     input_stream: "ITEM:single_hand_landmarks"
-    input_stream: "BATCH_END:palm_detections_ts"
+    input_stream: "BATCH_END:hand_rects_ts"
     output_stream: "ITERABLE:multi_hand_landmarks"
+}
+
+node {
+    calculator: "EndLoopNormalizedRectCalculator"
+    input_stream: "ITEM:single_hand_rect_from_landmarks"
+    input_stream: "BATCH_END:hand_rects_ts"
+    output_stream: "ITERABLE:hand_rects_from_landmarks"
+}
+
+node {
+    calculator: "PreviousLoopbackCalculator"
+    input_stream: "MAIN:frame"
+    input_stream: "LOOP:hand_rects_from_landmarks"
+    input_stream_info: {
+        tag_index: "LOOP"
+        back_edge: true
+    }
+    output_stream: "PREV_LOOP:prev_hand_rects_from_landmarks"
 }
