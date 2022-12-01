@@ -1,11 +1,16 @@
-## VSCode Setup
-In order to get Intelli-Sense working with bazel, we need to tell vscode where
-to look for the libraries we are using.
-
-When using the `ms-vscode.cpptools` extension, we can use a `compile_commands.json`
-file to enable this.
-
-To generate the `compile_commands.json` file run
-```bash
-bazel run @hedron_compile_commands//:refresh_all
+# Development Requirements
+* [Bazel](https://bazel.build/)
+  
+# IDE setup
+For any IDEs using some form of `clangd` for IntelliSense run
 ```
+bazel run //.vscode:compile_commands
+```
+to generate a `compile_commands.json` file.
+
+## VSCode
+VSCode is the preferred IDE as we have setup some tooling to make working in this
+code base easier.
+
+### Tasks
+* Refresh compile_commands.json
