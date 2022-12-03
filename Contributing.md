@@ -13,4 +13,5 @@ VSCode is the preferred IDE as we have setup some tooling to make working in thi
 code base easier.
 
 ### Tasks
+* Build all
 * Refresh compile_commands.json

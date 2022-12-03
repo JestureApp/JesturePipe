@@ -13,6 +13,22 @@
                 "reveal": "silent",
             },
             "problemMatcher": [],
+        },
+        {
+            "label": "Build all",
+            "type": "shell",
+            "command": "bazel",
+            "args": [
+                "build",
+                "//..."
+            ],
+            "presentation": {
+                "reveal": "silent",
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
         }
     ]
 }
