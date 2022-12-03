@@ -1,0 +1,34 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Refresh compile_commands.json",
+            "type": "shell",
+            "command": "bazel",
+            "args": [
+                "build",
+                "//.vscode:compile_commands"
+            ],
+            "presentation": {
+                "reveal": "silent",
+            },
+            "problemMatcher": [],
+        },
+        {
+            "label": "Build all",
+            "type": "shell",
+            "command": "bazel",
+            "args": [
+                "build",
+                "//..."
+            ],
+            "presentation": {
+                "reveal": "silent",
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+        }
+    ]
+}
