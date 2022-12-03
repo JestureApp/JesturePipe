@@ -6,7 +6,7 @@
             "type": "shell",
             "command": "bazel",
             "args": [
-                "build",
+                "run",
                 "//.vscode:compile_commands"
             ],
             "presentation": {

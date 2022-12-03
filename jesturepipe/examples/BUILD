@@ -16,3 +16,13 @@ cc_binary(
         "@mediapipe//mediapipe/framework/port:status",
     ],
 )
+
+cc_binary(
+    name = "jesturepipe_demo",
+    srcs = ["jesturepipe_demo.cc"],
+    deps = [
+        "//jesturepipe/graphs/jesturepipe",
+        "@com_google_absl//absl/status",
+        "@mediapipe//mediapipe/framework:calculator_framework",
+    ],
+)
