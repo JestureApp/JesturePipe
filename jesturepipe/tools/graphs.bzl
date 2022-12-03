@@ -1,20 +1,24 @@
+""" Utilities for compiling graphs."""
+
 load(
     "@mediapipe//mediapipe/framework/tool:mediapipe_graph.bzl",
     "mediapipe_binary_graph",
 )
 
 def jesture_binary_graph(name, short_name, graph = None, deps = None):
-    """Creates a binary graph from a graph and a header file called name.h
-    of the form
+    """Creates a binary graph from a graph and a header file containing config.
+
+    Produces a header file containing the graph config named <name>.h that defines
+    a variable of the form
     ```
-    const std::string {NAME}_CONFIG_CONTENTS = ...;
+    const std::string <short_name>_CONFIG_CONTENTS = ...;
     ```
 
     Args:
-        name (Label): The name of the rule to generate
+        name (Label):
         short_name (string):
-        graph (Label, optional): The graph file. Defaults to None.
-        deps ([Label], optional): Dependencies of the graph. Defaults to None.
+        graph (Label, optional):
+        deps (list, optional):
     """
 
     if not graph:
