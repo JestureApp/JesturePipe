@@ -1,10 +1,10 @@
 cc_library(
     name = "opencv",
-    hdrs = glob([
-        # For OpenCV 4.x
+    hdrs = [
         "include/aarch64-linux-gnu/opencv4/opencv2/cvconfig.h",
         "include/arm-linux-gnueabihf/opencv4/opencv2/cvconfig.h",
         "include/x86_64-linux-gnu/opencv4/opencv2/cvconfig.h",
+    ] + glob([
         "include/opencv4/opencv2/**/*.h*",
     ]),
     includes = [
