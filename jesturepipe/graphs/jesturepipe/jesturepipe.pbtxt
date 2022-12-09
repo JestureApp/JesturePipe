@@ -1,6 +1,12 @@
 # A graph implementing the JesturePipe pipeline
 
 ################################################################################
+# Input Side Packets
+################################################################################
+
+input_side_packet: "CAMERA:camera_index"
+
+################################################################################
 # Outputs
 ################################################################################
 
@@ -12,5 +18,6 @@ output_stream: "ANNOTATED_FRAME:annotated_frame"
 
 node {
     calculator: "CameraCalculator",
+    input_side_packet: "CAMERA:camera_index",
     output_stream: "VIDEO:annotated_frame",
 }

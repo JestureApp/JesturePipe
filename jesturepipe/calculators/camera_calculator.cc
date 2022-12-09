@@ -5,19 +5,31 @@
 #include "mediapipe/framework/port/opencv_video_inc.h"
 #include "mediapipe/framework/tool/status_util.h"
 
-const char VideoStream[] = "VIDEO";
+const char VideoOutputStream[] = "VIDEO";
+const char CameraInputPacket[] = "CAMERA";
 
 // TODO: docs
+
+// Example:
+// node {
+//  calculator: "CameraCalculator"
+//  input_side_packet: "CAMERA:camera"
+//  output_stream: "VIDEO:video"
+// }
 class CameraCalculator : public mediapipe::CalculatorBase {
    public:
     static absl::Status GetContract(mediapipe::CalculatorContract* cc) {
-        cc->Outputs().Tag(VideoStream).Set<mediapipe::ImageFrame>();
+        cc->Outputs().Tag(VideoOutputStream).Set<mediapipe::ImageFrame>();
+        cc->InputSidePackets().Tag(CameraInputPacket).Set<int>();
 
         return absl::OkStatus();
     }
 
     absl::Status Open(mediapipe::CalculatorContext* cc) override {
-        capture.open(2);
+        int camera_index =
+            cc->InputSidePackets().Tag(CameraInputPacket).Get<int>();
+
+        capture.open(camera_index);
 
         if (!capture.isOpened()) {
             return absl::InternalError("Failed to open camera");
@@ -49,7 +61,7 @@ class CameraCalculator : public mediapipe::CalculatorBase {
             (double)cv::getTickCount() / (double)cv::getTickFrequency() * 1e6;
 
         cc->Outputs()
-            .Tag(VideoStream)
+            .Tag(VideoOutputStream)
             .Add(output_frame.release(), mediapipe::Timestamp(frame_timestamp));
 
         return absl::OkStatus();

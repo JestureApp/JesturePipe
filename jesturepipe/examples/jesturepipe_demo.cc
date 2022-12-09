@@ -6,6 +6,7 @@
 #include "mediapipe/framework/port/opencv_imgproc_inc.h"
 
 constexpr char kOutputStream[] = "annotated_frame";
+constexpr char kCameraIndex[] = "camera_index";
 constexpr char kWindowName[] = "MediaPipe";
 
 absl::Status RunGraph() {
@@ -17,7 +18,9 @@ absl::Status RunGraph() {
     ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller,
                      graph.AddOutputStreamPoller(kOutputStream));
 
-    MP_RETURN_IF_ERROR(graph.StartRun({}));
+    MP_RETURN_IF_ERROR(graph.StartRun({
+        {kCameraIndex, mediapipe::Adopt(new int(2)).At(mediapipe::Timestamp())},
+    }));
 
     while (true) {
         mediapipe::Packet packet;
