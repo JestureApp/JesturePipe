@@ -6,4 +6,5 @@
         "--query-driver=**",
         "--enable-config",
     ],
+    "C_Cpp.intelliSenseEngine": "disabled",
 }

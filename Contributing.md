@@ -14,4 +14,8 @@ code base easier.
 
 ### Tasks
 * Build all
+* Build all (debug)
 * Refresh compile_commands.json
+
+### Debugging
+* JesturePipe Demo
