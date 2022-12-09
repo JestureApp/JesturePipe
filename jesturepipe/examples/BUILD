@@ -24,5 +24,9 @@ cc_binary(
         "//jesturepipe/graphs/jesturepipe",
         "@com_google_absl//absl/status",
         "@mediapipe//mediapipe/framework:calculator_framework",
+        "@mediapipe//mediapipe/framework/formats:image_frame",
+        "@mediapipe//mediapipe/framework/formats:image_frame_opencv",
+        "@mediapipe//mediapipe/framework/port:opencv_highgui",
+        "@mediapipe//mediapipe/framework/port:opencv_imgproc",
     ],
 )
