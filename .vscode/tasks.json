@@ -6,7 +6,7 @@
             "type": "shell",
             "command": "bazel",
             "args": [
-                "build",
+                "run",
                 "//.vscode:compile_commands"
             ],
             "presentation": {
@@ -29,6 +29,40 @@
                 "kind": "build",
                 "isDefault": true
             },
-        }
+        },
+        {
+            "label": "Build all (debug)",
+            "type": "shell",
+            "command": "bazel",
+            "args": [
+                "build",
+                "--compilation_mode=dbg",
+                "//..."
+            ],
+            "presentation": {
+                "reveal": "silent",
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+        },
+        {
+            "label": "Build JesturePipe Demo (debug)",
+            "type": "shell",
+            "command": "bazel",
+            "args": [
+                "build",
+                "--compilation_mode=dbg",
+                "//jesturepipe/examples:jesturepipe_demo"
+            ],
+            "presentation": {
+                "reveal": "silent",
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+        },
     ]
 }

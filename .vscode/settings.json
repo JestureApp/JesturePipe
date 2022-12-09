@@ -3,6 +3,8 @@
     "clangd.arguments": [
         "--header-insertion=never",
         "--compile-commands-dir=${workspaceFolder}/",
-        "--query-driver=**"
+        "--query-driver=**",
+        "--enable-config",
     ],
+    "C_Cpp.intelliSenseEngine": "disabled",
 }
