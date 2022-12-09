@@ -22,6 +22,7 @@ cc_binary(
     srcs = ["jesturepipe_demo.cc"],
     deps = [
         "//jesturepipe/graphs/jesturepipe",
+        "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/status",
         "@mediapipe//mediapipe/framework:calculator_framework",
         "@mediapipe//mediapipe/framework/formats:image_frame",

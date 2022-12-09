@@ -5,7 +5,7 @@ load(
     "mediapipe_binary_graph",
 )
 
-def jesture_binary_graph(name, short_name, graph = None, deps = None):
+def jesture_binary_graph(name, short_name, graph = None, deps = None, **kwargs):
     """Creates a binary graph from a graph and a header file containing config.
 
     Produces a header file containing the graph config named <name>.h that defines
@@ -19,6 +19,7 @@ def jesture_binary_graph(name, short_name, graph = None, deps = None):
         short_name (string):
         graph (Label, optional):
         deps (list, optional):
+        **kwargs: Additional arguments to pass to cc_library.
     """
 
     if not graph:
@@ -61,4 +62,5 @@ def jesture_binary_graph(name, short_name, graph = None, deps = None):
         name = name,
         hdrs = [name + ".h"],
         deps = deps,
+        **kwargs
     )

@@ -5,6 +5,9 @@
 ################################################################################
 
 input_side_packet: "CAMERA:camera_index"
+input_side_packet: "NUM_HANDS:num_hands"
+input_side_packet: "PALM_MODEL_PATH:palm_model_path"
+input_side_packet: "LANDMARK_MODEL_PATH:landmark_model_path"
 
 ################################################################################
 # Outputs
@@ -19,5 +22,21 @@ output_stream: "ANNOTATED_FRAME:annotated_frame"
 node {
     calculator: "CameraCalculator",
     input_side_packet: "CAMERA:camera_index",
-    output_stream: "VIDEO:annotated_frame",
+    output_stream: "VIDEO:input_video",
+}
+
+node {
+    calculator: "Hands"
+    input_side_packet: "NUM_HANDS:num_hands"
+    input_side_packet: "PALM_MODEL_PATH:palm_model_path"
+    input_side_packet: "LANDMARK_MODEL_PATH:landmark_model_path"
+    input_stream: "IMAGE:input_video"
+    output_stream: "LANDMARKS:multi_hand_landmarks"
+}
+
+node {
+    calculator: "HandsRenderer"
+    input_stream: "IMAGE:input_video"
+    input_stream: "LANDMARKS:multi_hand_landmarks"
+    output_stream: "IMAGE:annotated_frame"
 }

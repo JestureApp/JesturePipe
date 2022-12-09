@@ -32,6 +32,10 @@ mediapipe_simple_subgraph(
 
 mediapipe_simple_subgraph(
     name = "hand_landmark_detector_graph",
+    data = [
+        "@mediapipe//mediapipe/modules/hand_landmark:hand_landmark_full.tflite",
+        "@mediapipe//mediapipe/modules/hand_landmark:hand_landmark_lite.tflite",
+    ],
     graph = "hand_landmark_detector.pbtxt",
     register_as = "HandLandmarkDetector",
     deps = [
@@ -50,6 +54,10 @@ mediapipe_simple_subgraph(
 
 mediapipe_simple_subgraph(
     name = "palm_detector_graph",
+    data = [
+        "@mediapipe//mediapipe/modules/palm_detection:palm_detection_full.tflite",
+        "@mediapipe//mediapipe/modules/palm_detection:palm_detection_lite.tflite",
+    ],
     graph = "palm_detector.pbtxt",
     register_as = "PalmDetector",
     deps = [
@@ -98,12 +106,6 @@ cc_library(
     name = "hands_demo",
     srcs = ["hands_demo.cc"],
     hdrs = ["hands_demo.h"],
-    data = [
-        "@mediapipe//mediapipe/modules/hand_landmark:hand_landmark_full.tflite",
-        "@mediapipe//mediapipe/modules/hand_landmark:hand_landmark_lite.tflite",
-        "@mediapipe//mediapipe/modules/palm_detection:palm_detection_full.tflite",
-        "@mediapipe//mediapipe/modules/palm_detection:palm_detection_lite.tflite",
-    ],
     deps = [
         "//jesturepipe/graphs/hands:hands_demo_binary_graph",
         "@bazel_tools//tools/cpp/runfiles",
