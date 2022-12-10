@@ -54,6 +54,7 @@
             "args": [
                 "build",
                 "--compilation_mode=dbg",
+                // "--copt=-O2",
                 "//jesturepipe/examples:jesturepipe_demo"
             ],
             "presentation": {

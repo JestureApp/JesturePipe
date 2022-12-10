@@ -8,11 +8,21 @@
 
 constexpr char kOutputStream[] = "annotated_frame";
 constexpr char kWindowName[] = "MediaPipe";
+const std::string palm_model_rel_path = "mediapipe/mediapipe/modules/palm_detection/palm_detection_lite.tflite";
+const std::string hand_model_rel_path = "mediapipe/mediapipe/modules/hand_landmark/hand_landmark_lite.tflite";
 
 using bazel::tools::cpp::runfiles::Runfiles;
 
-absl::Status StartGraph(const std::string& arg0,
-                        mediapipe::CalculatorGraph* graph) {
+absl::Status RunGraph(const std::string& arg0) {
+    mediapipe::CalculatorGraph graph;
+
+    MP_RETURN_IF_ERROR(jesturepipe::jesturepipe_graph(&graph));
+
+    cv::namedWindow(kWindowName, 1);
+
+    ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller,
+                     graph.AddOutputStreamPoller(kOutputStream));
+
     std::string error;
     std::unique_ptr<Runfiles> runfiles(Runfiles::Create(arg0, &error));
 
@@ -20,11 +30,8 @@ absl::Status StartGraph(const std::string& arg0,
         return absl::NotFoundError(error);
     }
 
-    std::string palm_model_path = runfiles->Rlocation(
-        "mediapipe/mediapipe/modules/palm_detection/"
-        "palm_detection_lite.tflite");
-    std::string hand_model_path = runfiles->Rlocation(
-        "mediapipe/mediapipe/modules/hand_landmark/hand_landmark_lite.tflite");
+    std::string palm_model_path = runfiles->Rlocation(palm_model_rel_path);
+    std::string hand_model_path = runfiles->Rlocation(hand_model_rel_path);
 
     const std::map<std::string, mediapipe::Packet> side_packets{
         {"palm_model_path", mediapipe::MakePacket<std::string>(palm_model_path)
@@ -37,20 +44,7 @@ absl::Status StartGraph(const std::string& arg0,
         {"num_hands",
          mediapipe::MakePacket<int>(2).At(mediapipe::Timestamp(0))}};
 
-    MP_RETURN_IF_ERROR(graph->StartRun(side_packets));
-}
-
-absl::Status RunGraph(const std::string& arg0) {
-    mediapipe::CalculatorGraph graph;
-
-    MP_RETURN_IF_ERROR(jesturepipe::jesturepipe_graph(&graph));
-
-    cv::namedWindow(kWindowName, 1);
-
-    ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller,
-                     graph.AddOutputStreamPoller(kOutputStream));
-
-    MP_RETURN_IF_ERROR(StartGraph(arg0, &graph));
+    MP_RETURN_IF_ERROR(graph.StartRun(side_packets));
 
     while (true) {
         mediapipe::Packet packet;
