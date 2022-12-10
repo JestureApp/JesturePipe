@@ -79,6 +79,7 @@ mediapipe_simple_subgraph(
     deps = [
         ":hand_landmark_detector_graph",
         ":palm_detector_graph",
+        "@mediapipe//mediapipe/calculators/core:flow_limiter_calculator",
         "@mediapipe//mediapipe/calculators/core:begin_loop_calculator",
         "@mediapipe//mediapipe/calculators/core:clip_vector_size_calculator",
         "@mediapipe//mediapipe/calculators/core:end_loop_calculator",
