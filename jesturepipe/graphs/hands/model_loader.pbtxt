@@ -7,6 +7,7 @@ type: "ModelLoader"
 ################################################################################
 
 input_side_packet: "MODEL_PATH:model_path"
+input_side_packet: "MODEL_CONTENTS:model_contents"
 
 ################################################################################
 # Outputs
@@ -14,21 +15,27 @@ input_side_packet: "MODEL_PATH:model_path"
 
 output_side_packet: "MODEL:model"
 
-
 ################################################################################
 # Graph
 ################################################################################
 
+# node {
+#   calculator: "LocalFileContentsCalculator"
+#   input_side_packet: "FILE_PATH:model_path"
+#   output_side_packet: "CONTENTS:model_blob"
+#   options: {
+#     [mediapipe.LocalFileContentsCalculatorOptions.ext]: {
+#       text_mode: false
+#     }
+#   }
+# }
+
 # Loads the file in the specified path into a blob.
 node {
-  calculator: "LocalFileContentsCalculator"
-  input_side_packet: "FILE_PATH:model_path"
-  output_side_packet: "CONTENTS:model_blob"
-  options: {
-    [mediapipe.LocalFileContentsCalculatorOptions.ext]: {
-      text_mode: false
-    }
-  }
+    calculator: "FileContentsOrPathCalculator"
+    input_side_packet: "FILE_PATH:model_path"
+    input_side_packet: "FILE_CONTENTS:model_contents"
+    output_side_packet: "CONTENTS:model_blob"
 }
 
 # Converts the input blob into a TF Lite model.

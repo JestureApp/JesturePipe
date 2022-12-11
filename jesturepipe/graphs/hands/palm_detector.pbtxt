@@ -6,7 +6,8 @@ type: "PalmDetector"
 # Configuration (Input Side Packets)
 ################################################################################
 
-input_side_packet: "MODEL_PATH:model_path"
+# input_side_packet: "MODEL_PATH:model_path"
+# input_side_packet: "MODEL_CONTENTS:model_contents"
 
 ################################################################################
 # Inputs
@@ -52,9 +53,15 @@ node {
 }
 
 # Loads the palm detection TF Lite model.
+# node {
+#     calculator: "ModelLoader"
+#     input_side_packet: "MODEL_PATH:model_path"
+#     input_side_packet: "MODEL_CONTENTS:model_contents"
+#     output_side_packet: "MODEL:model"
+# }
+
 node {
-    calculator: "ModelLoader"
-    input_side_packet: "MODEL_PATH:model_path"
+    calculator: "PalmDetectionModelLiteCalculator"
     output_side_packet: "MODEL:model"
 }
 
