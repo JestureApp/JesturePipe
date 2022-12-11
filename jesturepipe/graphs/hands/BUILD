@@ -27,7 +27,6 @@ mediapipe_simple_subgraph(
     deps = [
         "@mediapipe//mediapipe/calculators/tflite:tflite_model_calculator",
         "@mediapipe//mediapipe/calculators/util:local_file_contents_calculator",
-        # "//jesturepipe/calculators:file_contents_or_path_calculator",
     ],
 )
 
@@ -41,16 +40,17 @@ mediapipe_simple_subgraph(
     register_as = "HandLandmarkDetector",
     deps = [
         ":model_loader_graph",
-        # "//jesturepipe/calculators:hand_landmark_model_lite_calculator",
         "@mediapipe//mediapipe/calculators/core:gate_calculator",
         "@mediapipe//mediapipe/calculators/core:split_vector_calculator",
         "@mediapipe//mediapipe/calculators/tensor:image_to_tensor_calculator",
         "@mediapipe//mediapipe/calculators/tensor:inference_calculator",
+        "@mediapipe//mediapipe/calculators/tensor:tensors_to_classification_calculator",
         "@mediapipe//mediapipe/calculators/tensor:tensors_to_floats_calculator",
         "@mediapipe//mediapipe/calculators/tensor:tensors_to_landmarks_calculator",
         "@mediapipe//mediapipe/calculators/util:landmark_letterbox_removal_calculator",
         "@mediapipe//mediapipe/calculators/util:landmark_projection_calculator",
         "@mediapipe//mediapipe/calculators/util:thresholding_calculator",
+        "@mediapipe//mediapipe/calculators/util:world_landmark_projection_calculator",
     ],
 )
 
@@ -64,7 +64,6 @@ mediapipe_simple_subgraph(
     register_as = "PalmDetector",
     deps = [
         ":model_loader_graph",
-        # "//jesturepipe/calculators:palm_detection_model_lite_calculator",
         "@mediapipe//mediapipe/calculators/tensor:image_to_tensor_calculator",
         "@mediapipe//mediapipe/calculators/tensor:inference_calculator",
         "@mediapipe//mediapipe/calculators/tensor:tensors_to_detections_calculator",
