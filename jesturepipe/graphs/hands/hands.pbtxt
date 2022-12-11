@@ -11,16 +11,10 @@ type: "Hands"
 input_side_packet: "NUM_HANDS:num_hands"
 
 # Path to the palm detection model.
-# input_side_packet: "PALM_MODEL_PATH:palm_model_path"
-
-# Contents of the palm detection model.
-# input_side_packet: "PALM_MODEL_CONTENTS:palm_model_contents"
+input_side_packet: "PALM_MODEL_PATH:palm_model_path"
 
 # Path to the hand landmark model.
-# input_side_packet: "LANDMARK_MODEL_PATH:landmark_model_path"
-
-# Contents of the hand landmark model.
-# input_side_packet: "LANDMARK_MODEL_CONTENTS:landmark_model_contents"
+input_side_packet: "LANDMARK_MODEL_PATH:landmark_model_path"
 
 ################################################################################
 # Inputs
@@ -106,8 +100,7 @@ node {
 # Detects the palm(s) in the image frame.
 node {
     calculator: "PalmDetector"
-    # input_side_packet: "MODEL_PATH:palm_model_path"
-    # input_side_packet: "MODEL_CONTENTS:palm_model_contents"
+    input_side_packet: "MODEL_PATH:palm_model_path"
     input_stream: "IMAGE:throttled_frame"
     output_stream: "DETECTIONS:palm_detections_raw"
 }
@@ -173,8 +166,7 @@ node {
 # Detect hand landmarks for the specific hand rect.
 node {
     calculator: "HandLandmarkDetector"
-    # input_side_packet: "MODEL_PATH:landmark_model_path"
-    # input_side_packet: "MODEL_CONTENTS:landmark_model_contents"
+    input_side_packet: "MODEL_PATH:landmark_model_path"
     input_stream: "IMAGE:frame_for_landmarks"
     input_stream: "ROI:single_hand_rect"
     output_stream: "LANDMARKS:single_hand_landmarks"

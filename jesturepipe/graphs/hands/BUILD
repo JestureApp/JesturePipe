@@ -26,22 +26,22 @@ mediapipe_simple_subgraph(
     register_as = "ModelLoader",
     deps = [
         "@mediapipe//mediapipe/calculators/tflite:tflite_model_calculator",
-        # "@mediapipe//mediapipe/calculators/util:local_file_contents_calculator",
-        "//jesturepipe/calculators:file_contents_or_path_calculator",
+        "@mediapipe//mediapipe/calculators/util:local_file_contents_calculator",
+        # "//jesturepipe/calculators:file_contents_or_path_calculator",
     ],
 )
 
 mediapipe_simple_subgraph(
     name = "hand_landmark_detector_graph",
-    # data = [
-    #     "@mediapipe//mediapipe/modules/hand_landmark:hand_landmark_full.tflite",
-    #     "@mediapipe//mediapipe/modules/hand_landmark:hand_landmark_lite.tflite",
-    # ],
+    data = [
+        "@mediapipe//mediapipe/modules/hand_landmark:hand_landmark_full.tflite",
+        "@mediapipe//mediapipe/modules/hand_landmark:hand_landmark_lite.tflite",
+    ],
     graph = "hand_landmark_detector.pbtxt",
     register_as = "HandLandmarkDetector",
     deps = [
-        # ":model_loader_graph",
-        "//jesturepipe/calculators:hand_landmark_model_lite_calculator",
+        ":model_loader_graph",
+        # "//jesturepipe/calculators:hand_landmark_model_lite_calculator",
         "@mediapipe//mediapipe/calculators/core:gate_calculator",
         "@mediapipe//mediapipe/calculators/core:split_vector_calculator",
         "@mediapipe//mediapipe/calculators/tensor:image_to_tensor_calculator",
@@ -56,15 +56,15 @@ mediapipe_simple_subgraph(
 
 mediapipe_simple_subgraph(
     name = "palm_detector_graph",
-    # data = [
-    #     "@mediapipe//mediapipe/modules/palm_detection:palm_detection_full.tflite",
-    #     "@mediapipe//mediapipe/modules/palm_detection:palm_detection_lite.tflite",
-    # ],
+    data = [
+        "@mediapipe//mediapipe/modules/palm_detection:palm_detection_full.tflite",
+        "@mediapipe//mediapipe/modules/palm_detection:palm_detection_lite.tflite",
+    ],
     graph = "palm_detector.pbtxt",
     register_as = "PalmDetector",
     deps = [
-        # ":model_loader_graph",
-        "//jesturepipe/calculators:palm_detection_model_lite_calculator",
+        ":model_loader_graph",
+        # "//jesturepipe/calculators:palm_detection_model_lite_calculator",
         "@mediapipe//mediapipe/calculators/tensor:image_to_tensor_calculator",
         "@mediapipe//mediapipe/calculators/tensor:inference_calculator",
         "@mediapipe//mediapipe/calculators/tensor:tensors_to_detections_calculator",

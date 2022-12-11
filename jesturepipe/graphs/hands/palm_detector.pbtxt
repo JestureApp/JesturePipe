@@ -6,8 +6,7 @@ type: "PalmDetector"
 # Configuration (Input Side Packets)
 ################################################################################
 
-# input_side_packet: "MODEL_PATH:model_path"
-# input_side_packet: "MODEL_CONTENTS:model_contents"
+input_side_packet: "MODEL_PATH:model_path"
 
 ################################################################################
 # Inputs
@@ -53,17 +52,16 @@ node {
 }
 
 # Loads the palm detection TF Lite model.
-# node {
-#     calculator: "ModelLoader"
-#     input_side_packet: "MODEL_PATH:model_path"
-#     input_side_packet: "MODEL_CONTENTS:model_contents"
-#     output_side_packet: "MODEL:model"
-# }
-
 node {
-    calculator: "PalmDetectionModelLiteCalculator"
+    calculator: "ModelLoader"
+    input_side_packet: "MODEL_PATH:model_path"
     output_side_packet: "MODEL:model"
 }
+
+# node {
+#     calculator: "PalmDetectionModelLiteCalculator"
+#     output_side_packet: "MODEL:model"
+# }
 
 # Runs a TensorFlow Lite model on CPU that takes an image tensor and outputs a
 # vector of tensors representing, for instance, detection boxes/keypoints and

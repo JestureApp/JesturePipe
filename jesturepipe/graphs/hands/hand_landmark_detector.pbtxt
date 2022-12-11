@@ -7,9 +7,8 @@ type: "HandLandmarkDetector"
 ################################################################################
 
 # The path to the hand landmaker detection model.
-# input_side_packet: "MODEL_PATH:model_path"
+input_side_packet: "MODEL_PATH:model_path"
 
-# input_side_packet: "MODEL_CONTENTS:model_contents"
 
 ################################################################################
 # Inputs
@@ -54,15 +53,9 @@ node {
 }
 
 # Loads the hand landmark TF Lite model.
-# node {
-#     calculator: "ModelLoader"
-#     input_side_packet: "MODEL_PATH:model_path"
-#     input_side_packet: "MODEL_CONTENTS:model_contents"
-#     output_side_packet: "MODEL:model"
-# }
-
 node {
-    calculator: "HandLandmarkModelLiteCalculator",
+    calculator: "ModelLoader"
+    input_side_packet: "MODEL_PATH:model_path"
     output_side_packet: "MODEL:model"
 }
 
@@ -122,29 +115,6 @@ node {
     }
   }
 }
-
-# # Drops handedness tensor if hand is not present.
-# node {
-#   calculator: "GateCalculator"
-#   input_stream: "handedness_tensor"
-#   input_stream: "ALLOW:hand_presence"
-#   output_stream: "ensured_handedness_tensor"
-# }
-
-# # Converts the handedness tensor into a float that represents the classification
-# # score of handedness.
-# node {
-#   calculator: "TensorsToClassificationCalculator"
-#   input_stream: "TENSORS:ensured_handedness_tensor"
-#   output_stream: "CLASSIFICATIONS:handedness"
-#   options: {
-#     [mediapipe.TensorsToClassificationCalculatorOptions.ext] {
-#       top_k: 1
-#       label_map_path: "mediapipe/modules/hand_landmark/handedness.txt"
-#       binary_classification: true
-#     }
-#   }
-# }
 
 # Drops landmarks tensors if hand is not present.
 node {
