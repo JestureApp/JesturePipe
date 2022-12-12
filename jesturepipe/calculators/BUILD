@@ -1,5 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
+# Note: every calculator must have alwayslink = 1 to be able to be used in graphs
+
 cc_library(
     name = "camera_calculator",
     srcs = [
@@ -21,8 +23,19 @@ cc_library(
         "actions_demo_calculator.cc",
     ],
     deps = [
+        "//jesturepipe/graphs/gesture_recognizer/calculators:gesture",
+        "@actions//actions",
         "@mediapipe//mediapipe/framework:calculator_framework",
-        "@actions//actions"
     ],
     alwayslink = 1,
+)
+
+cc_library(
+    name = "dedup_calculator",
+    srcs = [
+        "dedup_calculator.cc",
+    ],
+    hdrs = [
+        "dedup_calculator.h",
+    ],
 )

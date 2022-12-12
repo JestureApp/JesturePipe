@@ -6,7 +6,9 @@
 
 input_side_packet: "CAMERA:camera_index"
 input_side_packet: "NUM_HANDS:num_hands"
+
 input_side_packet: "PALM_MODEL_PATH:palm_model_path"
+
 input_side_packet: "LANDMARK_MODEL_PATH:landmark_model_path"
 
 ################################################################################
@@ -14,6 +16,9 @@ input_side_packet: "LANDMARK_MODEL_PATH:landmark_model_path"
 ################################################################################
 
 output_stream: "ANNOTATED_FRAME:annotated_frame"
+output_stream: "LANDMARKS:multi_hand_landmarks"
+output_stream: "WORLD_LANDMARKS:multi_hand_world_landmarks"
+output_stream: "HANDEDNESS:multi_hand_handedness"
 
 ################################################################################
 # Graph
@@ -32,11 +37,22 @@ node {
     input_side_packet: "LANDMARK_MODEL_PATH:landmark_model_path"
     input_stream: "IMAGE:input_video"
     output_stream: "LANDMARKS:multi_hand_landmarks"
+    output_stream: "WORLD_LANDMARKS:multi_hand_world_landmarks"
+    output_stream: "HANDEDNESS:multi_hand_handedness"
+}
+
+node {
+    calculator: "GestureRecognizer"
+    input_stream: "LANDMARKS:multi_hand_landmarks"
+    input_stream: "WORLD_LANDMARKS:multi_hand_world_landmarks"
+    input_stream: "HANDEDNESS:multi_handedness"
+    input_stream: "PALM_DETECTIONS:palm_detections"
+    output_stream: "GESTURE:gesture"
 }
 
 node {
     calculator: "ActionsDemoCalculator",
-    input_stream: "multi_hand_landmarks",
+    input_stream: "GESTURE:gesture",
 }
 
 node {

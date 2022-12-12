@@ -8,8 +8,10 @@
 
 constexpr char kOutputStream[] = "annotated_frame";
 constexpr char kWindowName[] = "MediaPipe";
-const std::string palm_model_rel_path = "mediapipe/mediapipe/modules/palm_detection/palm_detection_lite.tflite";
-const std::string hand_model_rel_path = "mediapipe/mediapipe/modules/hand_landmark/hand_landmark_lite.tflite";
+const std::string palm_model_rel_path =
+    "mediapipe/mediapipe/modules/palm_detection/palm_detection_lite.tflite";
+const std::string hand_model_rel_path =
+    "mediapipe/mediapipe/modules/hand_landmark/hand_landmark_lite.tflite";
 
 using bazel::tools::cpp::runfiles::Runfiles;
 
