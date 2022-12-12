@@ -1,3 +1,0 @@
-Diagnostics:
-    # absl uses some gcc intrinsics, ignore those errors 
-    Suppress: 'builtin_definition' 
