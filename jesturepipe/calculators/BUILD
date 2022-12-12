@@ -1,5 +1,3 @@
-load("//jesturepipe/tools:models.bzl", "model_compile")
-
 package(default_visibility = ["//visibility:public"])
 
 # Note: every calculator must have alwayslink = 1 to be able to be used in graphs
