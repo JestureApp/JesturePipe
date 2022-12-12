@@ -79,21 +79,11 @@ output_stream: "HAND_ROIS:hand_rects"
 #                                          └───────┘
 # Generated using https://asciiflow.com/
 
-node {
-    calculator: "FlowLimiterCalculator"
-    input_stream: "frame"
-    input_stream: "FINISHED:hand_rects_from_landmarks"
-    input_stream_info: {
-        tag_index: "FINISHED"
-        back_edge: true
-    }
-    output_stream: "throttled_frame"
-}
 
 # Gets the image frame size.
 node {
     calculator: "ImagePropertiesCalculator"
-    input_stream: "IMAGE:throttled_frame"
+    input_stream: "IMAGE:frame"
     output_stream: "SIZE:frame_size"
 }
 
@@ -101,7 +91,7 @@ node {
 node {
     calculator: "PalmDetector"
     input_side_packet: "MODEL_PATH:palm_model_path"
-    input_stream: "IMAGE:throttled_frame"
+    input_stream: "IMAGE:frame"
     output_stream: "DETECTIONS:palm_detections_raw"
 }
 
@@ -155,7 +145,7 @@ node {
 node {
     calculator: "BeginLoopNormalizedRectCalculator"
     input_stream: "ITERABLE:hand_rects"
-    input_stream: "CLONE:0:throttled_frame"
+    input_stream: "CLONE:0:frame"
     input_stream: "CLONE:1:frame_size"
     output_stream: "ITEM:single_hand_rect"
     output_stream: "CLONE:0:frame_for_landmarks"
@@ -195,7 +185,7 @@ node {
 
 node {
     calculator: "PreviousLoopbackCalculator"
-    input_stream: "MAIN:throttled_frame"
+    input_stream: "MAIN:frame"
     input_stream: "LOOP:hand_rects_from_landmarks"
     input_stream_info: {
         tag_index: "LOOP"
