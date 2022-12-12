@@ -1,0 +1,69 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Refresh compile_commands.json",
+            "type": "shell",
+            "command": "bazel",
+            "args": [
+                "run",
+                "//.vscode:compile_commands"
+            ],
+            "presentation": {
+                "reveal": "silent",
+            },
+            "problemMatcher": [],
+        },
+        {
+            "label": "Build all",
+            "type": "shell",
+            "command": "bazel",
+            "args": [
+                "build",
+                "//..."
+            ],
+            "presentation": {
+                "reveal": "silent",
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+        },
+        {
+            "label": "Build all (debug)",
+            "type": "shell",
+            "command": "bazel",
+            "args": [
+                "build",
+                "--compilation_mode=dbg",
+                "//..."
+            ],
+            "presentation": {
+                "reveal": "silent",
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+        },
+        {
+            "label": "Build JesturePipe Demo (debug)",
+            "type": "shell",
+            "command": "bazel",
+            "args": [
+                "build",
+                "--compilation_mode=dbg",
+                // "--copt=-O2",
+                "//jesturepipe/examples:jesturepipe_demo"
+            ],
+            "presentation": {
+                "reveal": "silent",
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+        },
+    ]
+}

@@ -1,11 +1,11 @@
 cc_library(
     name = "opencv",
+    # buildifier: disable=constant-globs
     hdrs = glob([
-        # For OpenCV 4.x
+        "include/opencv4/opencv2/**/*.h*",
         "include/aarch64-linux-gnu/opencv4/opencv2/cvconfig.h",
         "include/arm-linux-gnueabihf/opencv4/opencv2/cvconfig.h",
         "include/x86_64-linux-gnu/opencv4/opencv2/cvconfig.h",
-        "include/opencv4/opencv2/**/*.h*",
     ]),
     includes = [
         # For OpenCV 4.x
