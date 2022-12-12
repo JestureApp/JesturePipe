@@ -1,4 +1,8 @@
+load("//jesturepipe/tools:models.bzl", "model_compile")
+
 package(default_visibility = ["//visibility:public"])
+
+# Note: every calculator must have alwayslink = 1 to be able to be used in graphs
 
 cc_library(
     name = "camera_calculator",
@@ -21,8 +25,8 @@ cc_library(
         "actions_demo_calculator.cc",
     ],
     deps = [
+        "@actions//actions",
         "@mediapipe//mediapipe/framework:calculator_framework",
-        "@actions//actions"
     ],
     alwayslink = 1,
 )

@@ -15,6 +15,7 @@ jesture_binary_graph(
         "//jesturepipe/calculators:actions_demo_calculator",
         "//jesturepipe/graphs/hands:hands_graph",
         "//jesturepipe/graphs/hands:hands_renderer_graph",
+        "@mediapipe//mediapipe/framework:calculator_framework",
     ],
 )
 

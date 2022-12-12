@@ -50,7 +50,7 @@ hedron_compile_commands_setup()
 git_repository(
     name = "actions",
     branch = "v0.0.1",
-    remote = "git@capstone-cs.eng.utah.edu:jesture/actions.git"
+    remote = "git@capstone-cs.eng.utah.edu:jesture/actions.git",
 )
 
 load("@actions//:deps.bzl", "actions_repositiories")

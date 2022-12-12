@@ -10,6 +10,7 @@ const char CameraInputPacket[] = "CAMERA";
 
 // TODO: docs
 
+namespace jesturepipe {
 // Example:
 // node {
 //  calculator: "CameraCalculator"
@@ -80,3 +81,4 @@ class CameraCalculator : public mediapipe::CalculatorBase {
 };
 
 REGISTER_CALCULATOR(CameraCalculator);
+}  // namespace jesturepipe

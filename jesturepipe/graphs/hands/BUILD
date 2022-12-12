@@ -44,11 +44,13 @@ mediapipe_simple_subgraph(
         "@mediapipe//mediapipe/calculators/core:split_vector_calculator",
         "@mediapipe//mediapipe/calculators/tensor:image_to_tensor_calculator",
         "@mediapipe//mediapipe/calculators/tensor:inference_calculator",
+        "@mediapipe//mediapipe/calculators/tensor:tensors_to_classification_calculator",
         "@mediapipe//mediapipe/calculators/tensor:tensors_to_floats_calculator",
         "@mediapipe//mediapipe/calculators/tensor:tensors_to_landmarks_calculator",
         "@mediapipe//mediapipe/calculators/util:landmark_letterbox_removal_calculator",
         "@mediapipe//mediapipe/calculators/util:landmark_projection_calculator",
         "@mediapipe//mediapipe/calculators/util:thresholding_calculator",
+        "@mediapipe//mediapipe/calculators/util:world_landmark_projection_calculator",
     ],
 )
 
@@ -79,10 +81,10 @@ mediapipe_simple_subgraph(
     deps = [
         ":hand_landmark_detector_graph",
         ":palm_detector_graph",
-        "@mediapipe//mediapipe/calculators/core:flow_limiter_calculator",
         "@mediapipe//mediapipe/calculators/core:begin_loop_calculator",
         "@mediapipe//mediapipe/calculators/core:clip_vector_size_calculator",
         "@mediapipe//mediapipe/calculators/core:end_loop_calculator",
+        "@mediapipe//mediapipe/calculators/core:flow_limiter_calculator",
         "@mediapipe//mediapipe/calculators/core:previous_loopback_calculator",
         "@mediapipe//mediapipe/calculators/image:image_properties_calculator",
         "@mediapipe//mediapipe/calculators/util:association_calculator",
