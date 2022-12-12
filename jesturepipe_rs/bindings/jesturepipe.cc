@@ -88,4 +88,34 @@ Status* jesturepipe_stop(JesturePipe* pipe) {
 
     return status_new(status);
 }
+
+typedef struct OutputStreamPoller {
+    mediapipe::OutputStreamPoller* poller;
+} OutputStreamPoller;
+
+OutputStreamPoller* jesturepipe_output_poller_new() {
+    OutputStreamPoller* poller = new OutputStreamPoller();
+
+    return poller;
+}
+
+void jesturepipe_output_poller_free(OutputStreamPoller* poller) {
+    delete poller;
+}
+
+Status* jesturepipe_add_output_poller(JesturePipe* pipe,
+                                      const char* stream_name,
+                                      int stream_name_len,
+                                      OutputStreamPoller* output_poller) {
+    absl::StatusOr<mediapipe::OutputStreamPoller> poller =
+        pipe->graph.AddOutputStreamPoller(stream_name);
+
+    if (!poller.ok()) {
+        return status_new(poller.status());
+    }
+
+    output_poller->poller = &poller.value();
+
+    return status_new(absl::OkStatus());
+}
 }

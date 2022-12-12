@@ -4,6 +4,8 @@ use std::ffi::{c_char, c_int};
 // Only ever used through a pointer.
 enum _JesturePipe {}
 
+enum _OutputStreamPoller {}
+
 #[repr(C)]
 struct Status {
     pub code: c_int,
@@ -13,7 +15,7 @@ struct Status {
 mod raw {
     use std::ffi::{c_char, c_int};
 
-    use super::{Status, _JesturePipe};
+    use super::{Status, _JesturePipe, _OutputStreamPoller};
 
     extern "C" {
         pub(super) fn fails() -> *const Status;
@@ -38,6 +40,17 @@ mod raw {
         ) -> *const Status;
 
         pub(super) fn jesturepipe_stop(pipe: *mut _JesturePipe) -> *const Status;
+
+        pub(super) fn jesturepipe_output_poller_new() -> *const _OutputStreamPoller;
+
+        pub(super) fn jesturepipe_output_poller_free(poller: *const _OutputStreamPoller);
+
+        pub(super) fn jesturepipe_add_output_poller(
+            pipe: *mut _JesturePipe,
+            stream_name: *const c_char,
+            stream_name_len: c_int,
+            poller: *const _OutputStreamPoller,
+        ) -> *const Status;
     }
 }
 
@@ -138,6 +151,33 @@ impl JesturePipe {
         self.running = false;
         unsafe { status_to_result(raw::jesturepipe_stop(self.ptr)) }
     }
+
+    fn add_output_poller<S, T>(&self, stream_name: &str) -> Result<OutputStreamPoller<T>>
+    where
+        S: Into<Vec<u8>>,
+    {
+        let ptr = unsafe { raw::jesturepipe_output_poller_new() };
+
+        if ptr.is_null() {
+            panic!("Failed to create OutputStreamPoller.");
+        }
+
+        unsafe {
+            let stream_name = std::ffi::CString::new(stream_name)?;
+
+            status_to_result(raw::jesturepipe_add_output_poller(
+                self.ptr,
+                stream_name.as_ptr(),
+                stream_name.as_bytes().len() as i32,
+                ptr,
+            ))?;
+        }
+
+        Ok(OutputStreamPoller {
+            ptr,
+            _phantom: std::marker::PhantomData,
+        })
+    }
 }
 
 impl Drop for JesturePipe {
@@ -146,6 +186,21 @@ impl Drop for JesturePipe {
 
         unsafe {
             raw::jesturepipe_free(self.ptr);
+        }
+    }
+}
+
+pub struct OutputStreamPoller<T> {
+    ptr: *const _OutputStreamPoller,
+    _phantom: std::marker::PhantomData<T>,
+}
+
+impl<T> OutputStreamPoller<T> {}
+
+impl<T> Drop for OutputStreamPoller<T> {
+    fn drop(&mut self) {
+        unsafe {
+            raw::jesturepipe_output_poller_free(self.ptr);
         }
     }
 }

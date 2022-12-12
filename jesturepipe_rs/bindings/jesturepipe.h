@@ -27,6 +27,15 @@ Status* jesturepipe_start(JesturePipe* pipe, int camera_index, int num_hands);
 Status* jesturepipe_stop(JesturePipe* pipe);
 
 typedef struct OutputStreamPoller OutputStream;
+
+OutputStreamPoller* jesturepipe_output_poller_new();
+
+void jesturepipe_output_poller_free(OutputStreamPoller* poller);
+
+Status* jesturepipe_add_output_poller(JesturePipe* pipe,
+                                      const char* stream_name,
+                                      int stream_name_len,
+                                      OutputStreamPoller* output_poller);
 }
 
 #endif  // __H_JESTUREPIPE_BINDINGS__
