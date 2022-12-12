@@ -30,6 +30,12 @@ input_stream: "IMAGE:frame"
 # A collection of hand landmarks for each hand detected. (std::vector<NormalizedLandmarkList>)
 output_stream: "LANDMARKS:multi_hand_landmarks"
 
+output_stream: "WORLD_LANDMARKS:multi_hand_world_landmarks"
+
+output_stream: "HANDEDNESS:multi_handedness"
+
+output_stream: "PALM_DETECTIONS:palm_detections"
+
 # Regions of interest calculated based on landmarks. (std::vector<NormalizedRect>)
 output_stream: "HAND_ROIS:hand_rects"
 
@@ -79,6 +85,22 @@ output_stream: "HAND_ROIS:hand_rects"
 #                                          └───────┘
 # Generated using https://asciiflow.com/
 
+node {
+    calculator: "FlowLimiterCalculator"
+    input_stream: "frame"
+    input_stream: "FINISHED:hand_rects_from_landmarks"
+    input_stream_info: {
+        tag_index: "FINISHED"
+        back_edge: true
+    }
+    output_stream: "throttled_frame"
+    node_options: {
+        [type.googleapis.com/mediapipe.FlowLimiterCalculatorOptions] {
+            max_in_flight: 1
+            max_in_queue: 0
+        }
+    }
+}
 
 # Gets the image frame size.
 node {
@@ -160,6 +182,15 @@ node {
     input_stream: "IMAGE:frame_for_landmarks"
     input_stream: "ROI:single_hand_rect"
     output_stream: "LANDMARKS:single_hand_landmarks"
+    output_stream: "WORLD_LANDMARKS:single_hand_world_landmarks"
+    output_stream: "HANDEDNESS:single_handedness"
+}
+
+node {
+    calculator: "EndLoopClassificationListCalculator"
+    input_stream: "ITEM:single_handedness"
+    input_stream: "BATCH_END:hand_rects_ts"
+    output_stream: "ITERABLE:multi_handedness"
 }
 
 node {
@@ -174,6 +205,13 @@ node {
     input_stream: "ITEM:single_hand_landmarks"
     input_stream: "BATCH_END:hand_rects_ts"
     output_stream: "ITERABLE:multi_hand_landmarks"
+}
+
+node {
+    calculator: "EndLoopLandmarkListVectorCalculator"
+    input_stream: "ITEM:single_hand_world_landmarks"
+    input_stream: "BATCH_END:hand_rects_ts"
+    output_stream: "ITERABLE:multi_hand_world_landmarks"
 }
 
 node {
