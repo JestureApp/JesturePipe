@@ -1,38 +1,55 @@
 #include "absl/status/status.h"
-#include "mediapipe/framework/calculator_framework.h"
 #include "actions/actions.h"
+#include "jesturepipe/graphs/gesture_recognizer/calculators/gesture.h"
+#include "mediapipe/framework/calculator_framework.h"
 
 namespace jesturepipe {
-  class ActionsDemoCalculator : public mediapipe::CalculatorBase {
-    public:
-      static absl::Status GetContract(mediapipe::CalculatorContract* cc) {
-        cc->Inputs().Index(0).SetAny();
+namespace {
+const char GestureTag[] = "GESTURE";
+}
+
+class ActionsDemoCalculator : public mediapipe::CalculatorBase {
+   public:
+    static absl::Status GetContract(mediapipe::CalculatorContract* cc) {
+        cc->Inputs().Tag(GestureTag).Set<Gesture>();
 
         return absl::OkStatus();
-      }
+    }
 
-      absl::Status Open(mediapipe::CalculatorContext* cc) override {
+    absl::Status Open(mediapipe::CalculatorContext* cc) override {
         auto maybe_actions = actions::Actions<int>::Create();
 
-        if (! maybe_actions.ok()) {
-          return maybe_actions.status();
+        if (!maybe_actions.ok()) {
+            return maybe_actions.status();
         }
 
         actions = maybe_actions.value();
 
-        actions->Add(0, actions::Keystrokes{{'I', 0}, {'t', 0}, {' ', 0}, {'w', 0}, {'o', 0}, {'r', 0}, {'k', 0}, {'s', 0}, {' ', 0}, });
+        actions->Add(0, actions::Keystrokes{
+                            {'P', 0},
+                            {'e', 0},
+                            {'a', 0},
+                            {'c', 0},
+                            {'e', 0},
+                            {' ', 0},
+                        });
 
         return absl::OkStatus();
-      }
+    }
 
-      absl::Status Process(mediapipe::CalculatorContext* cc) override{
-        return actions->Perform(0);
-        // return absl::OkStatus();
-      }
+    absl::Status Process(mediapipe::CalculatorContext* cc) override {
+        auto gesture = cc->Inputs().Tag(GestureTag).Get<Gesture>();
 
-    private:
-        std::shared_ptr<actions::Actions<int>> actions;
-  };
+        if (gesture == Gesture::Peace) {
+            return actions->Perform(0);
+        }
 
-  REGISTER_CALCULATOR(ActionsDemoCalculator);
-}
+        return absl::OkStatus();
+    }
+
+   private:
+    std::shared_ptr<actions::Actions<int>> actions;
+};
+
+REGISTER_CALCULATOR(ActionsDemoCalculator);
+}  // namespace jesturepipe

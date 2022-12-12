@@ -41,10 +41,19 @@ node {
     output_stream: "HANDEDNESS:multi_hand_handedness"
 }
 
-# node {
-#     calculator: "ActionsDemoCalculator",
-#     input_stream: "multi_hand_landmarks",
-# }
+node {
+    calculator: "GestureRecognizer"
+    input_stream: "LANDMARKS:multi_hand_landmarks"
+    input_stream: "WORLD_LANDMARKS:multi_hand_world_landmarks"
+    input_stream: "HANDEDNESS:multi_handedness"
+    input_stream: "PALM_DETECTIONS:palm_detections"
+    output_stream: "GESTURE:gesture"
+}
+
+node {
+    calculator: "ActionsDemoCalculator",
+    input_stream: "GESTURE:gesture",
+}
 
 node {
     calculator: "HandsRenderer"

@@ -5,3 +5,38 @@ type: "GestureRecognizer"
 ################################################################################
 
 input_stream: "LANDMARKS:multi_hand_landmarks"
+
+input_stream: "WORLD_LANDMARKS:multi_hand_world_landmarks"
+
+input_stream: "HANDEDNESS:multi_handedness"
+
+input_stream: "PALM_DETECTIONS:palm_detections"
+
+################################################################################
+# Outputs
+################################################################################
+
+output_stream: "GESTURE:gesture"
+
+################################################################################
+# Graph
+################################################################################
+
+node {
+    calculator: "BeginLoopNormalizedLandmarkListVectorCalculator"
+    input_stream: "ITERABLE:multi_hand_landmarks"
+    output_stream: "ITEM:landmarks"
+    output_stream: "BATCH_END:landmarks_ts"
+}
+
+node {
+    calculator: "LandmarkToGestureFeatureCalculator"
+    input_stream: "LANDMARKS:landmarks"
+    output_stream: "GESTURE_FEATURE:gesture_feature"
+}
+
+node {
+    calculator: "GestureClassifierCalculator"
+    input_stream: "GESTURE_FEATURE:gesture_feature"
+    output_stream: "GESTURE:gesture"
+}
