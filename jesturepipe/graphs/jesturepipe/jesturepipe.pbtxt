@@ -34,10 +34,10 @@ node {
     output_stream: "LANDMARKS:multi_hand_landmarks"
 }
 
-node {
-    calculator: "ActionsDemoCalculator",
-    input_stream: "multi_hand_landmarks",
-}
+# node {
+#     calculator: "ActionsDemoCalculator",
+#     input_stream: "multi_hand_landmarks",
+# }
 
 node {
     calculator: "HandsRenderer"
