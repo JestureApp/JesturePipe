@@ -63,6 +63,10 @@ deps_remote_repositories = {
         "url": "https://github.com/google/googletest/archive/refs/tags/release-1.12.1.tar.gz",
         "strip_prefix": "googletest-release-1.12.1",
     },
+    "rules_rust": {
+        "sha256": "dd79bd4e2e2adabae738c5e93c36d351cf18071ff2acf6590190acf4138984f6",
+        "urls": ["https://github.com/bazelbuild/rules_rust/releases/download/0.14.0/rules_rust-v0.14.0.tar.gz"],
+    },
 }
 
 deps_remote_files = {

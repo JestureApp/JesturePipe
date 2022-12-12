@@ -43,6 +43,16 @@ http_archive(
     url = "https://github.com/hedronvision/bazel-compile-commands-extractor/archive/ed994039a951b736091776d677f324b3903ef939.tar.gz",
 )
 
-load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_setup")
+# load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_setup")
 
-hedron_compile_commands_setup()
+# hedron_compile_commands_setup()
+
+load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
+
+rules_rust_dependencies()
+
+rust_register_toolchains(edition = "2021")
+
+load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
+
+rust_analyzer_dependencies()
