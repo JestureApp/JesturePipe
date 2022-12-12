@@ -12,6 +12,7 @@ jesture_binary_graph(
     short_name = "jesturepipe",
     deps = [
         "//jesturepipe/calculators:camera_calculator",
+        "//jesturepipe/calculators:actions_demo_calculator",
         "//jesturepipe/graphs/hands:hands_graph",
         "//jesturepipe/graphs/hands:hands_renderer_graph",
     ],

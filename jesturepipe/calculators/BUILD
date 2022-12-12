@@ -14,3 +14,15 @@ cc_library(
     ],
     alwayslink = 1,
 )
+
+cc_library(
+    name = "actions_demo_calculator",
+    srcs = [
+        "actions_demo_calculator.cc",
+    ],
+    deps = [
+        "@mediapipe//mediapipe/framework:calculator_framework",
+        "@actions//actions"
+    ],
+    alwayslink = 1,
+)
