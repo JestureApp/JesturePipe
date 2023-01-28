@@ -1,0 +1,30 @@
+diff --git a/mediapipe/framework/tool/BUILD b/mediapipe/framework/tool/BUILD
+index de35f4fd..b9fc5a48 100644
+--- a/mediapipe/framework/tool/BUILD
++++ b/mediapipe/framework/tool/BUILD
+@@ -63,6 +63,12 @@ cc_library(
+     name = "text_to_binary_graph",
+     srcs = ["text_to_binary_graph.cc"],
+     visibility = ["//visibility:public"],
++    linkopts = select({
++        "//mediapipe:macos": [
++            "-framework CoreFoundation",
++        ],
++        "//conditions:default": [],
++    }),
+     deps = [
+         "//mediapipe/framework:calculator_cc_proto",
+         "//mediapipe/framework/port:advanced_proto",
+@@ -263,6 +269,12 @@ cc_binary(
+     name = "message_type_util",
+     srcs = ["message_type_util.cc"],
+     visibility = ["//visibility:public"],
++    linkopts = select({
++        "//mediapipe:macos": [
++            "-framework CoreFoundation",
++        ],
++        "//conditions:default": [],
++    }),
+     deps = [
+         "//mediapipe/framework/port:advanced_proto",
+         "//mediapipe/framework/port:file_helpers",

@@ -39,6 +39,12 @@ deps_remote_repositories = {
         "url": "https://github.com/google/mediapipe/archive/refs/tags/v0.8.11.zip",
         "sha256": "29276f31a6255b3afd27c2ceee63d39be46623ec01658973e305e95acc712eb4",
         "strip_prefix": "mediapipe-0.8.11",
+        "patches": [
+            "//third_party:mediapipe_macos.diff",
+        ],
+        "patch_args": [
+            "-p1",
+        ],
     },
     "build_bazel_rules_android": {
         "url": "https://github.com/bazelbuild/rules_android/archive/v0.1.1.zip",
@@ -116,5 +122,5 @@ def jesturepipe_respositories():
         native.new_local_repository,
         name = "macos_opencv",
         build_file = "//third_party:opencv_macos.BUILD",
-        path = "/usr/local",
+        path = "/opt/homebrew",
     )
