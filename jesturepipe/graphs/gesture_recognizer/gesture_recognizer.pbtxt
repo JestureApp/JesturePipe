@@ -40,3 +40,8 @@ node {
     input_stream: "GESTURE_FEATURE:gesture_feature"
     output_stream: "GESTURE:gesture"
 }
+
+node {
+    calculator: "Actions"
+    input_stream: "GESTURE:gesture"
+}
