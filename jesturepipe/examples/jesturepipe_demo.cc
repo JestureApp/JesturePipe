@@ -42,7 +42,7 @@ absl::Status RunGraph(const std::string& arg0) {
          mediapipe::MakePacket<std::string>(hand_model_path)
              .At(mediapipe::Timestamp(0))},
         {"camera_index",
-         mediapipe::MakePacket<int>(2).At(mediapipe::Timestamp(0))},
+         mediapipe::MakePacket<int>(0).At(mediapipe::Timestamp(0))},
         {"num_hands",
          mediapipe::MakePacket<int>(2).At(mediapipe::Timestamp(0))}};
 

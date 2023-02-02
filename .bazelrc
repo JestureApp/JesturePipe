@@ -6,7 +6,8 @@ build --local_ram_resources=HOST_RAM*.5
 build --local_cpu_resources=HOST_CPUS*.5
 build --enable_platform_specific_config
 
+build:macos --cxxopt=-std=c++17
+build:macos --host_cxxopt=-std=c++17
+
 build:linux --cxxopt=-std=c++17
 build:linux --host_cxxopt=-std=c++17
-
-run --define MEDIAPIPE_DISABLE_GPU=1

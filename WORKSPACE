@@ -1,5 +1,5 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+# load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 http_archive(
     name = "bazel_skylib",
@@ -46,12 +46,6 @@ http_archive(
 load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_setup")
 
 hedron_compile_commands_setup()
-
-git_repository(
-    name = "actions",
-    branch = "v0.0.1",
-    remote = "git@capstone-cs.eng.utah.edu:jesture/actions.git",
-)
 
 load("@actions//:deps.bzl", "actions_repositiories")
 

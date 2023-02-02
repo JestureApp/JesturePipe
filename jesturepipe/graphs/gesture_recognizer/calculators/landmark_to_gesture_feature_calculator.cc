@@ -1,5 +1,6 @@
 #include "absl/status/status.h"
 #include "jesturepipe/graphs/gesture_recognizer/calculators/gesture.h"
+#include "jesturepipe/graphs/gesture_recognizer/calculators/gesture_store.h"
 #include "math.h"
 #include "mediapipe/framework/calculator_framework.h"
 #include "mediapipe/framework/formats/landmark.pb.h"
@@ -53,35 +54,59 @@ class LandmarkToGestureFeatureCalculator : public mediapipe::CalculatorBase {
 
         GestureFeature feature;
 
-        feature.index =
-            GetFingerDirection(landmarks.landmark()[INDEX_FINGER_TIP].x() -
-                                   landmarks.landmark()[INDEX_FINGER_MCP].x(),
-                               landmarks.landmark()[INDEX_FINGER_TIP].y() -
-                                   landmarks.landmark()[INDEX_FINGER_MCP].y());
+        feature.index_vertical =
+            GetFingerDirectionVertical(landmarks.landmark()[INDEX_FINGER_TIP].y() -
+                                landmarks.landmark()[INDEX_FINGER_PIP].y());
+        
+        feature.index_horizontal =
+            GetFingerDirectionHorizontal(landmarks.landmark()[INDEX_FINGER_TIP].x() -
+                                landmarks.landmark()[INDEX_FINGER_PIP].x());
+                                
+        feature.middle_vertical =
+            GetFingerDirectionVertical(landmarks.landmark()[MIDDLE_FINGER_TIP].y() -
+                                landmarks.landmark()[MIDDLE_FINGER_PIP].y());
 
-        feature.middle =
-            GetFingerDirection(landmarks.landmark()[MIDDLE_FINGER_TIP].x() -
-                                   landmarks.landmark()[MIDDLE_FINGER_MCP].x(),
-                               landmarks.landmark()[MIDDLE_FINGER_TIP].y() -
-                                   landmarks.landmark()[MIDDLE_FINGER_MCP].y());
+        feature.middle_horizontal =
+            GetFingerDirectionHorizontal(landmarks.landmark()[MIDDLE_FINGER_TIP].x() -
+                                landmarks.landmark()[MIDDLE_FINGER_PIP].x());
 
-        feature.ring =
-            GetFingerDirection(landmarks.landmark()[RING_FINGER_TIP].x() -
-                                   landmarks.landmark()[RING_FINGER_MCP].x(),
-                               landmarks.landmark()[RING_FINGER_TIP].y() -
-                                   landmarks.landmark()[RING_FINGER_MCP].y());
+        feature.ring_vertical =
+            GetFingerDirectionVertical(landmarks.landmark()[RING_FINGER_TIP].y() -
+                                landmarks.landmark()[RING_FINGER_PIP].y());
 
-        feature.pinky =
-            GetFingerDirection(landmarks.landmark()[PINKY_TIP].x() -
-                                   landmarks.landmark()[PINKY_MCP].x(),
-                               landmarks.landmark()[PINKY_TIP].y() -
-                                   landmarks.landmark()[PINKY_MCP].y());
+        feature.ring_horizontal =
+            GetFingerDirectionHorizontal(landmarks.landmark()[RING_FINGER_TIP].x() -
+                                landmarks.landmark()[RING_FINGER_PIP].x());                      
 
-        feature.thumb =
-            GetFingerDirection(landmarks.landmark()[THUMB_TIP].x() -
-                                   landmarks.landmark()[THUMB_CMC].x(),
-                               landmarks.landmark()[THUMB_TIP].y() -
-                                   landmarks.landmark()[THUMB_CMC].y());
+        feature.pinky_vertical =
+            GetFingerDirectionVertical(landmarks.landmark()[PINKY_TIP].y() -
+                                landmarks.landmark()[PINKY_PIP].y());
+
+        feature.pinky_horizontal =
+            GetFingerDirectionHorizontal(landmarks.landmark()[PINKY_TIP].x() -
+                                landmarks.landmark()[PINKY_PIP].x());
+
+        feature.thumb_vertical =
+            GetFingerDirectionVertical(landmarks.landmark()[THUMB_TIP].y() -
+                                landmarks.landmark()[THUMB_MCP].y());
+
+        feature.thumb_horizontal =
+            GetFingerDirectionHorizontal(landmarks.landmark()[THUMB_TIP].x() -
+                                landmarks.landmark()[THUMB_MCP].x());
+
+        feature.middle_angle = 
+            GetAngle(landmarks.landmark()[MIDDLE_FINGER_TIP].x() -
+                                landmarks.landmark()[MIDDLE_FINGER_PIP].x(), landmarks.landmark()[MIDDLE_FINGER_TIP].y() -
+                                landmarks.landmark()[MIDDLE_FINGER_PIP].y());
+
+        feature.middle_angle = 
+            GetAngle(landmarks.landmark()[MIDDLE_FINGER_TIP].x() -
+                                landmarks.landmark()[MIDDLE_FINGER_PIP].x(), landmarks.landmark()[MIDDLE_FINGER_TIP].y() -
+                                landmarks.landmark()[MIDDLE_FINGER_PIP].y());
+        
+        feature.thumb_index_vertical = 
+            GetFingerDirectionVertical(landmarks.landmark()[THUMB_TIP].y() -
+                                landmarks.landmark()[INDEX_FINGER_TIP].y());
 
         cc->Outputs()
             .Tag(GestureFeatureTag)
@@ -92,26 +117,21 @@ class LandmarkToGestureFeatureCalculator : public mediapipe::CalculatorBase {
     }
 
    private:
-    static FingerDirection GetFingerDirection(double dx, double dy) {
-        if (dx == 0) {
-            if (dy < 0)
-                return FingerDirection::Up;
-            else if (dy > 0)
-                return FingerDirection::Down;
-            else
-                return FingerDirection::Right;
-        }
-
-        double theta = atan2(-dy, dx);
-
-        if (theta >= -M_PI_4 && theta <= M_PI_4)
-            return FingerDirection::Right;
-        else if (theta >= M_PI_4 && theta <= 3 * M_PI_4)
+    static FingerDirection GetFingerDirectionVertical(double dy){
+        if (dy < 0)
             return FingerDirection::Up;
-        else if (theta >= -3 * M_PI_4 && theta <= -M_PI_4)
+        else if (dy > 0)
             return FingerDirection::Down;
-        else
+    }
+    static FingerDirection GetFingerDirectionHorizontal(double dx){
+        if (dx < 0)
             return FingerDirection::Left;
+        else if (dx > 0)
+            return FingerDirection::Right;
+    }
+    static double GetAngle(double dx, double dy){
+        double theta = atan2(-dy, dx);
+        return theta * (180/M_PI);
     }
 };
 

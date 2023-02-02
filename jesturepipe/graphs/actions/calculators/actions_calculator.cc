@@ -1,14 +1,17 @@
 #include "absl/status/status.h"
+#include "actions/action.h"
 #include "actions/actions.h"
 #include "jesturepipe/graphs/gesture_recognizer/calculators/gesture.h"
 #include "mediapipe/framework/calculator_framework.h"
 
 namespace jesturepipe {
-namespace {
-const char GestureTag[] = "GESTURE";
-}
 
-class ActionsDemoCalculator : public mediapipe::CalculatorBase {
+namespace {
+using namespace actions;
+const char GestureTag[] = "GESTURE";
+}  // namespace
+
+class ActionsCalculator : public mediapipe::CalculatorBase {
    public:
     static absl::Status GetContract(mediapipe::CalculatorContract* cc) {
         cc->Inputs().Tag(GestureTag).Set<Gesture>();
@@ -17,22 +20,11 @@ class ActionsDemoCalculator : public mediapipe::CalculatorBase {
     }
 
     absl::Status Open(mediapipe::CalculatorContext* cc) override {
-        auto maybe_actions = actions::Actions<int>::Create();
+        auto maybe_actions = Actions::Create();
 
-        if (!maybe_actions.ok()) {
-            return maybe_actions.status();
-        }
+        if (!maybe_actions.ok()) return maybe_actions.status();
 
-        actions = maybe_actions.value();
-
-        actions->Add(0, actions::Keystrokes{
-                            {'P', 0},
-                            {'e', 0},
-                            {'a', 0},
-                            {'c', 0},
-                            {'e', 0},
-                            {' ', 0},
-                        });
+        actions = std::make_unique<Actions>(std::move(maybe_actions.value()));
 
         return absl::OkStatus();
     }
@@ -40,16 +32,23 @@ class ActionsDemoCalculator : public mediapipe::CalculatorBase {
     absl::Status Process(mediapipe::CalculatorContext* cc) override {
         auto gesture = cc->Inputs().Tag(GestureTag).Get<Gesture>();
 
-        if (gesture == Gesture::Peace) {
-            return actions->Perform(0);
+        if (gesture == Gesture::Custom) {
+            auto keystroke = action::ParseKeystroke("super+enter");
+
+            if (!keystroke.ok()) return keystroke.status();
+
+            return actions
+                ->Perform(keystroke.value(), action::target::Focused())
+                .get();
         }
 
         return absl::OkStatus();
     }
 
    private:
-    std::shared_ptr<actions::Actions<int>> actions;
+    std::unique_ptr<Actions> actions;
 };
 
-REGISTER_CALCULATOR(ActionsDemoCalculator);
+REGISTER_CALCULATOR(ActionsCalculator);
+
 }  // namespace jesturepipe
