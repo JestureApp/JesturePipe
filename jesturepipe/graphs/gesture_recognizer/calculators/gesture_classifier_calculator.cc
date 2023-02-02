@@ -1,7 +1,10 @@
+#include <tuple>
+#include <vector>
+
 #include "absl/status/status.h"
 #include "jesturepipe/graphs/gesture_recognizer/calculators/gesture.h"
+#include "jesturepipe/graphs/gesture_recognizer/calculators/gesture_store.h"
 #include "mediapipe/framework/calculator_framework.h"
-
 namespace jesturepipe {
 
 namespace {
@@ -40,40 +43,91 @@ class GestureClassifierCalculator : public mediapipe::CalculatorBase {
     absl::Status Process(mediapipe::CalculatorContext* cc) override {
         auto feature =
             cc->Inputs().Tag(GestureFeatureTag).Get<GestureFeature>();
-
         Gesture gesture;
 
-        if (feature.index == FingerDirection::Up &&
-            feature.middle == FingerDirection::Up &&
-            feature.ring == FingerDirection::Down &&
-            feature.pinky == FingerDirection::Down &&
-            feature.thumb == FingerDirection::Up) {
-            gesture = Gesture::Peace;
+        GestureStore& instance = GestureStore::get_instance();
+        if (!instance.to_record && instance.finished_custom_gesture) {
+            if (instance.features.size() != 0) {
+                GestureFeature custom_feature = instance.final_feature;
+                // Custom Gesture
+                if (feature.index_vertical == custom_feature.index_vertical &&
+                    feature.middle_vertical == custom_feature.middle_vertical &&
+                    feature.ring_vertical == custom_feature.ring_vertical &&
+                    feature.pinky_vertical == custom_feature.pinky_vertical &&
+                    feature.thumb_vertical == custom_feature.thumb_vertical &&
+                    feature.index_horizontal ==
+                        custom_feature.index_horizontal &&
+                    feature.middle_horizontal ==
+                        custom_feature.middle_horizontal &&
+                    feature.ring_horizontal == custom_feature.ring_horizontal &&
+                    feature.pinky_horizontal ==
+                        custom_feature.pinky_horizontal &&
+                    feature.thumb_horizontal ==
+                        custom_feature.thumb_horizontal) {
+                    gesture = Gesture::Custom;
+                    std::cout << "Saw Custom Gesture" << std::endl;
+                }
+            } else {
+                // Stop
+                if (feature.index_vertical == FingerDirection::Up &&
+                    feature.middle_vertical == FingerDirection::Up &&
+                    feature.ring_vertical == FingerDirection::Up &&
+                    feature.pinky_vertical == FingerDirection::Up &&
+                    feature.thumb_vertical == FingerDirection::Up &&
+                    feature.thumb_horizontal == FingerDirection::Left &&
+                    feature.middle_angle < 110 && feature.middle_angle > 60) {
+                    gesture = Gesture::Stop;
 
-            std::cout << "Saw Peace Gesture" << std::endl;
+                    std::cout << "Saw Stop Gesture" << std::endl;
+                }
+                // Pause
+                else if (feature.index_vertical == FingerDirection::Up &&
+                         feature.middle_vertical == FingerDirection::Up &&
+                         feature.ring_vertical == FingerDirection::Down &&
+                         feature.pinky_vertical == FingerDirection::Down &&
+                         feature.middle_angle < 120 &&
+                         feature.middle_angle > 60) {
+                    gesture = Gesture::Pause;
 
-        } else {
-            gesture = Gesture::Unknown;
+                    std::cout << "Saw Pause Gesture" << std::endl;
+                }
+                // Okay
+                else if (feature.index_vertical == FingerDirection::Down &&
+                         feature.middle_vertical == FingerDirection::Up &&
+                         feature.ring_vertical == FingerDirection::Up &&
+                         feature.pinky_vertical == FingerDirection::Up) {
+                    gesture = Gesture::Okay;
 
-            std::cout << "Unkown Gesture" << std::endl;
-            std::cout << "Index: " << FingerDirectionToString(feature.index)
-                      << std::endl;
+                    std::cout << "Saw Okay Gesture" << std::endl;
+                }
+                // Previous
+                else if (feature.index_horizontal == FingerDirection::Left &&
+                         feature.middle_horizontal == FingerDirection::Right &&
+                         feature.ring_horizontal == FingerDirection::Right &&
+                         feature.pinky_horizontal == FingerDirection::Right &&
+                         feature.thumb_vertical == FingerDirection::Up &&
+                         feature.thumb_index_vertical == FingerDirection::Up) {
+                    gesture = Gesture::Previous;
 
-            std::cout << "Middle: " << FingerDirectionToString(feature.middle)
-                      << std::endl;
+                    std::cout << "Saw Previous Gesture" << std::endl;
+                }
+                // Next
+                else if (feature.index_horizontal == FingerDirection::Right &&
+                         feature.middle_horizontal == FingerDirection::Left &&
+                         feature.ring_horizontal == FingerDirection::Left &&
+                         feature.pinky_horizontal == FingerDirection::Left &&
+                         feature.thumb_vertical == FingerDirection::Up &&
+                         feature.thumb_index_vertical == FingerDirection::Up) {
+                    gesture = Gesture::Next;
 
-            std::cout << "Ring: " << FingerDirectionToString(feature.ring)
-                      << std::endl;
-
-            std::cout << "Pinky: " << FingerDirectionToString(feature.pinky)
-                      << std::endl;
-
-            std::cout << "Thumb: " << FingerDirectionToString(feature.thumb)
-                      << std::endl;
-
-            std::cout << std::endl;
+                    std::cout << "Saw Next Gesture" << std::endl;
+                } else {
+                    gesture = Gesture::Unknown;
+                    std::cout << "Unkown Gesture" << std::endl;
+                    std::cout << std::endl;
+                }
+            }
         }
-
         cc->Outputs()
             .Tag(GestureTag)
             .AddPacket(mediapipe::MakePacket<Gesture>(gesture).At(

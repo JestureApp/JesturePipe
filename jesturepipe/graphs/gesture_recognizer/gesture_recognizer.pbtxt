@@ -12,6 +12,8 @@ input_stream: "HANDEDNESS:multi_handedness"
 
 input_stream: "PALM_DETECTIONS:palm_detections"
 
+# input_stream: "SHOULD_REC:should_rec"
+
 ################################################################################
 # Outputs
 ################################################################################
@@ -44,4 +46,9 @@ node {
 node {
     calculator: "Actions"
     input_stream: "GESTURE:gesture"
+}
+
+node{
+    calculator: "GestureRecorder"
+    input_stream: "LANDMARKS:landmarks"
 }
