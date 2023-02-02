@@ -11,7 +11,6 @@ jesture_binary_graph(
     graph = "jesturepipe.pbtxt",
     short_name = "jesturepipe",
     deps = [
-        "//jesturepipe/calculators:actions_demo_calculator",
         "//jesturepipe/calculators:camera_calculator",
         "//jesturepipe/graphs/gesture_recognizer:gesture_recognizer_graph",
         "//jesturepipe/graphs/hands:hands_graph",

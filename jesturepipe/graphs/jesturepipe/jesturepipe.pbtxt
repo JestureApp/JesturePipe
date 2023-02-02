@@ -51,11 +51,6 @@ node {
 }
 
 node {
-    calculator: "ActionsDemoCalculator",
-    input_stream: "GESTURE:gesture",
-}
-
-node {
     calculator: "HandsRenderer"
     input_stream: "IMAGE:input_video"
     input_stream: "LANDMARKS:multi_hand_landmarks"
