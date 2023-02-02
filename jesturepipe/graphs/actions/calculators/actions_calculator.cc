@@ -32,7 +32,7 @@ class ActionsCalculator : public mediapipe::CalculatorBase {
     absl::Status Process(mediapipe::CalculatorContext* cc) override {
         auto gesture = cc->Inputs().Tag(GestureTag).Get<Gesture>();
 
-        if (gesture == Gesture::Peace) {
+        if (gesture == Gesture::Custom) {
             auto keystroke = action::ParseKeystroke("super+enter");
 
             if (!keystroke.ok()) return keystroke.status();

@@ -5,14 +5,21 @@ namespace jesturepipe {
 typedef enum FingerDirection { Left, Right, Up, Down } FindDirection;
 
 typedef struct GestureFeature {
-    FingerDirection index;
-    FingerDirection middle;
-    FingerDirection ring;
-    FingerDirection pinky;
-    FingerDirection thumb;
-} GestureFeature;
+    FingerDirection index_vertical;
+    FingerDirection middle_vertical;
+    FingerDirection ring_vertical;
+    FingerDirection pinky_vertical;
+    FingerDirection thumb_vertical;
+    FingerDirection index_horizontal;
+    FingerDirection middle_horizontal;
+    FingerDirection ring_horizontal;
+    FingerDirection pinky_horizontal;
+    FingerDirection thumb_horizontal;
+    FingerDirection thumb_index_vertical;
+    double middle_angle;
+};
 
-typedef enum Gesture { Peace, Unknown } Gesture;
+typedef enum Gesture { Stop, Pause, Okay, Previous, Next, Custom, Unknown } Gesture;
 
 }  // namespace jesturepipe
 
