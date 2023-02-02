@@ -1,20 +1,43 @@
-cc_import(
+cc_library(
     name = "xcb",
-    shared_library = "lib/libxcb.so",
-    hdrs = glob(["include/xcb/*.h"]),
-    visibility = ["//visibility:public"],
-)
-
-cc_import(
-    name = "xtest",
-    shared_library = "lib/libxcb-xtest.so",
-    hdrs = ["include/xcb/xtest.h"],
-    visibility = ["//visibility:public"],
-)
-
-cc_import(
-    name = "keysyms",
-    shared_library = "lib/libxcb-keysyms.so",
-    hdrs = ["include/xcb/xcb_keysyms.h"],
+    # buildifier: disable=constant-globs
+    hdrs = glob([
+        "include/xcb/**/*.h*",
+    ]),
+    includes = [
+        "include/xcb/",
+    ],
+    linkopts = [
+        "-l:libxcb-composite.so",
+        "-l:libxcb-cursor.so",
+        "-l:libxcb-damage.so",
+        "-l:libxcb-dpms.so",
+        "-l:libxcb-dri2.so",
+        "-l:libxcb-dri3.so",
+        "-l:libxcb-ewmh.so",
+        "-l:libxcb-glx.so",
+        "-l:libxcb-icccm.so",
+        "-l:libxcb-image.so",
+        "-l:libxcb-keysyms.so",
+        "-l:libxcb-present.so",
+        "-l:libxcb-randr.so",
+        "-l:libxcb-record.so",
+        "-l:libxcb-render.so",
+        "-l:libxcb-res.so",
+        "-l:libxcb-screensaver.so",
+        "-l:libxcb-shape.so",
+        "-l:libxcb-shm.so",
+        "-l:libxcb-sync.so",
+        "-l:libxcb-util.so",
+        "-l:libxcb-xf86dri.so",
+        "-l:libxcb-xfixes.so",
+        "-l:libxcb-xinerama.so",
+        "-l:libxcb-xinput.so",
+        "-l:libxcb-xkb.so",
+        "-l:libxcb-xtest.so",
+        "-l:libxcb-xv.so",
+        "-l:libxcb-xvmc.so",
+        "-l:libxcb.so",
+    ],
     visibility = ["//visibility:public"],
 )

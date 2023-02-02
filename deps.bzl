@@ -2,6 +2,7 @@
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 deps_remote_repositories = {
     "org_tensorflow": {
@@ -123,4 +124,14 @@ def jesturepipe_respositories():
         name = "macos_opencv",
         build_file = "//third_party:opencv_macos.BUILD",
         path = "/opt/homebrew",
+    )
+
+    # TODO: change me to a git repository
+    maybe(
+        git_repository,
+        name = "actions",
+        remote = "git@capstone-cs.eng.utah.edu:jesture/actions.git",
+        # tag = "v0.1.0-alpha",
+        commit = "795f74f672ea981661e65acacd7c546d119d086f",
+        shallow_since = "1675349293 +0000",
     )
