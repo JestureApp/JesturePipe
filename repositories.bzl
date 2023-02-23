@@ -162,6 +162,7 @@ def jesturepipe_repositories():
         name = "rules_foreign_cc",
         url = "https://github.com/bazelbuild/rules_foreign_cc/archive/0.1.0.zip",
         strip_prefix = "rules_foreign_cc-0.1.0",
+        sha256 = "c2cdcf55ffaf49366725639e45dedd449b8c3fe22b54e31625eb80ce3a240f1e",
     )
 
     maybe(
@@ -226,7 +227,5 @@ def jesturepipe_repositories():
         git_repository,
         name = "actions",
         remote = "git@capstone-cs.eng.utah.edu:jesture/actions.git",
-        # tag = "v0.1.0-alpha",
-        commit = "e3ded7bb392ca35ae039e80bb35b3a56e5640edc",
-        # shallow_since = "1675349293 +0000",
+        tag = "v0.1.1",
     )
