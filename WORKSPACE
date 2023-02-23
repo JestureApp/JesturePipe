@@ -1,5 +1,10 @@
+workspace(name = "jesturepipe")
+
+################################################################################
+# Development Dependencies
+################################################################################
+
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-# load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 http_archive(
     name = "bazel_skylib",
@@ -9,30 +14,6 @@ http_archive(
         "https://github.com/bazelbuild/bazel-skylib/releases/download/1.3.0/bazel-skylib-1.3.0.tar.gz",
     ],
 )
-
-load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
-
-bazel_skylib_workspace()
-
-load("@bazel_skylib//lib:versions.bzl", "versions")
-
-versions.check(minimum_bazel_version = "5.0.0")
-
-load("//:deps.bzl", "jesturepipe_respositories")
-
-jesturepipe_respositories()
-
-# Necessary to break these up or else tensorflow setup will fail
-load("@org_tensorflow//tensorflow:workspace3.bzl", "tf_workspace3")
-load("@rules_foreign_cc//:workspace_definitions.bzl", "rules_foreign_cc_dependencies")
-
-tf_workspace3()
-
-rules_foreign_cc_dependencies()
-
-load("@org_tensorflow//tensorflow:workspace2.bzl", "tf_workspace2")
-
-tf_workspace2()
 
 # Hedron's Compile Commands Extractor for Bazel
 # https://github.com/hedronvision/bazel-compile-commands-extractor
@@ -47,6 +28,29 @@ load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_
 
 hedron_compile_commands_setup()
 
-load("@actions//:deps.bzl", "actions_repositiories")
+################################################################################
+# Workspace Setup
+################################################################################
 
-actions_repositiories()
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+
+bazel_skylib_workspace()
+
+load("@bazel_skylib//lib:versions.bzl", "versions")
+
+versions.check(
+    maximum_bazel_version = "5.3.0",
+    minimum_bazel_version = "5.0.0",
+)
+
+load("//:repositories.bzl", "jesturepipe_repositories")
+
+jesturepipe_repositories()
+
+load("//:setup0.bzl", "jesturepipe_setup0")
+
+jesturepipe_setup0()
+
+load("//:setup1.bzl", "jesturepipe_setup1")
+
+jesturepipe_setup1()
