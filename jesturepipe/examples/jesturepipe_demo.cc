@@ -8,10 +8,14 @@
 
 constexpr char kOutputStream[] = "annotated_frame";
 constexpr char kWindowName[] = "MediaPipe";
-const std::string palm_model_rel_path =
+const std::string palm_model_lite_rel_path =
     "mediapipe/mediapipe/modules/palm_detection/palm_detection_lite.tflite";
-const std::string hand_model_rel_path =
+const std::string palm_model_full_rel_path =
+    "mediapipe/mediapipe/modules/palm_detection/palm_detection_full.tflite";
+const std::string landmark_model_lite_rel_path =
     "mediapipe/mediapipe/modules/hand_landmark/hand_landmark_lite.tflite";
+const std::string landmark_model_full_rel_path =
+    "mediapipe/mediapipe/modules/hand_landmark/hand_landmark_full.tflite";
 
 using bazel::tools::cpp::runfiles::Runfiles;
 
@@ -23,13 +27,20 @@ absl::Status RunGraph(const std::string& arg0) {
         return absl::NotFoundError(error);
     }
 
-    std::string palm_model_path = runfiles->Rlocation(palm_model_rel_path);
-    std::string hand_model_path = runfiles->Rlocation(hand_model_rel_path);
+    std::string palm_model_full_path =
+        runfiles->Rlocation(palm_model_full_rel_path);
+    std::string palm_model_lite_path =
+        runfiles->Rlocation(palm_model_lite_rel_path);
+    std::string landmark_model_full_path =
+        runfiles->Rlocation(landmark_model_full_rel_path);
+    std::string landmark_model_lite_path =
+        runfiles->Rlocation(landmark_model_lite_rel_path);
 
     mediapipe::CalculatorGraph graph;
 
-    MP_RETURN_IF_ERROR(jesturepipe::jesturepipe_graph(&graph, palm_model_path,
-                                                      "", hand_model_path, ""));
+    MP_RETURN_IF_ERROR(jesturepipe::jesturepipe_graph(
+        &graph, palm_model_full_path, palm_model_lite_path,
+        landmark_model_full_path, landmark_model_lite_path));
 
     cv::namedWindow(kWindowName, 1);
 
@@ -45,6 +56,7 @@ absl::Status RunGraph(const std::string& arg0) {
         //      .At(mediapipe::Timestamp(0))},
         {"camera_index",
          mediapipe::MakePacket<int>(0).At(mediapipe::Timestamp(0))},
+        {"mode", mediapipe::MakePacket<int>(1).At(mediapipe::Timestamp(0))},
         {"num_hands",
          mediapipe::MakePacket<int>(2).At(mediapipe::Timestamp(0))}};
 

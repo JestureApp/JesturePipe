@@ -18,11 +18,13 @@ cc_library(
 )
 
 cc_library(
-    name = "dedup_calculator",
+    name = "if_else_calculator",
     srcs = [
-        "dedup_calculator.cc",
+        "if_else_calculator.cc",
     ],
-    hdrs = [
-        "dedup_calculator.h",
+    deps = [
+        "@mediapipe//mediapipe/framework:calculator_framework",
+        "@mediapipe//mediapipe/util:header_util",
     ],
+    alwayslink = 1,
 )

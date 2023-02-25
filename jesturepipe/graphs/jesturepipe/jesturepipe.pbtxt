@@ -6,10 +6,12 @@
 
 input_side_packet: "CAMERA:camera_index"
 input_side_packet: "NUM_HANDS:num_hands"
+input_side_packet: "MODE:mode"
 
-input_side_packet: "PALM_MODEL_PATH:palm_model_path"
-
-input_side_packet: "LANDMARK_MODEL_PATH:landmark_model_path"
+input_side_packet: "PALM_MODEL_FULL_PATH:palm_model_full_path"
+input_side_packet: "PALM_MODEL_LITE_PATH:palm_model_lite_path"
+input_side_packet: "LANDMARK_MODEL_FULL_PATH:landmark_model_full_path"
+input_side_packet: "LANDMARK_MODEL_LITE_PATH:landmark_model_lite_path"
 
 ################################################################################
 # Outputs
@@ -32,9 +34,12 @@ node {
 
 node {
     calculator: "Hands"
+    input_side_packet: "PALM_MODEL_FULL_PATH:palm_model_full_path"
+    input_side_packet: "PALM_MODEL_LITE_PATH:palm_model_lite_path"
+    input_side_packet: "LANDMARK_MODEL_FULL_PATH:landmark_model_full_path"
+    input_side_packet: "LANDMARK_MODEL_LITE_PATH:landmark_model_lite_path"
     input_side_packet: "NUM_HANDS:num_hands"
-    input_side_packet: "PALM_MODEL_PATH:palm_model_path"
-    input_side_packet: "LANDMARK_MODEL_PATH:landmark_model_path"
+    input_side_packet: "MODE:mode"
     input_stream: "IMAGE:input_video"
     output_stream: "LANDMARKS:multi_hand_landmarks"
     output_stream: "WORLD_LANDMARKS:multi_hand_world_landmarks"

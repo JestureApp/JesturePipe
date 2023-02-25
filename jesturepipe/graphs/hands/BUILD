@@ -40,6 +40,7 @@ mediapipe_simple_subgraph(
     register_as = "HandLandmarkDetector",
     deps = [
         ":model_loader_graph",
+        "//jesturepipe/calculators:if_else_calculator",
         "@mediapipe//mediapipe/calculators/core:gate_calculator",
         "@mediapipe//mediapipe/calculators/core:split_vector_calculator",
         "@mediapipe//mediapipe/calculators/tensor:image_to_tensor_calculator",
@@ -64,6 +65,7 @@ mediapipe_simple_subgraph(
     register_as = "PalmDetector",
     deps = [
         ":model_loader_graph",
+        "//jesturepipe/calculators:if_else_calculator",
         "@mediapipe//mediapipe/calculators/tensor:image_to_tensor_calculator",
         "@mediapipe//mediapipe/calculators/tensor:inference_calculator",
         "@mediapipe//mediapipe/calculators/tensor:tensors_to_detections_calculator",
