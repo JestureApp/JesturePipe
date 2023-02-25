@@ -39,7 +39,7 @@ absl::Status RunGraph(const std::string& arg0) {
     mediapipe::CalculatorGraph graph;
 
     MP_RETURN_IF_ERROR(jesturepipe::jesturepipe_graph(
-        &graph, palm_model_full_path, palm_model_lite_path,
+        graph, palm_model_full_path, palm_model_lite_path,
         landmark_model_full_path, landmark_model_lite_path));
 
     cv::namedWindow(kWindowName, 1);

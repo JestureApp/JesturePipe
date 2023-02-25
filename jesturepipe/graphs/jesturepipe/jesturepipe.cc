@@ -5,7 +5,7 @@
 #include "mediapipe/framework/calculator_framework.h"
 
 namespace jesturepipe {
-absl::Status jesturepipe_graph(mediapipe::CalculatorGraph* graph,
+absl::Status jesturepipe_graph(mediapipe::CalculatorGraph& graph,
                                std::string palm_model_full_path,
                                std::string palm_model_lite_path,
                                std::string landmark_model_full_path,
@@ -26,7 +26,7 @@ absl::Status jesturepipe_graph(mediapipe::CalculatorGraph* graph,
          mediapipe::MakePacket<std::string>(landmark_model_lite_path)},
     };
 
-    MP_RETURN_IF_ERROR(graph->Initialize(config, side_packets));
+    MP_RETURN_IF_ERROR(graph.Initialize(config, side_packets));
 
     return absl::OkStatus();
 }
