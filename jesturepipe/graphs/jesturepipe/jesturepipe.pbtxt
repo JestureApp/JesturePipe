@@ -47,8 +47,15 @@ node {
 }
 
 node {
+    calculator: "PacketClonerCalculator"
+    input_stream: "TICK:input_video"
+    input_stream: "multi_hand_landmarks"
+    output_stream: "multi_hand_landmarks_cloned"
+}
+
+node {
     calculator: "HandsRenderer"
     input_stream: "IMAGE:input_video"
-    input_stream: "LANDMARKS:multi_hand_landmarks"
+    input_stream: "LANDMARKS:multi_hand_landmarks_cloned"
     output_stream: "IMAGE:annotated_frame"
 }

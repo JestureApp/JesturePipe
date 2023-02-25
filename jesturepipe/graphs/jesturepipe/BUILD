@@ -15,6 +15,7 @@ jesture_binary_graph(
         "//jesturepipe/graphs/gesture_recognizer:gesture_recognizer_graph",
         "//jesturepipe/graphs/hands:hands_graph",
         "//jesturepipe/graphs/hands:hands_renderer_graph",
+        "@mediapipe//mediapipe/calculators/core:packet_cloner_calculator",
         "@mediapipe//mediapipe/framework:calculator_framework",
     ],
 )
