@@ -16,15 +16,6 @@ const std::string hand_model_rel_path =
 using bazel::tools::cpp::runfiles::Runfiles;
 
 absl::Status RunGraph(const std::string& arg0) {
-    mediapipe::CalculatorGraph graph;
-
-    MP_RETURN_IF_ERROR(jesturepipe::jesturepipe_graph(&graph));
-
-    cv::namedWindow(kWindowName, 1);
-
-    ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller,
-                     graph.AddOutputStreamPoller(kOutputStream));
-
     std::string error;
     std::unique_ptr<Runfiles> runfiles(Runfiles::Create(arg0, &error));
 
@@ -35,12 +26,23 @@ absl::Status RunGraph(const std::string& arg0) {
     std::string palm_model_path = runfiles->Rlocation(palm_model_rel_path);
     std::string hand_model_path = runfiles->Rlocation(hand_model_rel_path);
 
+    mediapipe::CalculatorGraph graph;
+
+    MP_RETURN_IF_ERROR(jesturepipe::jesturepipe_graph(&graph, palm_model_path,
+                                                      "", hand_model_path, ""));
+
+    cv::namedWindow(kWindowName, 1);
+
+    ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller,
+                     graph.AddOutputStreamPoller(kOutputStream));
+
     const std::map<std::string, mediapipe::Packet> side_packets{
-        {"palm_model_path", mediapipe::MakePacket<std::string>(palm_model_path)
-                                .At(mediapipe::Timestamp(0))},
-        {"landmark_model_path",
-         mediapipe::MakePacket<std::string>(hand_model_path)
-             .At(mediapipe::Timestamp(0))},
+        // {"palm_model_path",
+        // mediapipe::MakePacket<std::string>(palm_model_path)
+        //                         .At(mediapipe::Timestamp(0))},
+        // {"landmark_model_path",
+        //  mediapipe::MakePacket<std::string>(hand_model_path)
+        //      .At(mediapipe::Timestamp(0))},
         {"camera_index",
          mediapipe::MakePacket<int>(0).At(mediapipe::Timestamp(0))},
         {"num_hands",
