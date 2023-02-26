@@ -39,7 +39,7 @@ absl::Status RunGraph(const std::string& arg0) {
     mediapipe::CalculatorGraph graph;
 
     MP_RETURN_IF_ERROR(jesturepipe::jesturepipe_graph(
-        graph, palm_model_full_path, palm_model_lite_path,
+        &graph, palm_model_full_path, palm_model_lite_path,
         landmark_model_full_path, landmark_model_lite_path));
 
     cv::namedWindow(kWindowName, 1);
@@ -48,12 +48,6 @@ absl::Status RunGraph(const std::string& arg0) {
                      graph.AddOutputStreamPoller(kOutputStream));
 
     const std::map<std::string, mediapipe::Packet> side_packets{
-        // {"palm_model_path",
-        // mediapipe::MakePacket<std::string>(palm_model_path)
-        //                         .At(mediapipe::Timestamp(0))},
-        // {"landmark_model_path",
-        //  mediapipe::MakePacket<std::string>(hand_model_path)
-        //      .At(mediapipe::Timestamp(0))},
         {"camera_index",
          mediapipe::MakePacket<int>(0).At(mediapipe::Timestamp(0))},
         {"mode", mediapipe::MakePacket<int>(1).At(mediapipe::Timestamp(0))},
