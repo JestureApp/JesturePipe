@@ -49,6 +49,6 @@ node {
 node {
     calculator: "HandsRenderer"
     input_stream: "IMAGE:input_video"
-    input_stream: "LANDMARKS:multi_hand_landmarks_cloned"
+    input_stream: "LANDMARKS:multi_hand_landmarks"
     output_stream: "IMAGE:annotated_frame"
 }
