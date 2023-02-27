@@ -2,12 +2,14 @@
 #include "mediapipe/framework/calculator_framework.h"
 #include "mediapipe/util/header_util.h"
 
+namespace jesturepipe {
+namespace {
 const char IfStream[] = "IF";
 const char ElseStream[] = "ELSE";
 const char ConditionStream[] = "COND";
 const char ValueStream[] = "VALUE";
+}  // namespace
 
-namespace jesturepipe {
 // Example:
 // node {
 //  calculator: "CameraCalculator"

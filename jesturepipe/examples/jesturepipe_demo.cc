@@ -51,8 +51,9 @@ absl::Status RunGraph(const std::string& arg0) {
         {"camera_index",
          mediapipe::MakePacket<int>(0).At(mediapipe::Timestamp(0))},
         {"mode", mediapipe::MakePacket<int>(1).At(mediapipe::Timestamp(0))},
-        {"num_hands",
-         mediapipe::MakePacket<int>(2).At(mediapipe::Timestamp(0))}};
+        // {"num_hands",
+        //  mediapipe::MakePacket<int>(2).At(mediapipe::Timestamp(0))}
+    };
 
     MP_RETURN_IF_ERROR(graph.StartRun(side_packets));
 

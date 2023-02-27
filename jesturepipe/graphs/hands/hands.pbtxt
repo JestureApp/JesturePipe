@@ -44,6 +44,8 @@ output_stream: "PALM_DETECTIONS:palm_detections"
 # Regions of interest calculated based on landmarks. (std::vector<NormalizedRect>)
 output_stream: "HAND_ROIS:hand_rects"
 
+output_stream: "TICK:throttled_frame"
+
 ################################################################################
 # Graph
 ################################################################################

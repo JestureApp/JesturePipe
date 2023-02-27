@@ -3,48 +3,37 @@
 
 #include <functional>
 
-#include "absl/hash/hash.h"
 #include "mediapipe/framework/formats/landmark.pb.h"
 
 namespace jesturepipe {
-class Gesture {
+class GestureFrame {
    public:
     /**
-     * An important frame in the gesture. This may or may not end up equating to
-     * multiple camera frames.
-     *
-     * Used to represent the general shape of the hand at a point in time.
+     * Constructs a new key frame from a list of hand landmarks.
      */
-    class KeyFrame {
-       public:
-        /**
-         * Constructs a new key frame from a list of hand landmarks.
-         */
-        static KeyFrame FromLandmarks(
-            mediapipe::NormalizedLandmarkList& landmarks) noexcept;
+    static GestureFrame FromLandmarks(
+        mediapipe::NormalizedLandmarkList& landmarks) noexcept;
 
-        bool operator=(KeyFrame& other) noexcept;
+    GestureFrame(double index_direction, double middle_direction,
+                 double ring_direction, double pinky_direction,
+                 double thumb_direction) noexcept;
 
-        template <typename H>
-        friend H AbslHashValue(H h, const KeyFrame& frame) {
-            // TODO
-            return H::combine(0);
-        }
+    double index_direction;
+    double middle_direction;
+    double ring_direction;
+    double pinky_direction;
+    double thumb_direction;
 
-       private:
-        typedef enum { Left, Right, Up, Down } Direction;
+   protected:
+    bool isSame(const GestureFrame& frame1) const noexcept;
 
-        KeyFrame() noexcept;
-    };
-
-    void AddFrame(KeyFrame frame) noexcept;
-    void AddFrame(mediapipe::NormalizedLandmarkList& landmarks) noexcept;
-
-    KeyFrame& operator[](int index) noexcept;
-
-   private:
-    std::vector<KeyFrame> frames;
+    friend bool operator==(const GestureFrame& frame1,
+                           const GestureFrame& frame2) noexcept;
+    friend bool operator!=(const GestureFrame& frame1,
+                           const GestureFrame& frame2) noexcept;
 };
+
+class Gesture : public std::vector<GestureFrame> {};
 
 }  // namespace jesturepipe
 

@@ -1,0 +1,66 @@
+type: "Gestures"
+
+################################################################################
+# Inputs
+################################################################################
+
+input_side_packet: "NUM_HANDS:num_hands"
+
+input_stream: "TICK:tick"
+
+input_stream: "LANDMARKS:multi_hand_landmarks"
+
+input_stream: "WORLD_LANDMARKS:multi_hand_world_landmarks"
+
+input_stream: "HANDEDNESS:multi_handedness"
+
+################################################################################
+# Outputs
+################################################################################
+
+
+################################################################################
+# Graph
+################################################################################
+
+node {
+    calculator: "FixedLengthNormalizedLandmarkListVectorCalculator"
+    input_side_packet: "LENGTH:num_hands"
+    input_stream: "TICK:tick"
+    input_stream: "VECTOR:multi_hand_landmarks"
+    output_stream: "fixed_multi_hand_landmarks"
+}
+
+node {
+    calculator: "GetOptionalNormalizedLandmarkListVectorItemCalculator"
+    input_stream: "VECTOR:fixed_multi_hand_landmarks"
+    output_stream: "ITEM:landmarks1"
+    options {
+        [mediapipe.GetVectorItemCalculatorOptions.ext] {
+            item_index: 0
+        }
+    }
+}
+
+node {
+    calculator: "LandmarkToGestureFrameCalculator"
+    input_stream: "LANDMARKS:landmarks1"
+    output_stream: "FRAME:gesture_frames1"
+}
+
+node {
+    calculator: "DedupFramesCalculator"
+    input_stream: "gesture_frames1"
+    output_stream: "dedupped_gesture_frames1"
+}
+
+node {
+    calculator: "GestureRecognizerCalculator"
+    input_stream: "FRAME:dedupped_gesture_frames1"
+    output_stream: "REC:recognized_gestures1"
+}
+
+node {
+    calculator: "EchoerCalculator"
+    input_stream: "recognized_gestures1"
+}

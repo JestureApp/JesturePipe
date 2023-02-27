@@ -5,7 +5,6 @@
 ################################################################################
 
 input_side_packet: "CAMERA:camera_index"
-input_side_packet: "NUM_HANDS:num_hands"
 input_side_packet: "MODE:mode"
 
 input_side_packet: "PALM_MODEL_FULL_PATH:palm_model_full_path"
@@ -27,6 +26,16 @@ output_stream: "HANDEDNESS:multi_hand_handedness"
 ################################################################################
 
 node {
+  calculator: "ConstantSidePacketCalculator"
+  output_side_packet: "PACKET:num_hands"
+  node_options: {
+    [type.googleapis.com/mediapipe.ConstantSidePacketCalculatorOptions]: {
+      packet { int_value: 2 }
+    }
+  }
+}
+
+node {
     calculator: "CameraCalculator",
     input_side_packet: "CAMERA:camera_index",
     output_stream: "VIDEO:input_video",
@@ -44,6 +53,16 @@ node {
     output_stream: "LANDMARKS:multi_hand_landmarks"
     output_stream: "WORLD_LANDMARKS:multi_hand_world_landmarks"
     output_stream: "HANDEDNESS:multi_hand_handedness"
+    output_stream: "TICK:tick"
+}
+
+node {
+    calculator: "Gestures"
+    input_side_packet: "NUM_HANDS:num_hands"
+    input_stream: "TICK:tick"
+    input_stream: "LANDMARKS:multi_hand_landmarks"
+    input_stream: "WORLD_LANDMARKS:multi_hand_world_landmarks"
+    input_stream: "HANDEDNESS:multi_hand_handedness"
 }
 
 node {
