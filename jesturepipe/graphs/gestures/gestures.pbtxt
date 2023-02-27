@@ -14,10 +14,13 @@ input_stream: "WORLD_LANDMARKS:multi_hand_world_landmarks"
 
 input_stream: "HANDEDNESS:multi_handedness"
 
+input_stream: "GESTURE:gestures"
+
 ################################################################################
 # Outputs
 ################################################################################
 
+output_stream: "REC:recognized_gestures"
 
 ################################################################################
 # Graph
@@ -57,10 +60,11 @@ node {
 node {
     calculator: "GestureRecognizerCalculator"
     input_stream: "FRAME:dedupped_gesture_frames1"
-    output_stream: "REC:recognized_gestures1"
+    input_stream: "GESTURE:gestures"
+    output_stream: "REC:recognized_gestures"
 }
 
 node {
     calculator: "EchoerCalculator"
-    input_stream: "recognized_gestures1"
+    input_stream: "recognized_gestures"
 }

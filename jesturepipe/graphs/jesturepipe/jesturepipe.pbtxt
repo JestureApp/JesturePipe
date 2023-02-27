@@ -12,6 +12,8 @@ input_side_packet: "PALM_MODEL_LITE_PATH:palm_model_lite_path"
 input_side_packet: "LANDMARK_MODEL_FULL_PATH:landmark_model_full_path"
 input_side_packet: "LANDMARK_MODEL_LITE_PATH:landmark_model_lite_path"
 
+input_stream: "GESTURE:gestures"
+
 ################################################################################
 # Outputs
 ################################################################################
@@ -20,6 +22,7 @@ output_stream: "ANNOTATED_FRAME:annotated_frame"
 output_stream: "LANDMARKS:multi_hand_landmarks"
 output_stream: "WORLD_LANDMARKS:multi_hand_world_landmarks"
 output_stream: "HANDEDNESS:multi_hand_handedness"
+output_stream: "REC:recognized_gestures"
 
 ################################################################################
 # Graph
@@ -63,6 +66,8 @@ node {
     input_stream: "LANDMARKS:multi_hand_landmarks"
     input_stream: "WORLD_LANDMARKS:multi_hand_world_landmarks"
     input_stream: "HANDEDNESS:multi_hand_handedness"
+    input_stream: "GESTURE:gestures"
+    output_stream: "REC:recognized_gestures"
 }
 
 node {

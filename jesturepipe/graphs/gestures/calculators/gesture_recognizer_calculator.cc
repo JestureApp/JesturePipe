@@ -9,7 +9,7 @@ namespace jesturepipe {
 namespace {
 const char FrameTag[] = "FRAME";
 const char RecognitionTag[] = "REC";
-const char GesturesTag[] = "GESTURES";
+const char GesturesTag[] = "GESTURE";
 }  // namespace
 
 class GestureRecognizerCalculator : public mediapipe::CalculatorBase {
@@ -28,11 +28,11 @@ class GestureRecognizerCalculator : public mediapipe::CalculatorBase {
     }
 
     absl::Status Open(mediapipe::CalculatorContext* cc) override {
-        Gesture testGesture;
+        // Gesture testGesture;
 
-        testGesture.push_back(GestureFrame(90, 90, 90, 90, 90));
+        // testGesture.push_back(GestureFrame(90, 90, 90, 90, 90));
 
-        recognizer.addGesture(std::move(testGesture));
+        // recognizer.addGesture(std::move(testGesture));
 
         return absl::OkStatus();
     }
