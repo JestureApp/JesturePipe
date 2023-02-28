@@ -54,7 +54,7 @@ node {
     input_stream: "LANDMARKS:landmarks1"
     input_stream: "ADD_GESTURE:add_gesture"
     input_stream: "IS_RECORDING:is_recording"
-    output_stream: "GESTURE:recognizer_gestures"
+    output_stream: "GESTURE:recognized_gestures"
     output_stream: "ACT_GESTURE:actionable_gestures"
     output_stream: "REC_GESTURE:recorded_gestures"
 }
