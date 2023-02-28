@@ -4,7 +4,7 @@ cc_library(
     name = "actions_calculator",
     srcs = ["actions_calculator.cc"],
     deps = [
-        "//jesturepipe/graphs/gesture_recognizer/calculators:gesture",
+        # "//jesturepipe/graphs/gesture_recognizer/calculators:gesture",
         "@actions//actions",
         "@actions//actions:action",
         "@com_google_absl//absl/status",

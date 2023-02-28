@@ -14,7 +14,9 @@ input_stream: "WORLD_LANDMARKS:multi_hand_world_landmarks"
 
 input_stream: "HANDEDNESS:multi_handedness"
 
-input_stream: "GESTURE:gestures"
+input_stream: "ADD_GESTURE:add_gesture"
+
+input_stream: "IS_RECORDING:is_recording"
 
 ################################################################################
 # Outputs
@@ -46,25 +48,15 @@ node {
 }
 
 node {
-    calculator: "LandmarkToGestureFrameCalculator"
+    calculator: "GestureRecognizer2"
     input_stream: "LANDMARKS:landmarks1"
-    output_stream: "FRAME:gesture_frames1"
-}
-
-node {
-    calculator: "DedupFramesCalculator"
-    input_stream: "gesture_frames1"
-    output_stream: "dedupped_gesture_frames1"
-}
-
-node {
-    calculator: "GestureRecognizerCalculator"
-    input_stream: "FRAME:dedupped_gesture_frames1"
-    input_stream: "GESTURE:gestures"
-    output_stream: "REC:recognized_gestures"
+    input_stream: "ADD_GESTURE:add_gesture"
+    input_stream: "IS_RECORDING:is_recording"
+    output_stream: "SEEN:recognizer_gestures"
+    output_stream: "ACT:actionable_gestures"
 }
 
 node {
     calculator: "EchoerCalculator"
-    input_stream: "recognized_gestures"
+    input_stream: "actionable_gestures"
 }

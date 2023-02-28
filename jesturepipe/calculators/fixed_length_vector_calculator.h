@@ -31,11 +31,20 @@ class FixedLengthVectorCalculator : public mediapipe::CalculatorBase {
     absl::Status Open(mediapipe::CalculatorContext* cc) override {
         length = cc->InputSidePackets().Tag(LengthTag).Get<int>();
 
+        if (!cc->Inputs().Tag(VectorTag).Header().IsEmpty())
+            cc->Outputs().Index(0).SetHeader(
+                cc->Inputs().Tag(VectorTag).Header());
+
         return absl::OkStatus();
     }
 
     absl::Status Process(mediapipe::CalculatorContext* cc) override {
-        if (cc->Inputs().Tag(TickTag).IsEmpty()) return absl::OkStatus();
+        if (cc->Inputs().Tag(TickTag).IsEmpty()) {
+            cc->Outputs().Index(0).SetNextTimestampBound(
+                cc->InputTimestamp().NextAllowedInStream());
+
+            return absl::OkStatus();
+        }
 
         std::vector<absl::optional<T>> output(length);
 
@@ -51,6 +60,9 @@ class FixedLengthVectorCalculator : public mediapipe::CalculatorBase {
         cc->Outputs().Index(0).AddPacket(
             mediapipe::MakePacket<std::vector<absl::optional<T>>>(output).At(
                 cc->Inputs().Tag(TickTag).Value().Timestamp()));
+
+        cc->Outputs().Index(0).SetNextTimestampBound(
+            cc->InputTimestamp().NextAllowedInStream());
 
         return absl::OkStatus();
     }

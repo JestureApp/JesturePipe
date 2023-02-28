@@ -23,6 +23,11 @@ class LandmarkToGestureFrameCalculator : public mediapipe::CalculatorBase {
     }
 
     absl::Status Open(mediapipe::CalculatorContext* cc) override {
+        if (!cc->Inputs().Tag(LandmarksTag).Header().IsEmpty()) {
+            cc->Outputs().Tag(FrameTag).SetHeader(
+                cc->Inputs().Tag(LandmarksTag).Header());
+        }
+
         return absl::OkStatus();
     }
 
@@ -40,7 +45,7 @@ class LandmarkToGestureFrameCalculator : public mediapipe::CalculatorBase {
 
         cc->Outputs().Tag(FrameTag).AddPacket(
             mediapipe::MakePacket<absl::optional<GestureFrame>>(frame).At(
-                cc->InputTimestamp()));
+                cc->Inputs().Tag(LandmarksTag).Value().Timestamp()));
 
         return absl::OkStatus();
     }

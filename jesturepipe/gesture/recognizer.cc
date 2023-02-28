@@ -10,13 +10,12 @@ void GestureRecognizer::addGesture(Gesture&& gesture) noexcept {
     matchers.push_back(std::move(matcher));
 }
 
-absl::optional<Gesture> GestureRecognizer::nextFrame(
-    GestureFrame& frame) noexcept {
-    absl::optional<Gesture> matched;
+absl::optional<int> GestureRecognizer::nextFrame(GestureFrame& frame) noexcept {
+    absl::optional<int> matched;
 
     for (auto matcher : matchers) {
         if (matcher.matches(frame)) {
-            matched = matcher.getGesture();
+            matched = matcher.getGesture().id;
             break;
         }
     }
@@ -52,7 +51,7 @@ bool GestureRecognizer::GestureMatcher::matches(GestureFrame& frame) noexcept {
 
 void GestureRecognizer::GestureMatcher::reset() noexcept { next = 0; }
 
-Gesture GestureRecognizer::GestureMatcher::getGesture() noexcept {
+Gesture& GestureRecognizer::GestureMatcher::getGesture() noexcept {
     return gesture;
 }
 

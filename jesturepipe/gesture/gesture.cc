@@ -30,6 +30,28 @@ constexpr int PINKY_TIP = 20;
 constexpr double ANGLE_THRESHOLD = 20;
 }  // namespace
 
+Gesture::Gesture(int id) noexcept : id(id) {}
+
+Gesture::Gesture(const Gesture& other) noexcept
+    : id(other.id), frames(other.frames) {}
+
+Gesture& Gesture::operator=(const Gesture& other) noexcept {
+    if (this != &other) {
+        frames = other.frames;
+        id = other.id;
+    }
+
+    return *this;
+}
+
+GestureFrame& Gesture::operator[](unsigned long index) noexcept {
+    return frames[index];
+}
+
+void Gesture::AddFrame(GestureFrame frame) noexcept { frames.push_back(frame); }
+
+unsigned long Gesture::size() noexcept { return frames.size(); }
+
 double GetAngle(double dx, double dy) {
     double theta = atan2(-dy, dx);
     return theta * (180 / M_PI);

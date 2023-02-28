@@ -1,4 +1,5 @@
 #include "absl/status/status.h"
+#include "jesturepipe/gesture/gesture.h"
 #include "jesturepipe/graphs/jesturepipe/jesturepipe.h"
 #include "mediapipe/framework/calculator_framework.h"
 #include "mediapipe/framework/formats/image_frame_opencv.h"
@@ -36,6 +37,10 @@ absl::Status RunGraph(const std::string& arg0) {
     std::string landmark_model_lite_path =
         runfiles->Rlocation(landmark_model_lite_rel_path);
 
+    jesturepipe::Gesture testGesture(1);
+
+    testGesture.AddFrame(jesturepipe::GestureFrame(90, 90, 90, 90, 90));
+
     mediapipe::CalculatorGraph graph;
 
     MP_RETURN_IF_ERROR(jesturepipe::jesturepipe_graph(
@@ -56,6 +61,10 @@ absl::Status RunGraph(const std::string& arg0) {
     };
 
     MP_RETURN_IF_ERROR(graph.StartRun(side_packets));
+
+    MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+        "add_gesture", mediapipe::MakePacket<jesturepipe::Gesture>(testGesture)
+                           .At(mediapipe::Timestamp().NextAllowedInStream())));
 
     while (true) {
         mediapipe::Packet packet;

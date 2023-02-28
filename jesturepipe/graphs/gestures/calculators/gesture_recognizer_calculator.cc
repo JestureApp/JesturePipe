@@ -8,21 +8,22 @@
 namespace jesturepipe {
 namespace {
 const char FrameTag[] = "FRAME";
-const char RecognitionTag[] = "REC";
+const char SeenTag[] = "SEEN";
 const char GesturesTag[] = "GESTURE";
 }  // namespace
 
 class GestureRecognizerCalculator : public mediapipe::CalculatorBase {
    public:
     static absl::Status GetContract(mediapipe::CalculatorContract* cc) {
+        cc->SetProcessTimestampBounds(true);
+        cc->SetTimestampOffset(0);
         cc->Inputs().Tag(FrameTag).Set<absl::optional<GestureFrame>>();
 
         if (cc->Inputs().HasTag(GesturesTag)) {
             cc->Inputs().Tag(GesturesTag).Set<Gesture>();
-            cc->SetProcessTimestampBounds(true);
         }
 
-        cc->Outputs().Tag(RecognitionTag).Set<Gesture>();
+        cc->Outputs().Tag(SeenTag).Set<int>();
 
         return absl::OkStatus();
     }
@@ -44,7 +45,9 @@ class GestureRecognizerCalculator : public mediapipe::CalculatorBase {
             recognizer.addGesture(std::move(new_gesture));
         }
 
-        if (cc->Inputs().Tag(FrameTag).IsEmpty()) return absl::OkStatus();
+        if (cc->Inputs().Tag(FrameTag).IsEmpty()) {
+            return absl::OkStatus();
+        }
 
         absl::optional<GestureFrame> frame =
             cc->Inputs().Tag(FrameTag).Get<absl::optional<GestureFrame>>();
@@ -55,14 +58,12 @@ class GestureRecognizerCalculator : public mediapipe::CalculatorBase {
             return absl::OkStatus();
         }
 
-        absl::optional<Gesture> gesture = recognizer.nextFrame(frame.value());
+        absl::optional<int> gesture = recognizer.nextFrame(frame.value());
 
         if (gesture.has_value()) {
-            cc->Outputs()
-                .Tag(RecognitionTag)
-                .AddPacket(
-                    mediapipe::MakePacket<Gesture>(gesture.value())
-                        .At(cc->Inputs().Tag(FrameTag).Value().Timestamp()));
+            cc->Outputs().Tag(SeenTag).AddPacket(
+                mediapipe::MakePacket<int>(gesture.value())
+                    .At(cc->Inputs().Tag(FrameTag).Value().Timestamp()));
         }
 
         return absl::OkStatus();

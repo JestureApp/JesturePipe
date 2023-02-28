@@ -33,7 +33,24 @@ class GestureFrame {
                            const GestureFrame& frame2) noexcept;
 };
 
-class Gesture : public std::vector<GestureFrame> {};
+class Gesture {
+   public:
+    explicit Gesture(int id) noexcept;
+
+    Gesture(const Gesture& other) noexcept;
+    Gesture& operator=(const Gesture& other) noexcept;
+
+    GestureFrame& operator[](unsigned long index) noexcept;
+
+    void AddFrame(GestureFrame frame) noexcept;
+
+    unsigned long size() noexcept;
+
+    int id;
+
+   private:
+    std::vector<GestureFrame> frames;
+};
 
 }  // namespace jesturepipe
 

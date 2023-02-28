@@ -1,6 +1,18 @@
 # A graph implementing the JesturePipe pipeline
 
 ################################################################################
+# Config
+################################################################################
+
+profiler_config {
+  trace_enabled: true
+  enable_profiler: true
+  trace_log_interval_count: 200
+}
+
+report_deadlock: true
+
+################################################################################
 # Input Side Packets
 ################################################################################
 
@@ -12,7 +24,8 @@ input_side_packet: "PALM_MODEL_LITE_PATH:palm_model_lite_path"
 input_side_packet: "LANDMARK_MODEL_FULL_PATH:landmark_model_full_path"
 input_side_packet: "LANDMARK_MODEL_LITE_PATH:landmark_model_lite_path"
 
-input_stream: "GESTURE:gestures"
+input_stream: "ADD_GESTURE:add_gesture"
+input_stream: "IS_RECORDING:is_recording"
 
 ################################################################################
 # Outputs
@@ -66,7 +79,8 @@ node {
     input_stream: "LANDMARKS:multi_hand_landmarks"
     input_stream: "WORLD_LANDMARKS:multi_hand_world_landmarks"
     input_stream: "HANDEDNESS:multi_hand_handedness"
-    input_stream: "GESTURE:gestures"
+    input_stream: "ADD_GESTURE:add_gesture"
+    input_stream: "IS_RECORDING:is_recording"
     output_stream: "REC:recognized_gestures"
 }
 

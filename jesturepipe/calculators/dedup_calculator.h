@@ -3,6 +3,7 @@
 
 #include "absl/status/status.h"
 #include "mediapipe/framework/calculator_framework.h"
+#include "mediapipe/framework/port/logging.h"
 
 namespace jesturepipe {
 
@@ -18,19 +19,35 @@ class DedupCalculator : public mediapipe::CalculatorBase {
         return absl::OkStatus();
     }
 
-    // absl::Status Open(mediapipe::CalculatorContext* cc) override {
-    //     return absl::OkStatus();
-    // }
+    absl::Status Open(mediapipe::CalculatorContext* cc) override {
+        auto& input = cc->Inputs().Index(0);
+        auto& output = cc->Outputs().Index(0);
+
+        if (!input.Header().IsEmpty()) output.SetHeader(input.Header());
+
+        return absl::OkStatus();
+    }
 
     absl::Status Process(mediapipe::CalculatorContext* cc) override {
-        T val = cc->Inputs().Index(0).Get<T>();
+        auto& input = cc->Inputs().Index(0);
+        auto& output = cc->Outputs().Index(0);
+
+        T val = input.Get<T>();
 
         if (last == nullptr || val != *last) {
-            cc->Outputs().Index(0).AddPacket(mediapipe::MakePacket<T>(val).At(
-                cc->Inputs().Index(0).Value().Timestamp()));
+            output.AddPacket(
+                mediapipe::MakePacket<T>(val).At(input.Value().Timestamp()));
 
             delete last;
             last = new T(val);
+        } else {
+            // std::cout << cc->NodeName()
+            //           << ": found duplicate, setting timestamp bound to "
+            //           << cc->InputTimestamp().NextAllowedInStream()
+            //           << std::endl;
+
+            output.SetNextTimestampBound(
+                cc->InputTimestamp().NextAllowedInStream());
         }
 
         return absl::OkStatus();

@@ -15,7 +15,7 @@ class GestureRecognizer {
 
     void addGesture(Gesture&& gesture) noexcept;
 
-    absl::optional<Gesture> nextFrame(GestureFrame& frame) noexcept;
+    absl::optional<int> nextFrame(GestureFrame& frame) noexcept;
 
     void reset() noexcept;
 
@@ -28,7 +28,7 @@ class GestureRecognizer {
 
         bool matches(GestureFrame& frame) noexcept;
 
-        Gesture getGesture() noexcept;
+        Gesture& getGesture() noexcept;
 
        private:
         Gesture gesture;
