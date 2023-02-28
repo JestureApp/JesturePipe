@@ -27,6 +27,19 @@ cc_library(
 )
 
 cc_library(
+    name = "gesture_recorder_calculator",
+    srcs = ["gesture_recorder_calculator.cc"],
+    deps = [
+        "//jesturepipe/gesture",
+        "//jesturepipe/gesture:recorder",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/types:optional",
+        "@mediapipe//mediapipe/framework:calculator_framework",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
     name = "calc_ext",
     srcs = ["calc_ext.cc"],
     deps = [

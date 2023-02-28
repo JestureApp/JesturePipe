@@ -18,8 +18,9 @@ input_stream: "IS_RECORDING:is_recording"
 # Outputs
 ################################################################################
 
-output_stream: "SEEN:recognized_gestures"
-output_stream: "ACT:actionable_gestures"
+output_stream: "GESTURE:recognized_gestures"
+output_stream: "ACT_GESTURE:actionable_gestures"
+output_stream: "REC_GESTURE:recorded_gestures"
 
 ################################################################################
 # Graph
@@ -45,17 +46,29 @@ node {
 }
 
 node {
-    calculator: "GestureRecognizerCalculator"
-    input_stream: "FRAME:dedupped_gesture_frames"
-    input_stream: "GESTURE:synced_add_gesture"
-    output_stream: "SEEN:recognized_gestures"
+    calculator: "PacketSequencerCalculator"
+    input_stream: "INPUT:is_recording"
+    input_stream: "TICK:dedupped_gesture_frames"
+    output_stream: "OUTPUT:synced_is_recording"
 }
 
 node {
     calculator: "PacketClonerCalculator"
     input_stream: "TICK:dedupped_gesture_frames"
-    input_stream: "is_recording"
+    input_stream: "synced_is_recording"
     output_stream: "cloned_is_recording"
+}
+
+# node {
+#     calculator: "EchoerCalculator"
+#     input_stream: "cloned_is_recording"
+# }
+
+node {
+    calculator: "GestureRecognizerCalculator"
+    input_stream: "FRAME:dedupped_gesture_frames"
+    input_stream: "GESTURE:synced_add_gesture"
+    output_stream: "SEEN:recognized_gestures"
 }
 
 node {
@@ -69,5 +82,13 @@ node {
     calculator: "GateCalculator"
     input_stream: "ALLOW:cloned_is_recording"
     input_stream: "dedupped_gesture_frames"
+    output_stream: "STATE_CHANGE:recording_changed"
     output_stream: "recordable_gesture_frames"
+}
+
+node {
+    calculator: "GestureRecorderCalculator"
+    input_stream: "FRAME:recordable_gesture_frames"
+    input_stream: "FINISH:recording_changed"
+    output_stream: "GESTURE:recorded_gesture"
 }

@@ -40,15 +40,7 @@ class Gesture {
     Gesture(const Gesture& other) noexcept;
     Gesture& operator=(const Gesture& other) noexcept;
 
-    GestureFrame& operator[](unsigned long index) noexcept;
-
-    void AddFrame(GestureFrame frame) noexcept;
-
-    unsigned long size() noexcept;
-
     int id;
-
-   private:
     std::vector<GestureFrame> frames;
 };
 

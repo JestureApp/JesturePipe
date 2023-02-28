@@ -27,9 +27,9 @@ mediapipe_simple_subgraph(
     deps = [
         "//jesturepipe/calculators:echoer_calculator",
         "//jesturepipe/calculators:fixed_length_vector_calculator",
-        "//jesturepipe/calculators:sync_with_calculator",
         "//jesturepipe/graphs/gestures/calculators:calc_ext",
         "//jesturepipe/graphs/gestures/calculators:gesture_recognizer_calculator",
+        "//jesturepipe/graphs/gestures/calculators:gesture_recorder_calculator",
         "//jesturepipe/graphs/gestures/calculators:landmark_to_gesture_frame_calculator",
         "@mediapipe//mediapipe/calculators/core:constant_side_packet_calculator",
         "@mediapipe//mediapipe/calculators/core:gate_calculator",

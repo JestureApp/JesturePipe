@@ -23,6 +23,7 @@ input_side_packet: "PALM_MODEL_FULL_PATH:palm_model_full_path"
 input_side_packet: "PALM_MODEL_LITE_PATH:palm_model_lite_path"
 input_side_packet: "LANDMARK_MODEL_FULL_PATH:landmark_model_full_path"
 input_side_packet: "LANDMARK_MODEL_LITE_PATH:landmark_model_lite_path"
+input_side_packet: "IS_RECORDING:is_recording_init"
 
 input_stream: "ADD_GESTURE:add_gesture"
 input_stream: "IS_RECORDING:is_recording"
@@ -35,7 +36,9 @@ output_stream: "ANNOTATED_FRAME:annotated_frame"
 output_stream: "LANDMARKS:multi_hand_landmarks"
 output_stream: "WORLD_LANDMARKS:multi_hand_world_landmarks"
 output_stream: "HANDEDNESS:multi_hand_handedness"
-output_stream: "REC:recognized_gestures"
+output_stream: "GESTURE:recognized_gestures"
+output_stream: "ACT_GESTURE:actionable_gestures"
+output_stream: "REC_GESTURE:recorded_gestures"
 
 ################################################################################
 # Graph
@@ -52,9 +55,29 @@ node {
 }
 
 node {
+    calculator: "SidePacketToStreamCalculator"
+    input_side_packet: "is_recording_init"
+    output_stream: "AT_ZERO:is_recording_init_"
+}
+
+node {
+    calculator: "PacketSequencerCalculator"
+    input_stream: "INPUT:is_recording"
+    input_stream: "TICK:is_recording_init_"
+    output_stream: "OUTPUT:synced_is_recording"
+}
+
+node {
+    calculator: "MergeCalculator"
+    input_stream: "synced_is_recording"
+    input_stream: "is_recording_init_"
+    output_stream: "is_recording_"
+}
+
+node {
     calculator: "CameraCalculator",
-    input_side_packet: "CAMERA:camera_index",
-    output_stream: "VIDEO:input_video",
+    input_side_packet: "CAMERA:camera_index"
+    output_stream: "VIDEO:input_video"
 }
 
 node {
@@ -80,8 +103,10 @@ node {
     input_stream: "WORLD_LANDMARKS:multi_hand_world_landmarks"
     input_stream: "HANDEDNESS:multi_hand_handedness"
     input_stream: "ADD_GESTURE:add_gesture"
-    input_stream: "IS_RECORDING:is_recording"
-    output_stream: "REC:recognized_gestures"
+    input_stream: "IS_RECORDING:is_recording_"
+    output_stream: "GESTURE:recognized_gestures"
+    output_stream: "ACT_GESTURE:actionable_gestures"
+    output_stream: "REC_GESTURE:recorded_gestures"
 }
 
 node {

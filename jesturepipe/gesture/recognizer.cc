@@ -35,10 +35,10 @@ GestureRecognizer::GestureMatcher::GestureMatcher(Gesture&& gesture) noexcept
     : gesture(std::move(gesture)), next(0){};
 
 bool GestureRecognizer::GestureMatcher::matches(GestureFrame& frame) noexcept {
-    if (frame == gesture[next]) {
+    if (frame == gesture.frames[next]) {
         next++;
 
-        if (next == gesture.size()) {
+        if (next == gesture.frames.size()) {
             next = 0;
             return true;
         } else

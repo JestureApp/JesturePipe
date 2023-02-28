@@ -22,7 +22,9 @@ input_stream: "IS_RECORDING:is_recording"
 # Outputs
 ################################################################################
 
-output_stream: "REC:recognized_gestures"
+output_stream: "GESTURE:recognized_gestures"
+output_stream: "ACT_GESTURE:actionable_gesture"
+output_stream: "REC_GESTURE:recorded_gestures"
 
 ################################################################################
 # Graph
@@ -52,11 +54,8 @@ node {
     input_stream: "LANDMARKS:landmarks1"
     input_stream: "ADD_GESTURE:add_gesture"
     input_stream: "IS_RECORDING:is_recording"
-    output_stream: "SEEN:recognizer_gestures"
-    output_stream: "ACT:actionable_gestures"
+    output_stream: "GESTURE:recognizer_gestures"
+    output_stream: "ACT_GESTURE:actionable_gestures"
+    output_stream: "REC_GESTURE:recorded_gestures"
 }
 
-node {
-    calculator: "EchoerCalculator"
-    input_stream: "actionable_gestures"
-}

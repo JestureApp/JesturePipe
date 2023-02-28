@@ -71,13 +71,3 @@ cc_library(
         "@mediapipe//mediapipe/framework:calculator_framework",
     ],
 )
-
-cc_library(
-    name = "sync_with_calculator",
-    srcs = ["sync_with_calculator.cc"],
-    deps = [
-        "@mediapipe//mediapipe/framework:calculator_framework",
-        "@mediapipe//mediapipe/util:header_util",
-    ],
-    alwayslink = 1,
-)

@@ -19,3 +19,12 @@ cc_library(
         "@com_google_absl//absl/types:variant",
     ],
 )
+
+cc_library(
+    name = "recorder",
+    srcs = ["recorder.cc"],
+    hdrs = ["recorder.h"],
+    deps = [
+        ":gesture",
+    ],
+)

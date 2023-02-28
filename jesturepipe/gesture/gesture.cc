@@ -44,14 +44,6 @@ Gesture& Gesture::operator=(const Gesture& other) noexcept {
     return *this;
 }
 
-GestureFrame& Gesture::operator[](unsigned long index) noexcept {
-    return frames[index];
-}
-
-void Gesture::AddFrame(GestureFrame frame) noexcept { frames.push_back(frame); }
-
-unsigned long Gesture::size() noexcept { return frames.size(); }
-
 double GetAngle(double dx, double dy) {
     double theta = atan2(-dy, dx);
     return theta * (180 / M_PI);

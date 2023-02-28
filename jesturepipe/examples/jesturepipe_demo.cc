@@ -39,7 +39,7 @@ absl::Status RunGraph(const std::string& arg0) {
 
     jesturepipe::Gesture testGesture(1);
 
-    testGesture.AddFrame(jesturepipe::GestureFrame(90, 90, 90, 90, 90));
+    testGesture.frames.push_back(jesturepipe::GestureFrame(90, 90, 90, 90, 90));
 
     mediapipe::CalculatorGraph graph;
 
@@ -47,7 +47,7 @@ absl::Status RunGraph(const std::string& arg0) {
         &graph, palm_model_full_path, palm_model_lite_path,
         landmark_model_full_path, landmark_model_lite_path));
 
-    cv::namedWindow(kWindowName, 1);
+    cv::namedWindow(kWindowName, 0);
 
     ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller,
                      graph.AddOutputStreamPoller(kOutputStream));
