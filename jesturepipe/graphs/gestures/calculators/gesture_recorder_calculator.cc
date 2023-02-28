@@ -25,24 +25,28 @@ class GestureRecorderCalculator : public mediapipe::CalculatorBase {
     }
 
     absl::Status Process(mediapipe::CalculatorContext* cc) override {
+        // std::cout << "HERE" << std::endl;
+
         auto& input = cc->Inputs().Tag(FrameTag);
         auto& finish = cc->Inputs().Tag(FinishTag);
         auto& output = cc->Outputs().Tag(GestureTag);
 
         if (!finish.IsEmpty()) {
-            std::cout << "Finished recording gesture" << std::endl;
+            // std::cout << "Finished recording gesture" << std::endl;
             Gesture gesture = recorder.finish();
 
             if (gesture.frames.size()) {
                 output.AddPacket(mediapipe::MakePacket<Gesture>(gesture).At(
                     input.Value().Timestamp()));
                 return absl::OkStatus();
+            } else {
+                std::cout << "recorded empty gesture" << std::endl;
             }
         }
 
         if (!input.IsEmpty() &&
             input.Get<absl::optional<GestureFrame>>().has_value()) {
-            std::cout << "Recorded Frame" << std::endl;
+            // std::cout << "Recorded Frame" << std::endl;
 
             GestureFrame frame =
                 input.Get<absl::optional<GestureFrame>>().value();

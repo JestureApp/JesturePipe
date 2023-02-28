@@ -17,8 +17,20 @@ class EchoerCalculator : public mediapipe::CalculatorBase {
     }
 
     absl::Status Process(mediapipe::CalculatorContext* cc) override {
-        std::cout << "Echoer got input at "
-                  << cc->Inputs().Index(0).Value().Timestamp() << std::endl;
+        auto& input = cc->Inputs().Index(0);
+
+        if (input.IsEmpty()) return absl::OkStatus();
+
+        mediapipe::TypeId type_id = input.Value().GetTypeId();
+
+        std::cout << cc->NodeName() << ": Echoer got packet at "
+                  << input.Value().Timestamp();
+
+        if (type_id == mediapipe::kTypeId<bool>) {
+            std::cout << " with value " << input.Get<bool>();
+        }
+
+        std::cout << std::endl;
 
         return absl::OkStatus();
     }

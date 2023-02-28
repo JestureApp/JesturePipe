@@ -18,6 +18,7 @@ jesture_binary_graph(
         "//jesturepipe/graphs/hands:hands_renderer_graph",
         "@mediapipe//mediapipe/calculators/core:constant_side_packet_calculator",
         "@mediapipe//mediapipe/calculators/core:merge_calculator",
+        "@mediapipe//mediapipe/calculators/core:packet_cloner_calculator",
         "@mediapipe//mediapipe/calculators/core:packet_sequencer_calculator",
         "@mediapipe//mediapipe/calculators/core:side_packet_to_stream_calculator",
         "@mediapipe//mediapipe/framework:calculator_framework",

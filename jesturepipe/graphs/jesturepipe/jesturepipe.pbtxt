@@ -44,6 +44,12 @@ output_stream: "REC_GESTURE:recorded_gestures"
 # Graph
 ################################################################################
 
+# node {
+#     calculator: "EchoerCalculator"
+#     input_stream: "is_recording"
+# }
+
+
 node {
   calculator: "ConstantSidePacketCalculator"
   output_side_packet: "PACKET:num_hands"
@@ -94,6 +100,13 @@ node {
     output_stream: "HANDEDNESS:multi_hand_handedness"
     output_stream: "TICK:tick"
 }
+
+# node {
+#     calculator: "PacketClonerCalculator"
+#     input_stream: "TICK:multi_hand_landmarks"
+#     input_stream: "is_recording_"
+#     output_stream: "cloned_is_recording"
+# }
 
 node {
     calculator: "Gestures"

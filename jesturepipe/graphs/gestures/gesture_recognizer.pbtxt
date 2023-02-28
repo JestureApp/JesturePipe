@@ -26,6 +26,7 @@ output_stream: "REC_GESTURE:recorded_gestures"
 # Graph
 ################################################################################
 
+
 node {
     calculator: "LandmarkToGestureFrameCalculator"
     input_stream: "LANDMARKS:landmarks"
@@ -78,6 +79,16 @@ node {
     output_stream: "actionable_gestures"
 }
 
+# node {
+#     calculator: "EchoerCalculator"
+#     input_stream: "cloned_is_recording"
+# }
+
+# node {
+#     calculator: "EchoerCalculator"
+#     input_stream: "cloned_is_recording"
+# }
+
 node {
     calculator: "GateCalculator"
     input_stream: "ALLOW:cloned_is_recording"
@@ -86,9 +97,14 @@ node {
     output_stream: "recordable_gesture_frames"
 }
 
+# node {
+#     calculator: "EchoerCalculator"
+#     input_stream: "recordable_gesture_frames"
+# }
+
 node {
     calculator: "GestureRecorderCalculator"
     input_stream: "FRAME:recordable_gesture_frames"
     input_stream: "FINISH:recording_changed"
-    output_stream: "GESTURE:recorded_gesture"
+    output_stream: "GESTURE:recorded_gestures"
 }
