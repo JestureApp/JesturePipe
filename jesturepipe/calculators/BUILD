@@ -18,11 +18,56 @@ cc_library(
 )
 
 cc_library(
-    name = "dedup_calculator",
+    name = "if_else_calculator",
     srcs = [
-        "dedup_calculator.cc",
+        "if_else_calculator.cc",
     ],
-    hdrs = [
-        "dedup_calculator.h",
+    deps = [
+        "@mediapipe//mediapipe/framework:calculator_framework",
+        "@mediapipe//mediapipe/util:header_util",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "echoer_calculator",
+    srcs = ["echoer_calculator.cc"],
+    deps = [
+        "@mediapipe//mediapipe/framework:calculator_framework",
+        "@mediapipe//mediapipe/util:header_util",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "optional_calculator",
+    srcs = ["optional_calculator.cc"],
+    hdrs = ["optional_calculator.h"],
+    deps = [
+        "@com_google_absl//absl/types:optional",
+        "@mediapipe//mediapipe/framework:calculator_framework",
+        "@mediapipe//mediapipe/framework/formats:landmark_cc_proto",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "fixed_length_vector_calculator",
+    srcs = ["fixed_length_vector_calculator.cc"],
+    hdrs = ["fixed_length_vector_calculator.h"],
+    deps = [
+        "@com_google_absl//absl/types:optional",
+        "@mediapipe//mediapipe/framework:calculator_framework",
+        "@mediapipe//mediapipe/framework/formats:landmark_cc_proto",
+        "@mediapipe//mediapipe/framework/port:logging",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "dedup_calculator",
+    hdrs = ["dedup_calculator.h"],
+    deps = [
+        "@mediapipe//mediapipe/framework:calculator_framework",
     ],
 )

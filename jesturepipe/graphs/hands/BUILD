@@ -40,6 +40,7 @@ mediapipe_simple_subgraph(
     register_as = "HandLandmarkDetector",
     deps = [
         ":model_loader_graph",
+        "//jesturepipe/calculators:if_else_calculator",
         "@mediapipe//mediapipe/calculators/core:gate_calculator",
         "@mediapipe//mediapipe/calculators/core:split_vector_calculator",
         "@mediapipe//mediapipe/calculators/tensor:image_to_tensor_calculator",
@@ -64,6 +65,7 @@ mediapipe_simple_subgraph(
     register_as = "PalmDetector",
     deps = [
         ":model_loader_graph",
+        "//jesturepipe/calculators:if_else_calculator",
         "@mediapipe//mediapipe/calculators/tensor:image_to_tensor_calculator",
         "@mediapipe//mediapipe/calculators/tensor:inference_calculator",
         "@mediapipe//mediapipe/calculators/tensor:tensors_to_detections_calculator",
@@ -81,6 +83,8 @@ mediapipe_simple_subgraph(
     deps = [
         ":hand_landmark_detector_graph",
         ":palm_detector_graph",
+        "//jesturepipe/calculators:echoer_calculator",
+        "//jesturepipe/calculators:optional_calculator",
         "@mediapipe//mediapipe/calculators/core:begin_loop_calculator",
         "@mediapipe//mediapipe/calculators/core:clip_vector_size_calculator",
         "@mediapipe//mediapipe/calculators/core:end_loop_calculator",

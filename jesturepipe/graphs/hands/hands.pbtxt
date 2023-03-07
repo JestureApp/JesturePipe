@@ -10,11 +10,16 @@ type: "Hands"
 # Maximum number of hands to detect/track. (int)
 input_side_packet: "NUM_HANDS:num_hands"
 
+# Operation mode fast = 0, accurate = 1
+input_side_packet: "MODE:mode"
+
 # Path to the palm detection model.
-input_side_packet: "PALM_MODEL_PATH:palm_model_path"
+input_side_packet: "PALM_MODEL_LITE_PATH:palm_model_lite_path"
+input_side_packet: "PALM_MODEL_FULL_PATH:palm_model_full_path"
 
 # Path to the hand landmark model.
-input_side_packet: "LANDMARK_MODEL_PATH:landmark_model_path"
+input_side_packet: "LANDMARK_MODEL_FULL_PATH:landmark_model_full_path"
+input_side_packet: "LANDMARK_MODEL_LITE_PATH:landmark_model_lite_path"
 
 ################################################################################
 # Inputs
@@ -38,6 +43,8 @@ output_stream: "PALM_DETECTIONS:palm_detections"
 
 # Regions of interest calculated based on landmarks. (std::vector<NormalizedRect>)
 output_stream: "HAND_ROIS:hand_rects"
+
+output_stream: "TICK:throttled_frame"
 
 ################################################################################
 # Graph
@@ -112,7 +119,9 @@ node {
 # Detects the palm(s) in the image frame.
 node {
     calculator: "PalmDetector"
-    input_side_packet: "MODEL_PATH:palm_model_path"
+    input_side_packet: "MODEL_FULL_PATH:palm_model_full_path"
+    input_side_packet: "MODEL_LITE_PATH:palm_model_lite_path"
+    input_side_packet: "MODE:mode"
     input_stream: "IMAGE:throttled_frame"
     output_stream: "DETECTIONS:palm_detections_raw"
 }
@@ -178,7 +187,9 @@ node {
 # Detect hand landmarks for the specific hand rect.
 node {
     calculator: "HandLandmarkDetector"
-    input_side_packet: "MODEL_PATH:landmark_model_path"
+    input_side_packet: "MODEL_FULL_PATH:landmark_model_full_path"
+    input_side_packet: "MODEL_LITE_PATH:landmark_model_full_path"
+    input_side_packet: "MODE:mode"
     input_stream: "IMAGE:frame_for_landmarks"
     input_stream: "ROI:single_hand_rect"
     output_stream: "LANDMARKS:single_hand_landmarks"

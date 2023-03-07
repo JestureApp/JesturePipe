@@ -6,8 +6,11 @@ type: "HandLandmarkDetector"
 # Configuration (Input side packets)
 ################################################################################
 
+input_side_packet: "MODE:mode"
+
 # The path to the hand landmaker detection model.
-input_side_packet: "MODEL_PATH:model_path"
+input_side_packet: "MODEL_FULL_PATH:model_full_path"
+input_side_packet: "MODEL_LITE_PATH:model_lite_path"
 
 ################################################################################
 # Inputs
@@ -51,6 +54,14 @@ node {
       }
     }
   }
+}
+
+node {
+    calculator: "IfElseCalculator"
+    input_side_packet: "COND:mode"
+    input_side_packet: "IF:model_lite_path"
+    input_side_packet: "ELSE:model_full_path"
+    output_side_packet: "VALUE:model_path"
 }
 
 # Loads the hand landmark TF Lite model.

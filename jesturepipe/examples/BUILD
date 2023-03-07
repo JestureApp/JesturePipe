@@ -21,6 +21,7 @@ cc_binary(
     name = "jesturepipe_demo",
     srcs = ["jesturepipe_demo.cc"],
     deps = [
+        "//jesturepipe/gesture",
         "//jesturepipe/graphs/jesturepipe",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/status",

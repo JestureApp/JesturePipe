@@ -1,4 +1,5 @@
 #include "absl/status/status.h"
+#include "jesturepipe/gesture/gesture.h"
 #include "jesturepipe/graphs/jesturepipe/jesturepipe.h"
 #include "mediapipe/framework/calculator_framework.h"
 #include "mediapipe/framework/formats/image_frame_opencv.h"
@@ -8,23 +9,18 @@
 
 constexpr char kOutputStream[] = "annotated_frame";
 constexpr char kWindowName[] = "MediaPipe";
-const std::string palm_model_rel_path =
+const std::string palm_model_lite_rel_path =
     "mediapipe/mediapipe/modules/palm_detection/palm_detection_lite.tflite";
-const std::string hand_model_rel_path =
+const std::string palm_model_full_rel_path =
+    "mediapipe/mediapipe/modules/palm_detection/palm_detection_full.tflite";
+const std::string landmark_model_lite_rel_path =
     "mediapipe/mediapipe/modules/hand_landmark/hand_landmark_lite.tflite";
+const std::string landmark_model_full_rel_path =
+    "mediapipe/mediapipe/modules/hand_landmark/hand_landmark_full.tflite";
 
 using bazel::tools::cpp::runfiles::Runfiles;
 
 absl::Status RunGraph(const std::string& arg0) {
-    mediapipe::CalculatorGraph graph;
-
-    MP_RETURN_IF_ERROR(jesturepipe::jesturepipe_graph(&graph));
-
-    cv::namedWindow(kWindowName, 1);
-
-    ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller,
-                     graph.AddOutputStreamPoller(kOutputStream));
-
     std::string error;
     std::unique_ptr<Runfiles> runfiles(Runfiles::Create(arg0, &error));
 
@@ -32,21 +28,43 @@ absl::Status RunGraph(const std::string& arg0) {
         return absl::NotFoundError(error);
     }
 
-    std::string palm_model_path = runfiles->Rlocation(palm_model_rel_path);
-    std::string hand_model_path = runfiles->Rlocation(hand_model_rel_path);
+    std::string palm_model_full_path =
+        runfiles->Rlocation(palm_model_full_rel_path);
+    std::string palm_model_lite_path =
+        runfiles->Rlocation(palm_model_lite_rel_path);
+    std::string landmark_model_full_path =
+        runfiles->Rlocation(landmark_model_full_rel_path);
+    std::string landmark_model_lite_path =
+        runfiles->Rlocation(landmark_model_lite_rel_path);
+
+    jesturepipe::Gesture testGesture(1);
+
+    testGesture.frames.push_back(jesturepipe::GestureFrame(90, 90, 90, 90, 90));
+
+    mediapipe::CalculatorGraph graph;
+
+    MP_RETURN_IF_ERROR(jesturepipe::jesturepipe_graph(
+        &graph, palm_model_full_path, palm_model_lite_path,
+        landmark_model_full_path, landmark_model_lite_path));
+
+    cv::namedWindow(kWindowName, 0);
+
+    ASSIGN_OR_RETURN(mediapipe::OutputStreamPoller poller,
+                     graph.AddOutputStreamPoller(kOutputStream));
 
     const std::map<std::string, mediapipe::Packet> side_packets{
-        {"palm_model_path", mediapipe::MakePacket<std::string>(palm_model_path)
-                                .At(mediapipe::Timestamp(0))},
-        {"landmark_model_path",
-         mediapipe::MakePacket<std::string>(hand_model_path)
-             .At(mediapipe::Timestamp(0))},
         {"camera_index",
          mediapipe::MakePacket<int>(0).At(mediapipe::Timestamp(0))},
-        {"num_hands",
-         mediapipe::MakePacket<int>(2).At(mediapipe::Timestamp(0))}};
+        {"mode", mediapipe::MakePacket<int>(1).At(mediapipe::Timestamp(0))},
+        // {"num_hands",
+        //  mediapipe::MakePacket<int>(2).At(mediapipe::Timestamp(0))}
+    };
 
     MP_RETURN_IF_ERROR(graph.StartRun(side_packets));
+
+    MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+        "add_gesture", mediapipe::MakePacket<jesturepipe::Gesture>(testGesture)
+                           .At(mediapipe::Timestamp().NextAllowedInStream())));
 
     while (true) {
         mediapipe::Packet packet;

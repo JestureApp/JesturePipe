@@ -5,24 +5,26 @@
 #include "mediapipe/framework/calculator_framework.h"
 
 namespace jesturepipe {
-absl::Status jesturepipe_graph(mediapipe::CalculatorGraph* graph) {
+absl::Status jesturepipe_graph(mediapipe::CalculatorGraph* graph,
+                               std::string palm_model_full_path,
+                               std::string palm_model_lite_path,
+                               std::string landmark_model_full_path,
+                               std::string landmark_model_lite_path) {
     mediapipe::CalculatorGraphConfig config;
 
-    RET_CHECK(config.ParseFromArray(JESTUREPIPE_CONFIG_CONTENTS.c_str(),
-                                    JESTUREPIPE_CONFIG_CONTENTS.size()));
+    RET_CHECK(config.ParseFromString(JESTUREPIPE_CONFIG_CONTENTS));
 
-    MP_RETURN_IF_ERROR(graph->Initialize(config));
-
-    return absl::OkStatus();
-}
-
-absl::Status jesturepipe_graph(
-    mediapipe::CalculatorGraph* graph,
-    const std::map<std::string, mediapipe::Packet>& side_packets) {
-    mediapipe::CalculatorGraphConfig config;
-
-    RET_CHECK(config.ParseFromArray(JESTUREPIPE_CONFIG_CONTENTS.c_str(),
-                                    JESTUREPIPE_CONFIG_CONTENTS.size()));
+    const std::map<std::string, mediapipe::Packet> side_packets = {
+        {"palm_model_full_path",
+         mediapipe::MakePacket<std::string>(palm_model_full_path)},
+        {"palm_model_lite_path",
+         mediapipe::MakePacket<std::string>(palm_model_lite_path)},
+        {"landmark_model_full_path",
+         mediapipe::MakePacket<std::string>(landmark_model_full_path)},
+        {"landmark_model_lite_path",
+         mediapipe::MakePacket<std::string>(landmark_model_lite_path)},
+        {"is_recording_init", mediapipe::MakePacket<bool>(false)},
+    };
 
     MP_RETURN_IF_ERROR(graph->Initialize(config, side_packets));
 
