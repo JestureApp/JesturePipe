@@ -79,15 +79,3 @@ mediapipe_simple_subgraph(
         "@mediapipe//mediapipe/modules/hand_landmark:palm_detection_detection_to_roi",
     ],
 )
-
-mediapipe_simple_subgraph(
-    name = "hands_renderer",
-    graph = "hands_renderer.pbtxt",
-    register_as = "HandsRenderer",
-    deps = [
-        "@mediapipe//mediapipe/calculators/core:begin_loop_calculator",
-        "@mediapipe//mediapipe/calculators/core:end_loop_calculator",
-        "@mediapipe//mediapipe/calculators/util:annotation_overlay_calculator",
-        "@mediapipe//mediapipe/calculators/util:landmarks_to_render_data_calculator",
-    ],
-)

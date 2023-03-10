@@ -1,22 +1,23 @@
-type: "HandsRenderer"
+type: "FrameAnnotator"
 
 ################################################################################
 # Streams
 ################################################################################
 
-input_stream: "IMAGE:frame"
+# The frame to annotate
+# (ImageFrame)
+input_stream: "FRAME:frame"
+
+# The normalized landmarks produced by Hands
+# (std::vector<NormalizedLandmarkList>)
 input_stream: "NORM_LANDMARKS:multi_hand_landmarks"
 
-output_stream: "IMAGE:output_frame"
+output_stream: "FRAME:annotated_frame"
 
 ################################################################################
 # Nodes
 ################################################################################
 
-# Outputs each element of multi_palm_landmarks at a fake timestamp for the rest
-# of the graph to process. At the end of the loop, outputs the BATCH_END
-# timestamp for downstream calculators to inform them that all elements in the
-# vector have been processed.
 node {
   calculator: "BeginLoopNormalizedLandmarkListVectorCalculator"
   input_stream: "ITERABLE:multi_hand_landmarks"
@@ -80,10 +81,6 @@ node {
   }
 }
 
-
-# Collects a RenderData object for each hand into a vector. Upon receiving the
-# BATCH_END timestamp, outputs the vector of RenderData at the BATCH_END
-# timestamp.
 node {
   calculator: "EndLoopRenderDataCalculator"
   input_stream: "ITEM:single_hand_landmark_render_data"
@@ -97,5 +94,5 @@ node {
   calculator: "AnnotationOverlayCalculator"
   input_stream: "IMAGE:frame"
   input_stream: "VECTOR:0:multi_hand_landmarks_render_data"
-  output_stream: "IMAGE:output_frame"
+  output_stream: "IMAGE:annotated_frame"
 }

@@ -6,7 +6,7 @@ cc_binary(
     deps = [
         "//jesturepipe/calculators:camera_calculator",
         "//jesturepipe/graphs/hands",
-        "//jesturepipe/graphs/hands:hands_renderer",
+        "//jesturepipe/graphs/util:frame_annotator",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/status",
         "@mediapipe//mediapipe/framework:calculator_framework",

@@ -57,10 +57,10 @@ mediapipe::CalculatorGraphConfig graph_config() {
         }
 
         node {
-          calculator: "HandsRenderer"
-          input_stream: "IMAGE:frame"
+          calculator: "FrameAnnotator"
+          input_stream: "FRAME:frame"
           input_stream: "NORM_LANDMARKS:multi_hand_landmarks"
-          output_stream: "IMAGE:annotated_frame"
+          output_stream: "FRAME:annotated_frame"
         }
     )pb");
 }
