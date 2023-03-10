@@ -128,7 +128,7 @@ absl::Status run(Runfiles* runfiles, int camera_index, bool use_full) {
 
 int main(int argc, char** argv) {
     int camera_index = 2;
-    bool use_full = true;
+    bool use_full = false;
 
     google::InitGoogleLogging(argv[0]);
 

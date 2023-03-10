@@ -26,3 +26,27 @@ cc_library(
     ],
     alwayslink = 1,
 )
+
+cc_library(
+    name = "echoer_calculator",
+    srcs = ["echoer_calculator.cc"],
+    deps = [
+        "@mediapipe//mediapipe/framework:calculator_framework",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "fps_to_render_data_calculator",
+    srcs = ["fps_to_render_data_calculator.cc"],
+    deps = [
+        "@com_google_absl//absl/strings:str_format",
+        "@mediapipe//mediapipe/calculators/util:packet_frequency_cc_proto",
+        "@mediapipe//mediapipe/framework:calculator_framework",
+        "@mediapipe//mediapipe/framework/api2:node",
+        "@mediapipe//mediapipe/framework/api2:packet",
+        "@mediapipe//mediapipe/util:color_cc_proto",
+        "@mediapipe//mediapipe/util:render_data_cc_proto",
+    ],
+    alwayslink = 1,
+)

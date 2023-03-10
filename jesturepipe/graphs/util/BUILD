@@ -10,9 +10,16 @@ mediapipe_simple_subgraph(
     graph = "frame_annotator.pbtxt",
     register_as = "FrameAnnotator",
     deps = [
+        "//jesturepipe/calculators:echoer_calculator",
+        "//jesturepipe/calculators:fps_to_render_data_calculator",
         "@mediapipe//mediapipe/calculators/core:begin_loop_calculator",
         "@mediapipe//mediapipe/calculators/core:end_loop_calculator",
+        "@mediapipe//mediapipe/calculators/core:packet_cloner_calculator",
+        "@mediapipe//mediapipe/calculators/core:packet_sequencer_calculator",
         "@mediapipe//mediapipe/calculators/util:annotation_overlay_calculator",
+        "@mediapipe//mediapipe/calculators/util:labels_to_render_data_calculator",
         "@mediapipe//mediapipe/calculators/util:landmarks_to_render_data_calculator",
+        "@mediapipe//mediapipe/calculators/util:packet_frequency_calculator",
+        "@mediapipe//mediapipe/calculators/util:rect_to_render_data_calculator",
     ],
 )

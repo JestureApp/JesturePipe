@@ -88,11 +88,33 @@ node {
   output_stream: "ITERABLE:multi_hand_landmarks_render_data"
 }
 
+node {
+    calculator: "PacketFrequencyCalculator"
+    input_stream: "frame"
+    output_stream: "frame_frequency"
+    input_stream_handler {
+        input_stream_handler: "ImmediateInputStreamHandler"
+    }
+    options {
+        [mediapipe.PacketFrequencyCalculatorOptions.ext] {
+            time_window_sec: 1.0
+            label: "frame"
+        }
+    }
+}
+
+node {
+    calculator: "FpsToRenderDataCalculator"
+    input_stream: "FPS:frame_frequency"
+    output_stream: "RENDER_DATA:fps_render_data"
+}
+
 # Draws annotations and overlays them on top of the input images. Consumes
 # a vector of RenderData objects and draws each of them on the input frame.
 node {
   calculator: "AnnotationOverlayCalculator"
   input_stream: "IMAGE:frame"
+  input_stream: "fps_render_data"
   input_stream: "VECTOR:0:multi_hand_landmarks_render_data"
   output_stream: "IMAGE:annotated_frame"
 }
