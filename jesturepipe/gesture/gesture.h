@@ -1,46 +1,46 @@
 #ifndef JESTUREPIPE_GESTURE_GESTURE_H
 #define JESTUREPIPE_GESTURE_GESTURE_H
 
-#include <functional>
+#include <vector>
 
 #include "mediapipe/framework/formats/landmark.pb.h"
 
 namespace jesturepipe {
-class GestureFrame {
-   public:
-    /**
-     * Constructs a new key frame from a list of hand landmarks.
-     */
+typedef struct GestureFrame {
     static GestureFrame FromLandmarks(
-        mediapipe::NormalizedLandmarkList& landmarks) noexcept;
+        const mediapipe::NormalizedLandmarkList& landmarks) noexcept;
 
-    GestureFrame(double index_direction, double middle_direction,
-                 double ring_direction, double pinky_direction,
-                 double thumb_direction) noexcept;
+    /// \brief Measures the similarity between two frames.
+    /// \return The similarity measure. A value between 0 and 1.
+    static double similarity(const GestureFrame& a, const GestureFrame& b);
 
-    double index_direction;
-    double middle_direction;
-    double ring_direction;
-    double pinky_direction;
-    double thumb_direction;
+    /// \brief Measures the difference between two frames.
+    /// \return The difference measure. A value between 0 and 1.
+    static double difference(const GestureFrame& a, const GestureFrame& b);
 
-   protected:
-    bool isSame(const GestureFrame& frame1) const noexcept;
+    class ThresholdComparator {
+       public:
+        ThresholdComparator() = delete;
+        ThresholdComparator(double thresh) noexcept;
 
-    friend bool operator==(const GestureFrame& frame1,
-                           const GestureFrame& frame2) noexcept;
-    friend bool operator!=(const GestureFrame& frame1,
-                           const GestureFrame& frame2) noexcept;
-};
+        bool operator()(const GestureFrame& a, const GestureFrame& b);
+
+       private:
+        double thresh;
+    };
+} GestureFrame;
 
 class Gesture {
    public:
-    explicit Gesture(int id) noexcept;
+    Gesture() = default;
+    Gesture(std::vector<GestureFrame>&& frames);
 
     Gesture(const Gesture& other) noexcept;
     Gesture& operator=(const Gesture& other) noexcept;
 
-    int id;
+    Gesture(Gesture&& other) noexcept;
+    Gesture& operator=(Gesture&& other) noexcept;
+
     std::vector<GestureFrame> frames;
 };
 

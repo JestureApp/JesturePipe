@@ -10,21 +10,23 @@ cc_library(
 )
 
 cc_library(
+    name = "library",
+    srcs = ["library.cc"],
+    hdrs = ["library.h"],
+    deps = [
+        ":gesture",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
+cc_library(
     name = "recognizer",
     srcs = ["recognizer.cc"],
     hdrs = ["recognizer.h"],
     deps = [
         ":gesture",
+        ":library",
         "@com_google_absl//absl/types:optional",
-        "@com_google_absl//absl/types:variant",
-    ],
-)
-
-cc_library(
-    name = "recorder",
-    srcs = ["recorder.cc"],
-    hdrs = ["recorder.h"],
-    deps = [
-        ":gesture",
     ],
 )
