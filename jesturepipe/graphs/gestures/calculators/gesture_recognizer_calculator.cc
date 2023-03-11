@@ -1,6 +1,5 @@
 #include "jesturepipe/gesture/gesture.h"
 #include "jesturepipe/gesture/recognizer.h"
-#include "jesturepipe/graphs/gestures/library_service.h"
 #include "mediapipe/framework/api2/node.h"
 #include "mediapipe/framework/calculator_framework.h"
 

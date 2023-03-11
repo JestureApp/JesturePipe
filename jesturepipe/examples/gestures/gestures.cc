@@ -2,7 +2,6 @@
 
 #include "absl/status/status.h"
 #include "jesturepipe/gesture/library.h"
-#include "jesturepipe/graphs/gestures/library_service.h"
 #include "mediapipe/framework/api2/builder.h"
 #include "mediapipe/framework/calculator_graph.h"
 #include "mediapipe/framework/formats/image_frame.h"
@@ -45,7 +44,7 @@ mediapipe::CalculatorGraphConfig graph_config() {
 
         input_stream: "is_recording"
 
-        output_stream: "output_frame"
+        output_stream: "annotated_frame"
         output_stream: "recorded_gesture"
 
         node {

@@ -1,10 +1,15 @@
 #ifndef JESTUREPIPE_JESTUREPIPE_H
 #define JESTUREPIPE_JESTUREPIPE_H
 
+#include <memory>
 #include <string>
 
 #include "absl/status/status.h"
+#include "jesturepipe/gesture/gesture.h"
+#include "jesturepipe/gesture/library.h"
 #include "mediapipe/framework/calculator_graph.h"
+#include "mediapipe/framework/formats/image_frame.h"
+#include "mediapipe/framework/formats/landmark.pb.h"
 
 namespace jesturepipe {
 
@@ -45,7 +50,7 @@ class JesturePipe : private mediapipe::CalculatorGraph {
     /// \return A status indicating the success of starting the graph.
     /// An ok status if the graph started successfully or an error status
     /// otherwise.
-    absl::Status Start();
+    absl::Status Start(int camera_index = 0, bool use_full = false);
 
     /// \brief Stops the pipeline. This method will block until the pipeline has
     /// exited.
@@ -53,6 +58,30 @@ class JesturePipe : private mediapipe::CalculatorGraph {
     /// An ok status if the graph stopped successfully or an error status
     /// otherwise.
     absl::Status Stop();
+
+    absl::Status OnGestureRecognition(
+        std::function<absl::Status(const int&)> packet_callback);
+
+    absl::Status OnRecordedGesture(
+        std::function<absl::Status(const Gesture&)> packet_callback);
+
+    absl::Status OnLandmarks(
+        std::function<
+            absl::Status(const std::vector<mediapipe::NormalizedLandmarkList>&)>
+            packet_callback);
+
+    mediapipe::StatusOrPoller FramePoller();
+
+    bool IsRecording();
+
+    absl::Status SetRecording(bool);
+
+    void AddGesture(int id, Gesture&& gesture);
+
+   private:
+    bool recording;
+    int recording_ts;
+    std::shared_ptr<GestureLibrary> library;
 };
 
 }  // namespace jesturepipe

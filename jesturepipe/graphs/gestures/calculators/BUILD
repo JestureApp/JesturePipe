@@ -21,7 +21,6 @@ cc_library(
     deps = [
         "//jesturepipe/gesture",
         "//jesturepipe/gesture:recognizer",
-        "//jesturepipe/graphs/gestures:library_service",
         "@com_google_absl//absl/types:optional",
         "@mediapipe//mediapipe/framework:calculator_framework",
         "@mediapipe//mediapipe/framework/api2:node",

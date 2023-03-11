@@ -37,13 +37,3 @@ mediapipe_simple_subgraph(
         "@mediapipe//mediapipe/calculators/core:side_packet_to_stream_calculator",
     ],
 )
-
-cc_library(
-    name = "library_service",
-    srcs = ["library_service.cc"],
-    hdrs = ["library_service.h"],
-    deps = [
-        "//jesturepipe/gesture:library",
-        "@mediapipe//mediapipe/framework:calculator_framework",
-    ],
-)
