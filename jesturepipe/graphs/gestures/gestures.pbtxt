@@ -10,6 +10,8 @@ input_side_packet: "PALM_LITE_MODEL_PATH:palm_lite_model_path"
 input_side_packet: "HAND_LANDMARK_FULL_MODEL_PATH:hand_landmark_full_model_path"
 input_side_packet: "HAND_LANDMARK_LITE_MODEL_PATH:hand_landmark_lite_model_path"
 
+input_side_packet: "LIBRARY:gesture_library"
+
 # Whether or not to use full or lite models
 # (bool)
 input_side_packet: "USE_FULL:use_full"
@@ -29,16 +31,24 @@ output_stream: "NORM_LANDMARKS:multi_hand_landmarks"
 # (bool)
 output_stream: "HAND_PRESENCE:hand_presence"
 
+# (GestureFrame)
+output_stream: "GESTURE_FRAME:gesture_frame"
+
+# (int)
+output_stream: "GESTURE_ID:gesture_id"
+
 ################################################################################
 # Initialization Nodes
 ################################################################################
 
 node {
     calculator: "ConstantSidePacketCalculator"
-    output_side_packet: "PACKET:num_hands"
+    output_side_packet: "PACKET:0:num_hands"
+    output_side_packet: "PACKET:1:thresh"
     options: {
         [mediapipe.ConstantSidePacketCalculatorOptions.ext]: {
-        packet { int_value: 2 }
+            packet { int_value: 2 }
+            packet { double_value: 0.056}
         }
     }
 }
@@ -61,6 +71,39 @@ node {
 }
 
 node {
-    calculator: "LandmarksToFrames"
-    input_stream: "NORM_LANDMARKS:multi_hand_landmarks"
+    calculator: "GetNormalizedLandmarkListVectorItemCalculator"
+    input_stream: "VECTOR:multi_hand_landmarks"
+    output_stream: "ITEM:hand_landmarks"
+    options {
+        [mediapipe.GetVectorItemCalculatorOptions.ext] {
+            item_index: 0
+        }
+    }
+}
+
+node {
+    calculator: "ClockTimestampCalculator"
+    input_stream: "hand_landmarks"
+    output_stream: "hand_landmarks_time"
+}
+
+node {
+    calculator: "GestureFrameConstructorCalculator"
+    input_side_packet: "THRESH:thresh"
+    input_stream: "LANDMARKS:hand_landmarks"
+    input_stream: "TIMES:hand_landmarks_time"
+    output_stream: "GESTURE_FRAME:gesture_frame"
+}
+
+node {
+    calculator: "GestureRecognizerCalculator"
+    input_side_packet: "THRESH:thresh"
+    input_side_packet: "LIBRARY:gesture_library"
+    input_stream: "GESTURE_FRAME:gesture_frame"
+    output_stream: "GESTURE_ID:gesture_id"
+}
+
+node {
+    calculator: "EchoerCalculator"
+    input_stream: "gesture_id"
 }

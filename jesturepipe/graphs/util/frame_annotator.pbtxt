@@ -15,6 +15,12 @@ input_stream: "NORM_LANDMARKS:multi_hand_landmarks"
 # (bool)
 input_stream: "HAND_PRESENCE:hand_presence"
 
+# (GestureFrame)
+input_stream: "GESTURE_FRAME:gesture_frame"
+
+# (int)
+input_stream: "GESTURE_ID:gesture_id"
+
 # The annotated frame
 # (ImageFrame)
 output_stream: "FRAME:annotated_frame"
@@ -112,6 +118,8 @@ node {
     calculator: "DebugRenderDataCalculator"
     input_stream: "FPS:frame_frequency"
     input_stream: "HAND_PRESENCE:hand_presence"
+    input_stream: "GESTURE_FRAME:gesture_frame"
+    input_stream: "GESTURE_ID:gesture_id"
     output_stream: "RENDER_DATA:debug_render_data"
 }
 

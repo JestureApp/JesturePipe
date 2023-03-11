@@ -5,7 +5,9 @@ cc_binary(
     srcs = ["gestures.cc"],
     deps = [
         "//jesturepipe/calculators:camera_calculator",
+        "//jesturepipe/gesture:library",
         "//jesturepipe/graphs/gestures",
+        "//jesturepipe/graphs/gestures:library_service",
         "//jesturepipe/graphs/util:frame_annotator",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/status",

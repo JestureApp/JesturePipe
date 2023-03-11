@@ -1,4 +1,8 @@
+#include <memory>
+
 #include "absl/status/status.h"
+#include "jesturepipe/gesture/library.h"
+#include "jesturepipe/graphs/gestures/library_service.h"
 #include "mediapipe/framework/api2/builder.h"
 #include "mediapipe/framework/calculator_graph.h"
 #include "mediapipe/framework/formats/image_frame.h"
@@ -25,6 +29,8 @@ constexpr char hand_landmark_lite_model_path[] =
 constexpr char window_name[] = "JesturePipe Gestures";
 constexpr char frame_stream[] = "annotated_frame";
 
+using namespace jesturepipe;
+
 mediapipe::CalculatorGraphConfig graph_config() {
     using namespace mediapipe;
     return ParseTextProtoOrDie<CalculatorGraphConfig>(R"pb(
@@ -33,8 +39,8 @@ mediapipe::CalculatorGraphConfig graph_config() {
         input_side_packet: "hand_landmark_full_model_path"
         input_side_packet: "hand_landmark_lite_model_path"
         input_side_packet: "use_full"
-        input_side_packet: "num_hands"
         input_side_packet: "camera_index"
+        input_side_packet: "gesture_library"
 
         output_stream: "output_frame"
 
@@ -51,9 +57,12 @@ mediapipe::CalculatorGraphConfig graph_config() {
           input_side_packet: "HAND_LANDMARK_FULL_MODEL_PATH:hand_landmark_full_model_path"
           input_side_packet: "HAND_LANDMARK_LITE_MODEL_PATH:hand_landmark_lite_model_path"
           input_side_packet: "USE_FULL:use_full"
+          input_side_packet: "LIBRARY:gesture_library"
           input_stream: "IMAGE:frame"
           output_stream: "NORM_LANDMARKS:multi_hand_landmarks"
           output_stream: "HAND_PRESENCE:hand_presence"
+          output_stream: "GESTURE_FRAME:gesture_frame"
+          output_stream: "GESTURE_ID:gesture_id"
         }
 
         node {
@@ -61,15 +70,29 @@ mediapipe::CalculatorGraphConfig graph_config() {
           input_stream: "FRAME:frame"
           input_stream: "NORM_LANDMARKS:multi_hand_landmarks"
           input_stream: "HAND_PRESENCE:hand_presence"
+          input_stream: "GESTURE_FRAME:gesture_frame"
+          input_stream: "GESTURE_ID:gesture_id"
           output_stream: "FRAME:annotated_frame"
         }
     )pb");
+}
+
+std::shared_ptr<GestureLibrary> init_library() {
+    std::shared_ptr<GestureLibrary> library =
+        std::make_shared<GestureLibrary>();
+
+    library->Set(0, Gesture::Stop());
+    library->Set(1, Gesture::SlideLeft());
+
+    return library;
 }
 
 absl::Status run(Runfiles* runfiles, int camera_index, bool use_full) {
     using namespace mediapipe;
 
     CalculatorGraph graph;
+
+    std::shared_ptr<GestureLibrary> library = init_library();
 
     std::map<std::string, Packet> init_side_packets;
 
@@ -83,6 +106,8 @@ absl::Status run(Runfiles* runfiles, int camera_index, bool use_full) {
     init_side_packets["hand_landmark_lite_model_path"] =
         MakePacket<std::string>(
             runfiles->Rlocation(hand_landmark_lite_model_path));
+    init_side_packets["gesture_library"] =
+        MakePacket<std::shared_ptr<GestureLibrary>>(library);
 
     MP_RETURN_IF_ERROR(graph.Initialize(graph_config(), init_side_packets));
 

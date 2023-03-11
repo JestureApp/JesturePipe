@@ -2,6 +2,7 @@
 #define JESTUREPIPE_GESTURE_LIBRARY_H
 
 #include <map>
+#include <mutex>
 #include <shared_mutex>
 
 #include "absl/container/flat_hash_map.h"

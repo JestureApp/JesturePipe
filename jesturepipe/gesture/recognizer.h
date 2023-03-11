@@ -11,15 +11,17 @@ namespace jesturepipe {
 
 class GestureRecognizer {
    public:
-    GestureRecognizer() = delete;
+    GestureRecognizer();
     GestureRecognizer(std::shared_ptr<GestureLibrary> library,
                       double threshold);
 
     GestureRecognizer(GestureRecognizer&) = delete;
     GestureRecognizer& operator=(GestureRecognizer&) = delete;
 
-    GestureRecognizer(GestureRecognizer&&) = delete;
-    GestureRecognizer& operator=(GestureRecognizer&&) = delete;
+    GestureRecognizer(GestureRecognizer&&);
+    GestureRecognizer& operator=(GestureRecognizer&&);
+
+    void Reset();
 
     /// \brief Processes the next frame and attempts to match it against
     /// known gestures.
@@ -35,7 +37,7 @@ class GestureRecognizer {
         absl::optional<int> Matches();
 
        private:
-        int at;
+        long unsigned int at;
         int id;
         Gesture gesture;
         GestureFrame::Comparator* comp;

@@ -1,17 +1,21 @@
 #ifndef JESTUREPIPE_GESTURE_GESTURE_H
 #define JESTUREPIPE_GESTURE_GESTURE_H
 
+#include <memory>
 #include <vector>
 
-#include "mediapipe/framework/formats/landmark.pb.h"
+#include "absl/types/optional.h"
 
 namespace jesturepipe {
 typedef struct HandShape {
-    static HandShape FromLandmarks(
-        const mediapipe::NormalizedLandmarkList& landmarks) noexcept;
+    struct Comparator {
+        Comparator() = delete;
+        Comparator(double thresh) noexcept;
 
-    static bool are_similar(const HandShape& a, const HandShape& b,
-                            double thresh) noexcept;
+        bool operator()(const HandShape& a, const HandShape& b);
+
+        double thresh;
+    };
 
     double index_direction;
     double middle_direction;
@@ -21,23 +25,26 @@ typedef struct HandShape {
 } HandShape;
 
 typedef struct GestureFrame {
-    class Comparator {
+    struct Comparator {
        public:
         Comparator() = delete;
         Comparator(double thresh) noexcept;
 
         bool operator()(const GestureFrame& a, const GestureFrame& b);
 
-       private:
         double thresh;
+        HandShape::Comparator hand_shape_comp;
     };
 
     HandShape hand_shape;
-    double movement_direction;
+    absl::optional<double> movement_direction;
 } GestureFrame;
 
 class Gesture {
    public:
+    static Gesture Stop();
+    static Gesture SlideLeft();
+
     Gesture() = default;
     Gesture(std::vector<GestureFrame>&& frames);
 

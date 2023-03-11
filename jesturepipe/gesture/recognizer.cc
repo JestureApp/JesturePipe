@@ -1,9 +1,27 @@
 #include "jesturepipe/gesture/recognizer.h"
 
 namespace jesturepipe {
+GestureRecognizer::GestureRecognizer() : comp(0) {}
+
 GestureRecognizer::GestureRecognizer(std::shared_ptr<GestureLibrary> library,
                                      double threshold)
     : library(std::move(library)), comp(threshold) {}
+
+GestureRecognizer::GestureRecognizer(GestureRecognizer &&other) : comp(0) {
+    *this = std::move(other);
+}
+
+GestureRecognizer &GestureRecognizer::operator=(GestureRecognizer &&other) {
+    if (this != &other) {
+        library = std::move(other.library);
+        comp = std::move(other.comp);
+        matchers = std::move(other.matchers);
+    }
+
+    return *this;
+}
+
+void GestureRecognizer::Reset() { matchers.clear(); }
 
 absl::optional<int> GestureRecognizer::ProcessFrame(const GestureFrame &frame) {
     absl::optional<int> matched;
@@ -21,13 +39,15 @@ absl::optional<int> GestureRecognizer::ProcessFrame(const GestureFrame &frame) {
 
     // Remove all matchers that failed to match
     matchers.remove_if(
-        [&frame](GestureMatcher &matcher) { return matcher.Advance(frame); });
+        [&frame](GestureMatcher &matcher) { return !matcher.Advance(frame); });
 
     // Check if we've had any matches
     for (auto &matcher : matchers) {
         matched = matcher.Matches();
 
-        if (matched.has_value()) break;
+        if (matched.has_value()) {
+            break;
+        }
     }
 
     // If we found a match, remove all matchers
