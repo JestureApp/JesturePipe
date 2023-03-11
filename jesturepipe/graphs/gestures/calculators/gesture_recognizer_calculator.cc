@@ -15,10 +15,11 @@ class GestureRecognizerCalculator : public api2::Node {
         "LIBRARY"};
 
     static constexpr api2::Input<GestureFrame> kFrames{"GESTURE_FRAME"};
+    static constexpr api2::Input<api2::AnyType> kRecReset{"REC_RESET"};
 
     static constexpr api2::Output<int> kGestureId{"GESTURE_ID"};
 
-    MEDIAPIPE_NODE_CONTRACT(kThresh, kLibrary, kFrames, kGestureId)
+    MEDIAPIPE_NODE_CONTRACT(kThresh, kLibrary, kFrames, kRecReset, kGestureId)
 
     static absl::Status UpdateContract(mediapipe::CalculatorContract *cc) {
         cc->SetProcessTimestampBounds(true);
@@ -40,6 +41,8 @@ class GestureRecognizerCalculator : public api2::Node {
             recognizer.Reset();
             return absl::OkStatus();
         }
+
+        if (!kRecReset(cc).IsEmpty()) recognizer.Reset();
 
         GestureFrame frame = *kFrames(cc);
 

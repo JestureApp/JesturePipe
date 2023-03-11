@@ -45,7 +45,7 @@ class Gesture {
     static Gesture Stop();
     static Gesture SlideLeft();
 
-    Gesture() = default;
+    Gesture();
     Gesture(std::vector<GestureFrame>&& frames);
 
     Gesture(const Gesture& other) noexcept;

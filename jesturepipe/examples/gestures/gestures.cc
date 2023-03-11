@@ -28,6 +28,7 @@ constexpr char hand_landmark_lite_model_path[] =
 
 constexpr char window_name[] = "JesturePipe Gestures";
 constexpr char frame_stream[] = "annotated_frame";
+constexpr char recording_stream[] = "recorded_gesture";
 
 using namespace jesturepipe;
 
@@ -42,12 +43,22 @@ mediapipe::CalculatorGraphConfig graph_config() {
         input_side_packet: "camera_index"
         input_side_packet: "gesture_library"
 
+        input_stream: "is_recording"
+
         output_stream: "output_frame"
+        output_stream: "recorded_gesture"
 
         node {
           calculator: "CameraCalculator"
           input_side_packet: "CAMERA_INDEX:camera_index"
           output_stream: "FRAME:frame"
+        }
+
+        node {
+          calculator: "IsRecordingLatch"
+          input_stream: "IS_REC:is_recording"
+          input_stream: "FRAME:frame"
+          output_stream: "FRAME_IS_REC:frame_is_rec"
         }
 
         node {
@@ -59,10 +70,12 @@ mediapipe::CalculatorGraphConfig graph_config() {
           input_side_packet: "USE_FULL:use_full"
           input_side_packet: "LIBRARY:gesture_library"
           input_stream: "IMAGE:frame"
+          input_stream: "FRAME_IS_REC:frame_is_rec"
           output_stream: "NORM_LANDMARKS:multi_hand_landmarks"
           output_stream: "HAND_PRESENCE:hand_presence"
           output_stream: "GESTURE_FRAME:gesture_frame"
           output_stream: "GESTURE_ID:gesture_id"
+          output_stream: "RECORDED_GESTURE:recorded_gesture"
         }
 
         node {
@@ -72,6 +85,7 @@ mediapipe::CalculatorGraphConfig graph_config() {
           input_stream: "HAND_PRESENCE:hand_presence"
           input_stream: "GESTURE_FRAME:gesture_frame"
           input_stream: "GESTURE_ID:gesture_id"
+          input_stream: "IS_REC:frame_is_rec"
           output_stream: "FRAME:annotated_frame"
         }
     )pb");
@@ -85,6 +99,36 @@ std::shared_ptr<GestureLibrary> init_library() {
     library->Set(1, Gesture::SlideLeft());
 
     return library;
+}
+
+absl::Status on_recording(mediapipe::Packet packet) {
+    Gesture gesture = packet.Get<Gesture>();
+
+    std::cout << "Recorded gesture with frames:" << std::endl;
+
+    for (GestureFrame frame : *gesture.frames) {
+        std::cout << "GestureFrame{" << std::endl;
+        std::cout << "\tHandShape{" << std::endl;
+        std::cout << "\t\tindex_direction: " << frame.hand_shape.index_direction
+                  << std::endl;
+        std::cout << "\t\tmiddle_direction: "
+                  << frame.hand_shape.middle_direction << std::endl;
+        std::cout << "\t\tring_direction: " << frame.hand_shape.ring_direction
+                  << std::endl;
+        std::cout << "\t\tpinky_direction: " << frame.hand_shape.pinky_direction
+                  << std::endl;
+        std::cout << "\t\tthumb_direction: " << frame.hand_shape.thumb_direction
+                  << std::endl;
+        std::cout << "\t}" << std::endl;
+
+        if (frame.movement_direction.has_value())
+            std::cout << "movement_direction: "
+                      << frame.movement_direction.value() << std::endl;
+
+        std::cout << "}" << std::endl;
+    }
+
+    return absl::OkStatus();
 }
 
 absl::Status run(Runfiles* runfiles, int camera_index, bool use_full) {
@@ -118,12 +162,18 @@ absl::Status run(Runfiles* runfiles, int camera_index, bool use_full) {
 
     cv::namedWindow(window_name);
 
+    MP_RETURN_IF_ERROR(
+        graph.ObserveOutputStream(recording_stream, on_recording));
+
     ASSIGN_OR_RETURN(OutputStreamPoller poller,
                      graph.AddOutputStreamPoller(frame_stream));
 
     LOG(INFO) << "Starting Graph";
 
     MP_RETURN_IF_ERROR(graph.StartRun(run_side_packets));
+
+    bool is_recording = false;
+    int next_ts = 0;
 
     while (true) {
         Packet frame_packet;
@@ -139,7 +189,14 @@ absl::Status run(Runfiles* runfiles, int camera_index, bool use_full) {
 
         const int pressed_key = cv::waitKey(5);
 
-        if (pressed_key >= 0 && pressed_key != 255) break;
+        if (pressed_key >= 0 && pressed_key != 255 && pressed_key != 32) break;
+
+        if (pressed_key == 32) {
+            is_recording = !is_recording;
+            MP_RETURN_IF_ERROR(graph.AddPacketToInputStream(
+                "is_recording", mediapipe::MakePacket<bool>(is_recording)
+                                    .At(mediapipe::Timestamp(next_ts++))));
+        }
     }
 
     LOG(INFO) << "Exiting Graph";

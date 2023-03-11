@@ -28,3 +28,15 @@ cc_library(
     ],
     alwayslink = 1,
 )
+
+cc_library(
+    name = "gesture_recorder_calculator",
+    srcs = ["gesture_recorder_calculator.cc"],
+    deps = [
+        "//jesturepipe/gesture",
+        "//jesturepipe/gesture:recorder",
+        "@mediapipe//mediapipe/framework:calculator_framework",
+        "@mediapipe//mediapipe/framework/api2:node",
+    ],
+    alwayslink = 1,
+)

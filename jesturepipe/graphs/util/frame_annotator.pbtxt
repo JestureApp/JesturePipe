@@ -21,6 +21,9 @@ input_stream: "GESTURE_FRAME:gesture_frame"
 # (int)
 input_stream: "GESTURE_ID:gesture_id"
 
+# (bool)
+input_stream: "IS_REC:is_recording"
+
 # The annotated frame
 # (ImageFrame)
 output_stream: "FRAME:annotated_frame"
@@ -120,6 +123,7 @@ node {
     input_stream: "HAND_PRESENCE:hand_presence"
     input_stream: "GESTURE_FRAME:gesture_frame"
     input_stream: "GESTURE_ID:gesture_id"
+    input_stream: "IS_REC:is_recording"
     output_stream: "RENDER_DATA:debug_render_data"
 }
 

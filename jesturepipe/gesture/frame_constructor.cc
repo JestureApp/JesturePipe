@@ -9,7 +9,7 @@ namespace jesturepipe {
 
 namespace {
 constexpr double STATIONARY_DIST_THRESH = 0.1;
-const absl::Duration STATIONARY_TIME_THRESH = absl::Seconds(0.5);
+const absl::Duration STATIONARY_TIME_THRESH = absl::Seconds(0.75);
 
 constexpr int WRIST = 0;
 constexpr int THUMB_CMC = 1;

@@ -21,9 +21,12 @@ class GestureFrameConstructorCalculator : public api2::Node {
 
     static constexpr api2::Input<absl::Time> kTimes{"TIMES"};
 
+    static constexpr api2::Input<api2::AnyType> kRecReset{"REC_RESET"};
+
     static constexpr api2::Output<GestureFrame> kGestureFrame{"GESTURE_FRAME"};
 
-    MEDIAPIPE_NODE_CONTRACT(kThresh, kLandmarks, kTimes, kGestureFrame)
+    MEDIAPIPE_NODE_CONTRACT(kThresh, kLandmarks, kTimes, kRecReset,
+                            kGestureFrame)
 
     static absl::Status UpdateContract(mediapipe::CalculatorContract *cc) {
         cc->SetProcessTimestampBounds(true);
@@ -41,12 +44,11 @@ class GestureFrameConstructorCalculator : public api2::Node {
     // CHECKME: Do I need to update output timestamp bounds
     absl::Status Process(mediapipe::CalculatorContext *cc) override {
         if (kLandmarks(cc).IsEmpty()) {
-            // std::cout << cc->NodeName() << ": Reset at " <<
-            // cc->InputTimestamp()
-            //           << std::endl;
             frame_constructor.Reset();
             return absl::OkStatus();
         }
+
+        if (!kRecReset(cc).IsEmpty()) frame_constructor.Reset();
 
         mediapipe::NormalizedLandmarkList landmarks = *kLandmarks(cc);
         absl::Time time = *kTimes(cc);

@@ -17,8 +17,10 @@ class DebugRenderDataCalculator : public api2::Node {
    public:
     static constexpr api2::Input<mediapipe::PacketFrequency> kFps{"FPS"};
     static constexpr api2::Input<bool> kHandPresence{"HAND_PRESENCE"};
+
     static constexpr api2::Input<GestureFrame>::Optional kGestureFrame{
         "GESTURE_FRAME"};
+    static constexpr api2::Input<bool>::Optional kIsRecording{"IS_REC"};
 
     static constexpr api2::Input<int>::Optional kGestureId{"GESTURE_ID"};
 
@@ -26,7 +28,7 @@ class DebugRenderDataCalculator : public api2::Node {
         "RENDER_DATA"};
 
     MEDIAPIPE_NODE_CONTRACT(kFps, kHandPresence, kGestureFrame, kGestureId,
-                            kRenderData)
+                            kIsRecording, kRenderData)
 
     static absl::Status UpdateContract(mediapipe::CalculatorContract *cc) {
         cc->SetProcessTimestampBounds(true);
@@ -43,6 +45,12 @@ class DebugRenderDataCalculator : public api2::Node {
             absl::StrFormat("FPS: %2.2f", fps),
             absl::StrFormat("Hand Present: %s", hand_presence),
         };
+
+        if (kIsRecording(cc).IsConnected() && !kIsRecording(cc).IsEmpty()) {
+            std::string is_recording = *kIsRecording(cc) ? "true" : "false";
+
+            lines.push_back(absl::StrFormat("Is Recording: %s", is_recording));
+        }
 
         if (kGestureFrame(cc).IsConnected()) {
             if (!kGestureFrame(cc).IsEmpty()) last_frame = *kGestureFrame(cc);

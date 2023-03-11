@@ -32,6 +32,15 @@ cc_library(
 )
 
 cc_library(
+    name = "recorder",
+    srcs = ["recorder.cc"],
+    hdrs = ["recorder.h"],
+    deps = [
+        ":gesture",
+    ],
+)
+
+cc_library(
     name = "frame_constructor",
     srcs = ["frame_constructor.cc"],
     hdrs = ["frame_constructor.h"],

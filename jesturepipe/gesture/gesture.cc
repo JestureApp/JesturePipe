@@ -59,6 +59,8 @@ bool GestureFrame::Comparator::operator()(const GestureFrame& a,
                           b.movement_direction.value(), angle_thresh)));
 }
 
+Gesture::Gesture() : frames(std::make_shared<std::vector<GestureFrame>>()) {}
+
 Gesture::Gesture(std::vector<GestureFrame>&& frames)
     : frames(std::make_shared<std::vector<GestureFrame>>(std::move(frames))) {}
 

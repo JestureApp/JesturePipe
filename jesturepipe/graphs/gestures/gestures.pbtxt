@@ -24,6 +24,9 @@ input_side_packet: "USE_FULL:use_full"
 # (ImageFrame)
 input_stream: "IMAGE:frame"
 
+# (bool)
+input_stream: "FRAME_IS_REC:frame_is_rec"
+
 # Collection of normalized hand landmarks
 # (std::vector<NormalizedLandmarkList>)
 output_stream: "NORM_LANDMARKS:multi_hand_landmarks"
@@ -36,6 +39,12 @@ output_stream: "GESTURE_FRAME:gesture_frame"
 
 # (int)
 output_stream: "GESTURE_ID:gesture_id"
+
+# (int)
+output_stream: "ACTIONABLE_GESTURE_ID:actionable_gesture_id"
+
+# (Gesture)
+output_stream: "RECORDED_GESTURE:recorded_gesture"
 
 ################################################################################
 # Initialization Nodes
@@ -56,6 +65,12 @@ node {
 ################################################################################
 # Primary Nodes
 ################################################################################
+
+node {
+    calculator: "StateChangeCalculator"
+    input_stream: "STATE:frame_is_rec"
+    output_stream: "STATE_CHANGE:rec_reset"
+}
 
 node {
     calculator: "Hands"
@@ -92,18 +107,37 @@ node {
     input_side_packet: "THRESH:thresh"
     input_stream: "LANDMARKS:hand_landmarks"
     input_stream: "TIMES:hand_landmarks_time"
+    input_stream: "REC_RESET:rec_reset"
     output_stream: "GESTURE_FRAME:gesture_frame"
 }
+
 
 node {
     calculator: "GestureRecognizerCalculator"
     input_side_packet: "THRESH:thresh"
     input_side_packet: "LIBRARY:gesture_library"
     input_stream: "GESTURE_FRAME:gesture_frame"
+    input_stream: "REC_RESET:rec_reset"
     output_stream: "GESTURE_ID:gesture_id"
 }
 
 node {
-    calculator: "EchoerCalculator"
+    calculator: "GateCalculator"
+    input_stream: "ALLOW:frame_is_rec"
+    input_stream: "gesture_frame"
+    output_stream: "recordable_gesture_frame"
+}
+
+node {
+    calculator: "GestureRecorderCalculator"
+    input_stream: "GESTURE_FRAME:recordable_gesture_frame"
+    input_stream: "REC_RESET:rec_reset"
+    output_stream: "GESTURE:recorded_gesture"
+}
+
+node {
+    calculator: "GateCalculator"
+    input_stream: "DISALLOW:frame_is_rec"
     input_stream: "gesture_id"
+    output_stream: "actionable_gesture_id"
 }

@@ -1,0 +1,51 @@
+type: "IsRecordingLatch"
+
+################################################################################
+# Streams
+################################################################################
+
+input_stream: "IS_REC:is_recording"
+input_stream: "FRAME:frame"
+
+output_stream: "FRAME_IS_REC:frame_is_rec"
+
+################################################################################
+# Nodes
+################################################################################
+
+node {
+    calculator: "ConstantSidePacketCalculator"
+    output_side_packet: "PACKET:init_is_rec"
+    options: {
+        [mediapipe.ConstantSidePacketCalculatorOptions.ext]: {
+            packet { bool_value: false }
+        }
+    }
+}
+
+node {
+    calculator: "SidePacketToStreamCalculator"
+    input_side_packet: "init_is_rec"
+    output_stream: "AT_ZERO:is_rec_0"
+}
+
+node {
+    calculator: "PacketSequencerCalculator"
+    input_stream: "INPUT:is_recording"
+    input_stream: "TICK:frame"
+    output_stream: "OUTPUT:sync_is_recording"
+}
+
+node {
+    calculator: "MergeCalculator"
+    input_stream: "is_rec_0"
+    input_stream: "sync_is_recording"
+    output_stream: "merged_is_rec"
+}
+
+node {
+    calculator: "PacketClonerCalculator"
+    input_stream: "merged_is_rec"
+    input_stream: "TICK:frame"
+    output_stream: "frame_is_rec"
+}

@@ -47,9 +47,8 @@ cc_library(
 )
 
 cc_library(
-    name = "optional_wrap_calculator",
-    srcs = ["optional_wrap_calculator.cc"],
-    hdrs = ["optional_wrap_calculator.h"],
+    name = "state_change_calculator",
+    srcs = ["state_change_calculator.cc"],
     deps = [
         "@com_google_absl//absl/types:optional",
         "@mediapipe//mediapipe/framework:calculator_framework",
