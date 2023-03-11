@@ -22,7 +22,7 @@ constexpr char hand_landmark_full_model_path[] =
 constexpr char hand_landmark_lite_model_path[] =
     "mediapipe/mediapipe/modules/hand_landmark/hand_landmark_lite.tflite";
 
-constexpr char window_name[] = "JesturePipe Hands";
+constexpr char window_name[] = "JesturePipe Gestures";
 constexpr char frame_stream[] = "annotated_frame";
 
 mediapipe::CalculatorGraphConfig graph_config() {
@@ -45,13 +45,12 @@ mediapipe::CalculatorGraphConfig graph_config() {
         }
 
         node {
-          calculator: "Hands"
+          calculator: "Gestures"
           input_side_packet: "PALM_FULL_MODEL_PATH:palm_full_model_path"
           input_side_packet: "PALM_LITE_MODEL_PATH:palm_lite_model_path"
           input_side_packet: "HAND_LANDMARK_FULL_MODEL_PATH:hand_landmark_full_model_path"
           input_side_packet: "HAND_LANDMARK_LITE_MODEL_PATH:hand_landmark_lite_model_path"
           input_side_packet: "USE_FULL:use_full"
-          input_side_packet: "NUM_HANDS:num_hands"
           input_stream: "IMAGE:frame"
           output_stream: "NORM_LANDMARKS:multi_hand_landmarks"
           output_stream: "HAND_PRESENCE:hand_presence"
@@ -84,8 +83,6 @@ absl::Status run(Runfiles* runfiles, int camera_index, bool use_full) {
     init_side_packets["hand_landmark_lite_model_path"] =
         MakePacket<std::string>(
             runfiles->Rlocation(hand_landmark_lite_model_path));
-
-    init_side_packets["num_hands"] = MakePacket<int>(2);
 
     MP_RETURN_IF_ERROR(graph.Initialize(graph_config(), init_side_packets));
 

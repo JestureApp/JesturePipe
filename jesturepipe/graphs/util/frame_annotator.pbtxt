@@ -12,6 +12,11 @@ input_stream: "FRAME:frame"
 # (std::vector<NormalizedLandmarkList>)
 input_stream: "NORM_LANDMARKS:multi_hand_landmarks"
 
+# (bool)
+input_stream: "HAND_PRESENCE:hand_presence"
+
+# The annotated frame
+# (ImageFrame)
 output_stream: "FRAME:annotated_frame"
 
 ################################################################################
@@ -97,16 +102,17 @@ node {
     }
     options {
         [mediapipe.PacketFrequencyCalculatorOptions.ext] {
-            time_window_sec: 1.0
+            time_window_sec: 0.5
             label: "frame"
         }
     }
 }
 
 node {
-    calculator: "FpsToRenderDataCalculator"
+    calculator: "DebugRenderDataCalculator"
     input_stream: "FPS:frame_frequency"
-    output_stream: "RENDER_DATA:fps_render_data"
+    input_stream: "HAND_PRESENCE:hand_presence"
+    output_stream: "RENDER_DATA:debug_render_data"
 }
 
 # Draws annotations and overlays them on top of the input images. Consumes
@@ -114,7 +120,7 @@ node {
 node {
   calculator: "AnnotationOverlayCalculator"
   input_stream: "IMAGE:frame"
-  input_stream: "fps_render_data"
+  input_stream: "debug_render_data"
   input_stream: "VECTOR:0:multi_hand_landmarks_render_data"
   output_stream: "IMAGE:annotated_frame"
 }

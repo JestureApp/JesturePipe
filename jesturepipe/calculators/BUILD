@@ -37,16 +37,23 @@ cc_library(
 )
 
 cc_library(
-    name = "fps_to_render_data_calculator",
-    srcs = ["fps_to_render_data_calculator.cc"],
+    name = "get_vector_item_calculator",
+    srcs = ["get_vector_item_calculator.cc"],
     deps = [
-        "@com_google_absl//absl/strings:str_format",
-        "@mediapipe//mediapipe/calculators/util:packet_frequency_cc_proto",
+        "@mediapipe//mediapipe/calculators/core:get_vector_item_calculator",
+        "@mediapipe//mediapipe/framework/formats:landmark_cc_proto",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "optional_wrap_calculator",
+    srcs = ["optional_wrap_calculator.cc"],
+    hdrs = ["optional_wrap_calculator.h"],
+    deps = [
+        "@com_google_absl//absl/types:optional",
         "@mediapipe//mediapipe/framework:calculator_framework",
         "@mediapipe//mediapipe/framework/api2:node",
-        "@mediapipe//mediapipe/framework/api2:packet",
-        "@mediapipe//mediapipe/util:color_cc_proto",
-        "@mediapipe//mediapipe/util:render_data_cc_proto",
     ],
     alwayslink = 1,
 )

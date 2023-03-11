@@ -71,6 +71,7 @@ mediapipe_simple_subgraph(
         "@mediapipe//mediapipe/calculators/core:clip_vector_size_calculator",
         "@mediapipe//mediapipe/calculators/core:end_loop_calculator",
         "@mediapipe//mediapipe/calculators/core:gate_calculator",
+        "@mediapipe//mediapipe/calculators/core:packet_presence_calculator",
         "@mediapipe//mediapipe/calculators/core:previous_loopback_calculator",
         "@mediapipe//mediapipe/calculators/image:image_properties_calculator",
         "@mediapipe//mediapipe/calculators/util:association_norm_rect_calculator",

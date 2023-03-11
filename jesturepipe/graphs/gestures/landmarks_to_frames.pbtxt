@@ -1,0 +1,42 @@
+type: "LandmarksToFrames"
+
+################################################################################
+# Side Packets
+################################################################################
+
+# (double)
+input_side_packet: "GESTURE_THRESH:gesture_thresh"
+
+################################################################################
+# Streams
+################################################################################
+
+# Collection of normalized hand landmarks
+# (std::vector<NormalizedLandmarkList>)
+input_stream: "NORM_LANDMARKS:multi_hand_landmarks"
+
+################################################################################
+# Nodes
+################################################################################
+
+node {
+    calculator: "GetNormalizedLandmarkListVectorItemCalculator"
+    input_stream: "VECTOR:multi_hand_landmarks"
+    output_stream: "ITEM:hand_landmarks"
+    options {
+        [mediapipe.GetVectorItemCalculatorOptions.ext] {
+            item_index: 0
+        }
+    }
+}
+
+node {
+    calculator: "LandmarksToHandShapeCalculator"
+    input_stream: "LANDMARKS:hand_landmarks"
+    output_stream: "HAND_SHAPE:hand_shape"
+}
+
+
+# landmarks to hand shapes
+
+# frame constructor

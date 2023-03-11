@@ -28,8 +28,7 @@ class GestureRecognizer {
    private:
     class GestureMatcher {
        public:
-        GestureMatcher(int id, Gesture gesture,
-                       GestureFrame::ThresholdComparator* comp);
+        GestureMatcher(int id, Gesture gesture, GestureFrame::Comparator* comp);
 
         bool Advance(const GestureFrame& frame);
 
@@ -39,11 +38,11 @@ class GestureRecognizer {
         int at;
         int id;
         Gesture gesture;
-        GestureFrame::ThresholdComparator* comp;
+        GestureFrame::Comparator* comp;
     };
 
     std::shared_ptr<GestureLibrary> library;
-    GestureFrame::ThresholdComparator comp;
+    GestureFrame::Comparator comp;
     std::list<GestureMatcher> matchers;
 };
 

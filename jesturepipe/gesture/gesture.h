@@ -6,28 +6,34 @@
 #include "mediapipe/framework/formats/landmark.pb.h"
 
 namespace jesturepipe {
-typedef struct GestureFrame {
-    static GestureFrame FromLandmarks(
+typedef struct HandShape {
+    static HandShape FromLandmarks(
         const mediapipe::NormalizedLandmarkList& landmarks) noexcept;
 
-    /// \brief Measures the similarity between two frames.
-    /// \return The similarity measure. A value between 0 and 1.
-    static double similarity(const GestureFrame& a, const GestureFrame& b);
+    static bool are_similar(const HandShape& a, const HandShape& b,
+                            double thresh) noexcept;
 
-    /// \brief Measures the difference between two frames.
-    /// \return The difference measure. A value between 0 and 1.
-    static double difference(const GestureFrame& a, const GestureFrame& b);
+    double index_direction;
+    double middle_direction;
+    double ring_direction;
+    double pinky_direction;
+    double thumb_direction;
+} HandShape;
 
-    class ThresholdComparator {
+typedef struct GestureFrame {
+    class Comparator {
        public:
-        ThresholdComparator() = delete;
-        ThresholdComparator(double thresh) noexcept;
+        Comparator() = delete;
+        Comparator(double thresh) noexcept;
 
         bool operator()(const GestureFrame& a, const GestureFrame& b);
 
        private:
         double thresh;
     };
+
+    HandShape hand_shape;
+    double movement_direction;
 } GestureFrame;
 
 class Gesture {
@@ -41,7 +47,7 @@ class Gesture {
     Gesture(Gesture&& other) noexcept;
     Gesture& operator=(Gesture&& other) noexcept;
 
-    std::vector<GestureFrame> frames;
+    std::shared_ptr<std::vector<GestureFrame>> frames;
 };
 
 }  // namespace jesturepipe

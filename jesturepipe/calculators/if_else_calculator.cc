@@ -1,4 +1,3 @@
-
 #include "mediapipe/framework/api2/node.h"
 #include "mediapipe/framework/calculator_framework.h"
 #include "mediapipe/util/header_util.h"

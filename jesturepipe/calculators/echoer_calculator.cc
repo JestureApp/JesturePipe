@@ -7,6 +7,8 @@ namespace jesturepipe {
 class EchoerCalculator : public mediapipe::CalculatorBase {
    public:
     static absl::Status GetContract(mediapipe::CalculatorContract *cc) {
+        cc->SetProcessTimestampBounds(true);
+
         for (int i = 0; i < cc->Inputs().NumEntries(); i++) {
             cc->Inputs().Index(i).SetAny();
         }
@@ -20,6 +22,9 @@ class EchoerCalculator : public mediapipe::CalculatorBase {
 
             if (!packet.IsEmpty())
                 std::cout << cc->NodeName() << ": Got packet at "
+                          << packet.Timestamp() << std::endl;
+            else
+                std::cout << cc->NodeName() << ": Got empty packet at "
                           << packet.Timestamp() << std::endl;
         }
 

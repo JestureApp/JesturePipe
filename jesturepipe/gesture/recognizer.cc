@@ -13,7 +13,7 @@ absl::optional<int> GestureRecognizer::ProcessFrame(const GestureFrame &frame) {
         // Acquire read lock on library
         auto lk = library->RLock();
         for (const auto &[id, gesture] : *library) {
-            if (comp(gesture.frames[0], frame)) {
+            if (comp(gesture.frames->at(0), frame)) {
                 matchers.push_back(GestureMatcher(id, gesture, &comp));
             }
         }
@@ -37,13 +37,13 @@ absl::optional<int> GestureRecognizer::ProcessFrame(const GestureFrame &frame) {
 }
 
 GestureRecognizer::GestureMatcher::GestureMatcher(
-    int id, Gesture gesture, GestureFrame::ThresholdComparator *comp)
+    int id, Gesture gesture, GestureFrame::Comparator *comp)
     : at(0), id(id), gesture(gesture), comp(comp) {}
 
 bool GestureRecognizer::GestureMatcher::Advance(const GestureFrame &frame) {
-    if (at < 0 || at >= gesture.frames.size()) return false;
+    if (at < 0 || at >= gesture.frames->size()) return false;
 
-    if ((*comp)(gesture.frames[at], frame)) {
+    if ((*comp)(gesture.frames->at(at), frame)) {
         at += 1;
         return true;
     } else {
@@ -55,7 +55,7 @@ bool GestureRecognizer::GestureMatcher::Advance(const GestureFrame &frame) {
 absl::optional<int> GestureRecognizer::GestureMatcher::Matches() {
     absl::optional<int> match;
 
-    if (at == gesture.frames.size()) match = id;
+    if (at == gesture.frames->size()) match = id;
 
     return match;
 }

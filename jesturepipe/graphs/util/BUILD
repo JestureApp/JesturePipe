@@ -11,7 +11,7 @@ mediapipe_simple_subgraph(
     register_as = "FrameAnnotator",
     deps = [
         "//jesturepipe/calculators:echoer_calculator",
-        "//jesturepipe/calculators:fps_to_render_data_calculator",
+        "//jesturepipe/graphs/util/calculators:debug_render_data_calculator",
         "@mediapipe//mediapipe/calculators/core:begin_loop_calculator",
         "@mediapipe//mediapipe/calculators/core:end_loop_calculator",
         "@mediapipe//mediapipe/calculators/core:packet_cloner_calculator",
