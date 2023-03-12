@@ -13,6 +13,7 @@ mediapipe::CalculatorGraphConfig graph_config() {
         input_side_packet: "hand_landmark_full_model_path"
         input_side_packet: "hand_landmark_lite_model_path"
         input_side_packet: "gesture_library"
+        input_side_packet: "action_mapper"
 
         input_side_packet: "use_full"
         input_side_packet: "camera_index"
@@ -56,6 +57,12 @@ mediapipe::CalculatorGraphConfig graph_config() {
         }
 
         node {
+          calculator: "Actions"
+          input_side_packet: "ACTION_MAPPER:action_mapper"
+          input_stream: "GESTURE_ID:actionable_gesture_id"
+        }
+
+        node {
           calculator: "FrameAnnotator"
           input_stream: "FRAME:frame"
           input_stream: "NORM_LANDMARKS:multi_hand_landmarks"
@@ -70,7 +77,8 @@ mediapipe::CalculatorGraphConfig graph_config() {
 
 JesturePipe::JesturePipe()
     : mediapipe::CalculatorGraph(),
-      library(std::make_shared<GestureLibrary>()) {}
+      library(std::make_shared<GestureLibrary>()),
+      actions(std::make_shared<ActionMapper>()) {}
 
 absl::Status JesturePipe::Initialize(const JesturePipeConfig& config) {
     using namespace mediapipe;
@@ -91,6 +99,9 @@ absl::Status JesturePipe::Initialize(const JesturePipeConfig& config) {
 
     side_packets["gesture_library"] =
         MakePacket<std::shared_ptr<GestureLibrary>>(library);
+
+    side_packets["action_mapper"] =
+        MakePacket<std::shared_ptr<ActionMapper>>(actions);
 
     absl::Status status =
         CalculatorGraph::Initialize(graph_config(), side_packets);
@@ -173,7 +184,7 @@ absl::Status JesturePipe::OnLandmarks(
 // }
 
 mediapipe::StatusOrPoller JesturePipe::FramePoller() {
-    return AddOutputStreamPoller("annotated_frame");
+    return mediapipe::CalculatorGraph::AddOutputStreamPoller("annotated_frame");
 }
 
 bool JesturePipe::IsRecording() { return recording; }
@@ -190,6 +201,15 @@ absl::Status JesturePipe::SetRecording(bool recording) {
 
 void JesturePipe::AddGesture(int id, Gesture&& gesture) {
     library->Set(id, std::move(gesture));
+}
+
+void JesturePipe::AddAction(int gesture_id, actions::Action action) {
+    std::unique_lock<std::shared_mutex> lk(actions->mutex);
+
+    if (!actions->mapping.contains(gesture_id))
+        actions->mapping[gesture_id] = {};
+
+    actions->mapping[gesture_id].push_back(action);
 }
 
 }  // namespace jesturepipe

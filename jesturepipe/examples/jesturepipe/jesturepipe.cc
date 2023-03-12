@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "absl/status/status.h"
+#include "actions/action/keystroke.h"
 #include "jesturepipe/gesture/library.h"
 #include "mediapipe/framework/calculator_graph.h"
 #include "mediapipe/framework/formats/image_frame.h"
@@ -29,52 +30,6 @@ constexpr char window_name[] = "JesturePipe";
 
 using namespace jesturepipe;
 
-// absl::Status on_recording(mediapipe::Packet packet) {
-//     Gesture gesture = packet.Get<Gesture>();
-
-//     std::cout << "Recorded gesture with frames:" << std::endl;
-
-//     for (GestureFrame frame : *gesture.frames) {
-//         std::cout << "GestureFrame{" << std::endl;
-//         std::cout << "\tHandShape{" << std::endl;
-//         std::cout << "\t\tindex_direction: " <<
-//         frame.hand_shape.index_direction
-//                   << std::endl;
-//         std::cout << "\t\tmiddle_direction: "
-//                   << frame.hand_shape.middle_direction << std::endl;
-//         std::cout << "\t\tring_direction: " <<
-//         frame.hand_shape.ring_direction
-//                   << std::endl;
-//         std::cout << "\t\tpinky_direction: " <<
-//         frame.hand_shape.pinky_direction
-//                   << std::endl;
-//         std::cout << "\t\tthumb_direction: " <<
-//         frame.hand_shape.thumb_direction
-//                   << std::endl;
-//         std::cout << "\t}" << std::endl;
-
-//         if (frame.movement_direction.has_value())
-//             std::cout << "movement_direction: "
-//                       << frame.movement_direction.value() << std::endl;
-
-//         std::cout << "}" << std::endl;
-//     }
-
-//     return absl::OkStatus();
-// }
-
-// absl::Status on_frame(const mediapipe::ImageFrame& frame) {
-//     cv::Mat frame_mat = mediapipe::formats::MatView(&frame);
-
-//     cv::cvtColor(frame_mat, frame_mat, cv::COLOR_RGB2BGR);
-
-//     cv::imshow(window_name, frame_mat);
-
-//     const int pressed_key = cv::waitKey(5);
-
-//     return absl::OkStatus();
-// }
-
 absl::Status run(Runfiles* runfiles, int camera_index, bool use_full) {
     using namespace mediapipe;
     JesturePipeConfig config{
@@ -88,6 +43,12 @@ absl::Status run(Runfiles* runfiles, int camera_index, bool use_full) {
     JesturePipe jesturepipe;
 
     jesturepipe.AddGesture(0, Gesture::Stop());
+
+    auto pgdown_action = actions::action::ParseKeystroke("Page_Down");
+
+    if (!pgdown_action.ok()) return pgdown_action.status();
+
+    jesturepipe.AddAction(0, pgdown_action.value());
 
     MP_RETURN_IF_ERROR(jesturepipe.Initialize(config));
 

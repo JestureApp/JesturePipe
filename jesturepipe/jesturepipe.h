@@ -5,6 +5,7 @@
 #include <string>
 
 #include "absl/status/status.h"
+#include "jesturepipe/actions/mapper.h"
 #include "jesturepipe/gesture/gesture.h"
 #include "jesturepipe/gesture/library.h"
 #include "mediapipe/framework/calculator_graph.h"
@@ -76,12 +77,15 @@ class JesturePipe : private mediapipe::CalculatorGraph {
 
     absl::Status SetRecording(bool);
 
-    void AddGesture(int id, Gesture&& gesture);
+    void AddGesture(int gesture_id, Gesture&& gesture);
+
+    void AddAction(int gesture_id, actions::Action action);
 
    private:
     bool recording;
     int recording_ts;
     std::shared_ptr<GestureLibrary> library;
+    std::shared_ptr<ActionMapper> actions;
 };
 
 }  // namespace jesturepipe

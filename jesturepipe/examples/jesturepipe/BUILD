@@ -5,7 +5,7 @@ cc_binary(
     srcs = ["jesturepipe.cc"],
     deps = [
         "//jesturepipe",
-        "//jesturepipe/graphs/gestures",
+        "@actions//actions/action:keystroke",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/status",
         "@mediapipe//mediapipe/framework/formats:image_frame",

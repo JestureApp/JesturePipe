@@ -5,9 +5,12 @@ cc_library(
     srcs = ["jesturepipe.cc"],
     hdrs = ["jesturepipe.h"],
     deps = [
+        "//jesturepipe/actions:mapper",
         "//jesturepipe/calculators:camera_calculator",
         "//jesturepipe/gesture",
         "//jesturepipe/gesture:library",
+        "//jesturepipe/graphs/actions",
+        "//jesturepipe/graphs/gestures",
         "//jesturepipe/graphs/gestures:is_recording_latch",
         "//jesturepipe/graphs/util:frame_annotator",
         "@com_google_absl//absl/status",
