@@ -7,7 +7,13 @@
 #include "absl/types/optional.h"
 
 namespace jesturepipe {
+/// \brief Represents the shape of the hand. Contains all information
+/// responsible for comparing hand shapes between frames.
 typedef struct HandShape {
+    /// \brief A comparator functor for comparing `HandShape`s.
+    ///
+    /// Returns `true` if the `HandShape`s should be considered equal, or
+    /// `false` otherwise.
     struct Comparator {
         Comparator() = delete;
         Comparator(double thresh) noexcept;
@@ -24,6 +30,7 @@ typedef struct HandShape {
     double thumb_direction;
 } HandShape;
 
+/// \brief Represents a single frame of a gesture.
 typedef struct GestureFrame {
     struct Comparator {
        public:
