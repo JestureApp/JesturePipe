@@ -1,70 +1,54 @@
-
-#include "absl/status/status.h"
-#include "absl/types/optional.h"
 #include "jesturepipe/gesture/gesture.h"
 #include "jesturepipe/gesture/recognizer.h"
+#include "mediapipe/framework/api2/node.h"
 #include "mediapipe/framework/calculator_framework.h"
 
 namespace jesturepipe {
-namespace {
-const char FrameTag[] = "FRAME";
-const char SeenTag[] = "SEEN";
-const char GesturesTag[] = "GESTURE";
-}  // namespace
 
-class GestureRecognizerCalculator : public mediapipe::CalculatorBase {
+namespace api2 = mediapipe::api2;
+
+class GestureRecognizerCalculator : public api2::Node {
    public:
-    static absl::Status GetContract(mediapipe::CalculatorContract* cc) {
+    static constexpr api2::SideInput<double> kThresh{"THRESH"};
+    static constexpr api2::SideInput<std::shared_ptr<GestureLibrary>> kLibrary{
+        "LIBRARY"};
+
+    static constexpr api2::Input<GestureFrame> kFrames{"GESTURE_FRAME"};
+    static constexpr api2::Input<api2::AnyType> kRecReset{"REC_RESET"};
+
+    static constexpr api2::Output<int> kGestureId{"GESTURE_ID"};
+
+    MEDIAPIPE_NODE_CONTRACT(kThresh, kLibrary, kFrames, kRecReset, kGestureId)
+
+    static absl::Status UpdateContract(mediapipe::CalculatorContract *cc) {
         cc->SetProcessTimestampBounds(true);
-        cc->SetTimestampOffset(0);
-        cc->Inputs().Tag(FrameTag).Set<absl::optional<GestureFrame>>();
-
-        if (cc->Inputs().HasTag(GesturesTag)) {
-            cc->Inputs().Tag(GesturesTag).Set<Gesture>();
-        }
-
-        cc->Outputs().Tag(SeenTag).Set<int>();
+        // cc->UseService(GestureLibraryService);
 
         return absl::OkStatus();
     }
 
-    absl::Status Open(mediapipe::CalculatorContext* cc) override {
-        // Gesture testGesture;
+    absl::Status Open(mediapipe::CalculatorContext *cc) override {
+        cc->SetOffset(mediapipe::TimestampDiff(0));
 
-        // testGesture.push_back(GestureFrame(90, 90, 90, 90, 90));
-
-        // recognizer.addGesture(std::move(testGesture));
+        recognizer = GestureRecognizer(*kLibrary(cc), *kThresh(cc));
 
         return absl::OkStatus();
     }
 
-    absl::Status Process(mediapipe::CalculatorContext* cc) override {
-        if (cc->Inputs().HasTag(GesturesTag) &&
-            !cc->Inputs().Tag(GesturesTag).IsEmpty()) {
-            Gesture new_gesture = cc->Inputs().Tag(GesturesTag).Get<Gesture>();
-            recognizer.addGesture(std::move(new_gesture));
-        }
-
-        if (cc->Inputs().Tag(FrameTag).IsEmpty()) {
+    absl::Status Process(mediapipe::CalculatorContext *cc) override {
+        if (kFrames(cc).IsEmpty()) {
+            recognizer.Reset();
             return absl::OkStatus();
         }
 
-        absl::optional<GestureFrame> frame =
-            cc->Inputs().Tag(FrameTag).Get<absl::optional<GestureFrame>>();
+        if (!kRecReset(cc).IsEmpty()) recognizer.Reset();
 
-        if (!frame.has_value()) {
-            recognizer.reset();
+        GestureFrame frame = *kFrames(cc);
 
-            return absl::OkStatus();
-        }
+        absl::optional<int> gesture_id = recognizer.ProcessFrame(frame);
 
-        absl::optional<int> gesture = recognizer.nextFrame(frame.value());
-
-        if (gesture.has_value()) {
-            cc->Outputs().Tag(SeenTag).AddPacket(
-                mediapipe::MakePacket<int>(gesture.value())
-                    .At(cc->Inputs().Tag(FrameTag).Value().Timestamp()));
-        }
+        if (gesture_id.has_value())
+            kGestureId(cc).Send(gesture_id.value(), cc->InputTimestamp());
 
         return absl::OkStatus();
     }
@@ -73,6 +57,6 @@ class GestureRecognizerCalculator : public mediapipe::CalculatorBase {
     GestureRecognizer recognizer;
 };
 
-REGISTER_CALCULATOR(GestureRecognizerCalculator);
+MEDIAPIPE_REGISTER_NODE(GestureRecognizerCalculator);
 
 }  // namespace jesturepipe

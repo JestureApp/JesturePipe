@@ -1,47 +1,67 @@
 #ifndef JESTUREPIPE_GESTURE_GESTURE_H
 #define JESTUREPIPE_GESTURE_GESTURE_H
 
-#include <functional>
+#include <memory>
+#include <vector>
 
-#include "mediapipe/framework/formats/landmark.pb.h"
+#include "absl/types/optional.h"
 
 namespace jesturepipe {
-class GestureFrame {
-   public:
-    /**
-     * Constructs a new key frame from a list of hand landmarks.
-     */
-    static GestureFrame FromLandmarks(
-        mediapipe::NormalizedLandmarkList& landmarks) noexcept;
+/// \brief Represents the shape of the hand. Contains all information
+/// responsible for comparing hand shapes between frames.
+typedef struct HandShape {
+    /// \brief A comparator functor for comparing `HandShape`s.
+    ///
+    /// Returns `true` if the `HandShape`s should be considered equal, or
+    /// `false` otherwise.
+    struct Comparator {
+        Comparator() = delete;
+        Comparator(double thresh) noexcept;
 
-    GestureFrame(double index_direction, double middle_direction,
-                 double ring_direction, double pinky_direction,
-                 double thumb_direction) noexcept;
+        bool operator()(const HandShape& a, const HandShape& b);
+
+        double thresh;
+    };
 
     double index_direction;
     double middle_direction;
     double ring_direction;
     double pinky_direction;
     double thumb_direction;
+} HandShape;
 
-   protected:
-    bool isSame(const GestureFrame& frame1) const noexcept;
+/// \brief Represents a single frame of a gesture.
+typedef struct GestureFrame {
+    struct Comparator {
+       public:
+        Comparator() = delete;
+        Comparator(double thresh) noexcept;
 
-    friend bool operator==(const GestureFrame& frame1,
-                           const GestureFrame& frame2) noexcept;
-    friend bool operator!=(const GestureFrame& frame1,
-                           const GestureFrame& frame2) noexcept;
-};
+        bool operator()(const GestureFrame& a, const GestureFrame& b);
+
+        double thresh;
+        HandShape::Comparator hand_shape_comp;
+    };
+
+    HandShape hand_shape;
+    absl::optional<double> movement_direction;
+} GestureFrame;
 
 class Gesture {
    public:
-    explicit Gesture(int id) noexcept;
+    static Gesture Stop();
+    static Gesture SlideLeft();
+
+    Gesture();
+    Gesture(std::vector<GestureFrame>&& frames);
 
     Gesture(const Gesture& other) noexcept;
     Gesture& operator=(const Gesture& other) noexcept;
 
-    int id;
-    std::vector<GestureFrame> frames;
+    Gesture(Gesture&& other) noexcept;
+    Gesture& operator=(Gesture&& other) noexcept;
+
+    std::shared_ptr<std::vector<GestureFrame>> frames;
 };
 
 }  // namespace jesturepipe

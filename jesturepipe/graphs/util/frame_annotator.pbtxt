@@ -1,28 +1,37 @@
-# Graph for rendering hand landmarks
-
-type: "HandsRenderer"
+type: "FrameAnnotator"
 
 ################################################################################
-# Inputs
+# Streams
 ################################################################################
 
-input_stream: "IMAGE:input_frame"
-input_stream: "LANDMARKS:multi_hand_landmarks"
+# The frame to annotate
+# (ImageFrame)
+input_stream: "FRAME:frame"
+
+# The normalized landmarks produced by Hands
+# (std::vector<NormalizedLandmarkList>)
+input_stream: "NORM_LANDMARKS:multi_hand_landmarks"
+
+# (bool)
+input_stream: "HAND_PRESENCE:hand_presence"
+
+# (GestureFrame)
+input_stream: "GESTURE_FRAME:gesture_frame"
+
+# (int)
+input_stream: "GESTURE_ID:gesture_id"
+
+# (bool)
+input_stream: "IS_REC:is_recording"
+
+# The annotated frame
+# (ImageFrame)
+output_stream: "FRAME:annotated_frame"
 
 ################################################################################
-# Outputs
+# Nodes
 ################################################################################
 
-output_stream: "IMAGE:output_frame"
-
-################################################################################
-# Graph
-################################################################################
-
-# Outputs each element of multi_palm_landmarks at a fake timestamp for the rest
-# of the graph to process. At the end of the loop, outputs the BATCH_END
-# timestamp for downstream calculators to inform them that all elements in the
-# vector have been processed.
 node {
   calculator: "BeginLoopNormalizedLandmarkListVectorCalculator"
   input_stream: "ITERABLE:multi_hand_landmarks"
@@ -86,9 +95,6 @@ node {
   }
 }
 
-# Collects a RenderData object for each hand into a vector. Upon receiving the
-# BATCH_END timestamp, outputs the vector of RenderData at the BATCH_END
-# timestamp.
 node {
   calculator: "EndLoopRenderDataCalculator"
   input_stream: "ITEM:single_hand_landmark_render_data"
@@ -96,11 +102,37 @@ node {
   output_stream: "ITERABLE:multi_hand_landmarks_render_data"
 }
 
+node {
+    calculator: "PacketFrequencyCalculator"
+    input_stream: "frame"
+    output_stream: "frame_frequency"
+    input_stream_handler {
+        input_stream_handler: "ImmediateInputStreamHandler"
+    }
+    options {
+        [mediapipe.PacketFrequencyCalculatorOptions.ext] {
+            time_window_sec: 0.5
+            label: "frame"
+        }
+    }
+}
+
+node {
+    calculator: "DebugRenderDataCalculator"
+    input_stream: "FPS:frame_frequency"
+    input_stream: "HAND_PRESENCE:hand_presence"
+    input_stream: "GESTURE_FRAME:gesture_frame"
+    input_stream: "GESTURE_ID:gesture_id"
+    input_stream: "IS_REC:is_recording"
+    output_stream: "RENDER_DATA:debug_render_data"
+}
+
 # Draws annotations and overlays them on top of the input images. Consumes
 # a vector of RenderData objects and draws each of them on the input frame.
 node {
   calculator: "AnnotationOverlayCalculator"
-  input_stream: "IMAGE:input_frame"
+  input_stream: "IMAGE:frame"
+  input_stream: "debug_render_data"
   input_stream: "VECTOR:0:multi_hand_landmarks_render_data"
-  output_stream: "IMAGE:output_frame"
+  output_stream: "IMAGE:annotated_frame"
 }

@@ -1,53 +1,36 @@
-#include "absl/status/status.h"
+#include "mediapipe/framework/api2/node.h"
 #include "mediapipe/framework/calculator_framework.h"
 #include "mediapipe/util/header_util.h"
 
 namespace jesturepipe {
-namespace {
-const char IfStream[] = "IF";
-const char ElseStream[] = "ELSE";
-const char ConditionStream[] = "COND";
-const char ValueStream[] = "VALUE";
-}  // namespace
 
-// Example:
+namespace api2 = mediapipe::api2;
+
+// Example
 // node {
-//  calculator: "CameraCalculator"
-//  input_side_packet: "CAMERA:camera"
-//  output_stream: "VIDEO:video"
+//     calculator: "IfElseCalculator"
+//     input_side_packet: "COND:if_cond"
+//     input_side_packet: "IF:on_true"
+//     input_side_packet: "ELSE:on_false"
+//     output_side_packet: "VALUE:result"
 // }
-class IfElseCalculator : public mediapipe::CalculatorBase {
+class IfElseCalculator : public api2::Node {
    public:
-    static absl::Status GetContract(mediapipe::CalculatorContract* cc) {
-        // cc->Outputs().Tag(VideoOutputStream).Set<mediapipe::ImageFrame>();
-        // cc->InputSidePackets().Tag(CameraInputPacket).Set<int>();
+    static constexpr api2::SideInput<bool> kCond{"COND"};
+    static constexpr api2::SideInput<api2::AnyType> kIf{"IF"};
+    static constexpr api2::SideInput<api2::SameType<kIf>> kElse{"ELSE"};
 
-        cc->InputSidePackets().Tag(IfStream).SetAny();
-        cc->InputSidePackets()
-            .Tag(ElseStream)
-            .SetSameAs(&cc->InputSidePackets().Tag(IfStream));
-        cc->InputSidePackets().Tag(ConditionStream).Set<int>();
+    static constexpr api2::SideOutput<api2::SameType<kIf>> kValue{"VALUE"};
 
-        cc->OutputSidePackets()
-            .Tag(ValueStream)
-            .SetSameAs(&cc->InputSidePackets().Tag(IfStream));
-
-        return absl::OkStatus();
-    }
+    MEDIAPIPE_NODE_CONTRACT(kCond, kIf, kElse, kValue)
 
     absl::Status Open(mediapipe::CalculatorContext* cc) override {
-        int cond = cc->InputSidePackets().Tag(ConditionStream).Get<int>();
-
         RET_CHECK_OK(CopyInputHeadersToOutputs(cc->Inputs(), &cc->Outputs()));
 
-        if (cond) {
-            auto packet = cc->InputSidePackets().Tag(IfStream);
-
-            cc->OutputSidePackets().Tag(ValueStream).Set(packet);
+        if (*kCond(cc)) {
+            kValue(cc).Set(kIf(cc));
         } else {
-            auto packet = cc->InputSidePackets().Tag(ElseStream);
-
-            cc->OutputSidePackets().Tag(ValueStream).Set(packet);
+            kValue(cc).Set(kElse(cc));
         }
 
         return absl::OkStatus();
@@ -58,5 +41,6 @@ class IfElseCalculator : public mediapipe::CalculatorBase {
     }
 };
 
-REGISTER_CALCULATOR(IfElseCalculator);
+MEDIAPIPE_REGISTER_NODE(IfElseCalculator);
+
 }  // namespace jesturepipe

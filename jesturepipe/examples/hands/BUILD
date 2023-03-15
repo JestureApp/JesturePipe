@@ -1,23 +1,20 @@
 package(default_visibility = ["//visibility:public"])
 
-cc_library(
-    name = "jesturepipe",
-    srcs = ["jesturepipe.cc"],
-    hdrs = ["jesturepipe.h"],
+cc_binary(
+    name = "hands",
+    srcs = ["hands.cc"],
     deps = [
-        "//jesturepipe/actions:mapper",
         "//jesturepipe/calculators:camera_calculator",
-        "//jesturepipe/gesture",
-        "//jesturepipe/gesture:library",
-        "//jesturepipe/graphs/actions",
-        "//jesturepipe/graphs/gestures",
-        "//jesturepipe/graphs/gestures:is_recording_latch",
+        "//jesturepipe/graphs/hands",
         "//jesturepipe/graphs/util:frame_annotator",
+        "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/status",
         "@mediapipe//mediapipe/framework:calculator_framework",
         "@mediapipe//mediapipe/framework/api2:builder",
         "@mediapipe//mediapipe/framework/formats:image_frame",
-        "@mediapipe//mediapipe/framework/formats:landmark_cc_proto",
+        "@mediapipe//mediapipe/framework/formats:image_frame_opencv",
+        "@mediapipe//mediapipe/framework/port:opencv_highgui",
+        "@mediapipe//mediapipe/framework/port:opencv_imgproc",
         "@mediapipe//mediapipe/framework/port:parse_text_proto",
     ],
 )

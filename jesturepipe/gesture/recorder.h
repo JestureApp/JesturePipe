@@ -7,11 +7,8 @@ namespace jesturepipe {
 
 class GestureRecorder {
    public:
-    GestureRecorder() noexcept;
-
-    Gesture finish() noexcept;
-
-    void addFrame(GestureFrame frame) noexcept;
+    void AddFrame(GestureFrame frame);
+    Gesture Finish();
 
    private:
     Gesture gesture;

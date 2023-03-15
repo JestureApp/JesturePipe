@@ -1,58 +1,82 @@
 #include "jesturepipe/gesture/recognizer.h"
 
 namespace jesturepipe {
+GestureRecognizer::GestureRecognizer() : comp(0) {}
 
-// GestureRecognizer::
+GestureRecognizer::GestureRecognizer(std::shared_ptr<GestureLibrary> library,
+                                     double threshold)
+    : library(std::move(library)), comp(threshold) {}
 
-void GestureRecognizer::addGesture(Gesture&& gesture) noexcept {
-    GestureMatcher matcher(std::move(gesture));
-
-    matchers.push_back(std::move(matcher));
+GestureRecognizer::GestureRecognizer(GestureRecognizer &&other) : comp(0) {
+    *this = std::move(other);
 }
 
-absl::optional<int> GestureRecognizer::nextFrame(GestureFrame& frame) noexcept {
+GestureRecognizer &GestureRecognizer::operator=(GestureRecognizer &&other) {
+    if (this != &other) {
+        library = std::move(other.library);
+        comp = std::move(other.comp);
+        matchers = std::move(other.matchers);
+    }
+
+    return *this;
+}
+
+void GestureRecognizer::Reset() { matchers.clear(); }
+
+absl::optional<int> GestureRecognizer::ProcessFrame(const GestureFrame &frame) {
     absl::optional<int> matched;
 
-    for (auto matcher : matchers) {
-        if (matcher.matches(frame)) {
-            matched = matcher.getGesture().id;
+    // Check if this is the first frame in any gesture
+    {
+        // Acquire read lock on library
+        auto lk = library->RLock();
+        for (const auto &[id, gesture] : *library) {
+            if (comp(gesture.frames->at(0), frame)) {
+                matchers.push_back(GestureMatcher(id, gesture, &comp));
+            }
+        }
+    }
+
+    // Remove all matchers that failed to match
+    matchers.remove_if(
+        [&frame](GestureMatcher &matcher) { return !matcher.Advance(frame); });
+
+    // Check if we've had any matches
+    for (auto &matcher : matchers) {
+        matched = matcher.Matches();
+
+        if (matched.has_value()) {
             break;
         }
     }
 
-    if (matched.has_value()) reset();
+    // If we found a match, remove all matchers
+    if (matched.has_value()) matchers.clear();
 
     return matched;
 }
 
-void GestureRecognizer::reset() noexcept {
-    for (auto matcher : matchers) {
-        matcher.reset();
+GestureRecognizer::GestureMatcher::GestureMatcher(
+    int id, Gesture gesture, GestureFrame::Comparator *comp)
+    : at(0), id(id), gesture(gesture), comp(comp) {}
+
+bool GestureRecognizer::GestureMatcher::Advance(const GestureFrame &frame) {
+    if (at < 0 || at >= gesture.frames->size()) return false;
+
+    if ((*comp)(gesture.frames->at(at), frame)) {
+        at += 1;
+        return true;
+    } else {
+        at = -1;
+        return false;
     }
 }
 
-GestureRecognizer::GestureMatcher::GestureMatcher(Gesture&& gesture) noexcept
-    : gesture(std::move(gesture)), next(0){};
+absl::optional<int> GestureRecognizer::GestureMatcher::Matches() {
+    absl::optional<int> match;
 
-bool GestureRecognizer::GestureMatcher::matches(GestureFrame& frame) noexcept {
-    if (frame == gesture.frames[next]) {
-        next++;
+    if (at == gesture.frames->size()) match = id;
 
-        if (next == gesture.frames.size()) {
-            next = 0;
-            return true;
-        } else
-            return false;
-    }
-
-    next = 0;
-    return false;
+    return match;
 }
-
-void GestureRecognizer::GestureMatcher::reset() noexcept { next = 0; }
-
-Gesture& GestureRecognizer::GestureMatcher::getGesture() noexcept {
-    return gesture;
-}
-
 }  // namespace jesturepipe

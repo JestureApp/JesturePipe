@@ -1,16 +1,23 @@
-# A graph implementing the JesturePipe pipeline
+type: "Actions"
 
 ################################################################################
-# Input Packets
+# Side Packets
 ################################################################################
 
-input_stream: "GESTURE:gesture"
+input_side_packet: "ACTION_MAPPER:action_mapper"
 
 ################################################################################
-# Graph
+# Streams
+################################################################################
+
+input_stream: "GESTURE_ID:gesture_id"
+
+################################################################################
+# Nodes
 ################################################################################
 
 node {
-    calculator: "ActionsCalculator"
-    input_stream: "GESTURE:gesture"
+    calculator: "ActionDispatcherCalculator"
+    input_side_packet: "MAPPER:action_mapper"
+    input_stream: "GESTURE_ID:gesture_id"
 }

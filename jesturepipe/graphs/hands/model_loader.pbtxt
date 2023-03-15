@@ -1,22 +1,19 @@
-# A graph which loads a tflite model.
-
 type: "ModelLoader"
 
 ################################################################################
-# Configuration (Input side packets)
+# Side Packets
 ################################################################################
 
+# The path to the TFLite model to load
 input_side_packet: "MODEL_PATH:model_path"
 
-################################################################################
-# Outputs
-################################################################################
-
+# The model that was loaded
 output_side_packet: "MODEL:model"
 
 ################################################################################
-# Graph
+# Nodes
 ################################################################################
+
 
 # Loads the file in the specified path into a blob.
 node {

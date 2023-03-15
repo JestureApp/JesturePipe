@@ -5,35 +5,36 @@ load(
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files(glob(["*.pbtxt"]))
-
 mediapipe_simple_subgraph(
-    name = "gestures_graph",
+    name = "gestures",
     graph = "gestures.pbtxt",
     register_as = "Gestures",
     deps = [
-        ":gesture_recognizer_graph",
         "//jesturepipe/calculators:echoer_calculator",
-        "//jesturepipe/calculators:fixed_length_vector_calculator",
-        "//jesturepipe/graphs/gestures/calculators:calc_ext",
+        "//jesturepipe/calculators:get_vector_item_calculator",
+        "//jesturepipe/calculators:state_change_calculator",
+        "//jesturepipe/graphs/gestures/calculators:gesture_frame_constructor_calculator",
+        "//jesturepipe/graphs/gestures/calculators:gesture_recognizer_calculator",
+        "//jesturepipe/graphs/gestures/calculators:gesture_recorder_calculator",
+        "//jesturepipe/graphs/hands",
         "@mediapipe//mediapipe/calculators/core:constant_side_packet_calculator",
+        "@mediapipe//mediapipe/calculators/core:flow_limiter_calculator",
+        "@mediapipe//mediapipe/calculators/core:gate_calculator",
+        "@mediapipe//mediapipe/calculators/core:merge_calculator",
+        "@mediapipe//mediapipe/calculators/core:packet_cloner_calculator",
+        "@mediapipe//mediapipe/calculators/util:clock_timestamp_calculator",
     ],
 )
 
 mediapipe_simple_subgraph(
-    name = "gesture_recognizer_graph",
-    graph = "gesture_recognizer.pbtxt",
-    register_as = "GestureRecognizer2",
+    name = "is_recording_latch",
+    graph = "is_recording_latch.pbtxt",
+    register_as = "IsRecordingLatch",
     deps = [
-        "//jesturepipe/calculators:echoer_calculator",
-        "//jesturepipe/calculators:fixed_length_vector_calculator",
-        "//jesturepipe/graphs/gestures/calculators:calc_ext",
-        "//jesturepipe/graphs/gestures/calculators:gesture_recognizer_calculator",
-        "//jesturepipe/graphs/gestures/calculators:gesture_recorder_calculator",
-        "//jesturepipe/graphs/gestures/calculators:landmark_to_gesture_frame_calculator",
         "@mediapipe//mediapipe/calculators/core:constant_side_packet_calculator",
-        "@mediapipe//mediapipe/calculators/core:gate_calculator",
+        "@mediapipe//mediapipe/calculators/core:merge_calculator",
         "@mediapipe//mediapipe/calculators/core:packet_cloner_calculator",
         "@mediapipe//mediapipe/calculators/core:packet_sequencer_calculator",
+        "@mediapipe//mediapipe/calculators/core:side_packet_to_stream_calculator",
     ],
 )

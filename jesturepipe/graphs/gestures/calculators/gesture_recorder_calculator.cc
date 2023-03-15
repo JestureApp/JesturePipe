@@ -1,61 +1,37 @@
-#include "absl/status/status.h"
-#include "absl/types/optional.h"
+#include <iostream>
+
 #include "jesturepipe/gesture/gesture.h"
 #include "jesturepipe/gesture/recorder.h"
+#include "mediapipe/framework/api2/node.h"
 #include "mediapipe/framework/calculator_framework.h"
 
 namespace jesturepipe {
+namespace api2 = mediapipe::api2;
 
-namespace {
-const char FrameTag[] = "FRAME";
-const char FinishTag[] = "FINISH";
-const char GestureTag[] = "GESTURE";
-}  // namespace
-
-class GestureRecorderCalculator : public mediapipe::CalculatorBase {
+class GestureRecorderCalculator : public api2::Node {
    public:
-    static absl::Status GetContract(mediapipe::CalculatorContract* cc) {
-        cc->SetProcessTimestampBounds(true);
-        cc->Inputs().Tag(FrameTag).Set<absl::optional<GestureFrame>>();
-        cc->Inputs().Tag(FinishTag).SetAny();
+    static constexpr api2::Input<GestureFrame> kFrame{"GESTURE_FRAME"};
+    static constexpr api2::Input<api2::AnyType> kRecReset{"REC_RESET"};
 
-        cc->Outputs().Tag(GestureTag).Set<Gesture>();
+    static constexpr api2::Output<Gesture> kGesture{"GESTURE"};
 
-        return absl::OkStatus();
-    }
+    MEDIAPIPE_NODE_CONTRACT(kFrame, kRecReset, kGesture)
 
-    absl::Status Process(mediapipe::CalculatorContext* cc) override {
-        // std::cout << "HERE" << std::endl;
+    absl::Status Process(mediapipe::CalculatorContext *cc) override {
+        if (!kRecReset(cc).IsEmpty()) {
+            Gesture gesture = recorder.Finish();
 
-        auto& input = cc->Inputs().Tag(FrameTag);
-        auto& finish = cc->Inputs().Tag(FinishTag);
-        auto& output = cc->Outputs().Tag(GestureTag);
-
-        if (!finish.IsEmpty()) {
-            // std::cout << "Finished recording gesture" << std::endl;
-            Gesture gesture = recorder.finish();
-
-            if (gesture.frames.size()) {
-                output.AddPacket(mediapipe::MakePacket<Gesture>(gesture).At(
-                    input.Value().Timestamp()));
-                return absl::OkStatus();
-            } else {
-                std::cout << "recorded empty gesture" << std::endl;
+            if (gesture.frames->size() > 0) {
+                kGesture(cc).Send(gesture, cc->InputTimestamp());
             }
+
+            recorder = GestureRecorder();
+            return absl::OkStatus();
         }
 
-        if (!input.IsEmpty() &&
-            input.Get<absl::optional<GestureFrame>>().has_value()) {
-            // std::cout << "Recorded Frame" << std::endl;
+        if (kFrame(cc).IsEmpty()) return absl::OkStatus();
 
-            GestureFrame frame =
-                input.Get<absl::optional<GestureFrame>>().value();
-
-            recorder.addFrame(frame);
-        }
-
-        output.SetNextTimestampBound(
-            cc->InputTimestamp().NextAllowedInStream());
+        recorder.AddFrame(*kFrame(cc));
 
         return absl::OkStatus();
     }
@@ -64,6 +40,6 @@ class GestureRecorderCalculator : public mediapipe::CalculatorBase {
     GestureRecorder recorder;
 };
 
-REGISTER_CALCULATOR(GestureRecorderCalculator);
+MEDIAPIPE_REGISTER_NODE(GestureRecorderCalculator);
 
 }  // namespace jesturepipe

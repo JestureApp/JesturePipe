@@ -5,7 +5,18 @@ cc_library(
     srcs = ["gesture.cc"],
     hdrs = ["gesture.h"],
     deps = [
-        "@mediapipe//mediapipe/framework/formats:landmark_cc_proto",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
+cc_library(
+    name = "library",
+    srcs = ["library.cc"],
+    hdrs = ["library.h"],
+    deps = [
+        ":gesture",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/types:optional",
     ],
 )
 
@@ -15,8 +26,8 @@ cc_library(
     hdrs = ["recognizer.h"],
     deps = [
         ":gesture",
+        ":library",
         "@com_google_absl//absl/types:optional",
-        "@com_google_absl//absl/types:variant",
     ],
 )
 
@@ -26,5 +37,17 @@ cc_library(
     hdrs = ["recorder.h"],
     deps = [
         ":gesture",
+    ],
+)
+
+cc_library(
+    name = "frame_constructor",
+    srcs = ["frame_constructor.cc"],
+    hdrs = ["frame_constructor.h"],
+    deps = [
+        ":gesture",
+        "@com_google_absl//absl/time",
+        "@com_google_absl//absl/types:optional",
+        "@mediapipe//mediapipe/framework/formats:landmark_cc_proto",
     ],
 )

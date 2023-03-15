@@ -1,43 +1,53 @@
-#ifndef JESTUREPIPE_GESTURE_PARSER_H
-#define JESTUREPIPE_GESTURE_PARSER_H
+#ifndef JESTUREPIPE_GESTURE_RECOGNIZER_H
+#define JESTUREPIPE_GESTURE_RECOGNIZER_H
 
 #include <list>
 
 #include "absl/types/optional.h"
-#include "absl/types/variant.h"
 #include "jesturepipe/gesture/gesture.h"
+#include "jesturepipe/gesture/library.h"
 
 namespace jesturepipe {
 
 class GestureRecognizer {
    public:
-    // GestureRecognizer() noexcept;
+    GestureRecognizer();
+    GestureRecognizer(std::shared_ptr<GestureLibrary> library,
+                      double threshold);
 
-    void addGesture(Gesture&& gesture) noexcept;
+    GestureRecognizer(GestureRecognizer&) = delete;
+    GestureRecognizer& operator=(GestureRecognizer&) = delete;
 
-    absl::optional<int> nextFrame(GestureFrame& frame) noexcept;
+    GestureRecognizer(GestureRecognizer&&);
+    GestureRecognizer& operator=(GestureRecognizer&&);
 
-    void reset() noexcept;
+    void Reset();
+
+    /// \brief Processes the next frame and attempts to match it against
+    /// known gestures.
+    absl::optional<int> ProcessFrame(const GestureFrame& frame);
 
    private:
     class GestureMatcher {
        public:
-        GestureMatcher(Gesture&& gesture) noexcept;
+        GestureMatcher(int id, Gesture gesture, GestureFrame::Comparator* comp);
 
-        void reset() noexcept;
+        bool Advance(const GestureFrame& frame);
 
-        bool matches(GestureFrame& frame) noexcept;
-
-        Gesture& getGesture() noexcept;
+        absl::optional<int> Matches();
 
        private:
+        long unsigned int at;
+        int id;
         Gesture gesture;
-        long unsigned int next;
+        GestureFrame::Comparator* comp;
     };
 
+    std::shared_ptr<GestureLibrary> library;
+    GestureFrame::Comparator comp;
     std::list<GestureMatcher> matchers;
 };
 
 }  // namespace jesturepipe
 
-#endif  // JESTUREPIPE_GESTURE_PARSER_H
+#endif  // JESTUREPIPE_GESTURE_RECOGNIZER_H
