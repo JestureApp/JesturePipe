@@ -52,12 +52,12 @@ absl::Status run(Runfiles* runfiles, int camera_index, bool use_full) {
 
     MP_RETURN_IF_ERROR(jesturepipe.Initialize(config));
 
-    cv::namedWindow(window_name);
+    cv::namedWindow(window_name, cv::WINDOW_AUTOSIZE);
 
     ASSIGN_OR_RETURN(OutputStreamPoller poller, jesturepipe.FramePoller());
 
     LOG(INFO) << "Starting Graph";
-    MP_RETURN_IF_ERROR(jesturepipe.Start(2));
+    MP_RETURN_IF_ERROR(jesturepipe.Start(0));
 
     while (true) {
         Packet frame_packet;

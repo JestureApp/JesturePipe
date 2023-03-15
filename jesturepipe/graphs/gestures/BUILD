@@ -18,6 +18,7 @@ mediapipe_simple_subgraph(
         "//jesturepipe/graphs/gestures/calculators:gesture_recorder_calculator",
         "//jesturepipe/graphs/hands",
         "@mediapipe//mediapipe/calculators/core:constant_side_packet_calculator",
+        "@mediapipe//mediapipe/calculators/core:flow_limiter_calculator",
         "@mediapipe//mediapipe/calculators/core:gate_calculator",
         "@mediapipe//mediapipe/calculators/core:merge_calculator",
         "@mediapipe//mediapipe/calculators/core:packet_cloner_calculator",
