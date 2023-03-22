@@ -59,6 +59,9 @@ class JesturePipe : private mediapipe::CalculatorGraph {
     /// An ok status if the graph stopped successfully or an error status
     /// otherwise.
     absl::Status Stop();
+    absl::Status Pause();
+    absl::Status Next();
+    absl::Status Prev();
 
     absl::Status OnGestureRecognition(
         std::function<absl::Status(const int&)> packet_callback);

@@ -1,5 +1,6 @@
 #include "jesturepipe/gesture/recognizer.h"
-
+#include "jesturepipe/gesture/frame_count.h"
+#include <ctime>
 namespace jesturepipe {
 GestureRecognizer::GestureRecognizer() : comp(0) {}
 
@@ -25,7 +26,7 @@ void GestureRecognizer::Reset() { matchers.clear(); }
 
 absl::optional<int> GestureRecognizer::ProcessFrame(const GestureFrame &frame) {
     absl::optional<int> matched;
-
+    
     // Check if this is the first frame in any gesture
     {
         // Acquire read lock on library
@@ -44,12 +45,39 @@ absl::optional<int> GestureRecognizer::ProcessFrame(const GestureFrame &frame) {
     // Check if we've had any matches
     for (auto &matcher : matchers) {
         matched = matcher.Matches();
-
+        FrameCount &instance = FrameCount::get_instance();
         if (matched.has_value()) {
+            // std::cout << "id: " << *matched << std::endl;
+            if (*matched == 1) {
+                instance.slide_left_count++;
+                if (instance.slide_left_count == 3){
+                    instance.slide_left_count = 0;
+                    instance.cool_down_init_time = absl::Now();
+                    instance.should_cool_down = true;
+                    break;
+                }
+                *matched = -100;
+            }
+            else 
+                instance.slide_left_count = 0;
+
+            if (*matched == 5) {
+                instance.slide_right_count++;    
+                if (instance.slide_right_count == 3){
+                    instance.slide_right_count = 0;
+                    instance.cool_down_init_time = absl::Now();
+                    instance.should_cool_down = true;
+                    break;
+                }
+                *matched = -100;
+            }        
+            else
+                instance.slide_right_count = 0; 
+            instance.cool_down_init_time = absl::Now();
+            instance.should_cool_down = true;
             break;
         }
     }
-
     // If we found a match, remove all matchers
     if (matched.has_value()) matchers.clear();
 
@@ -74,9 +102,8 @@ bool GestureRecognizer::GestureMatcher::Advance(const GestureFrame &frame) {
 
 absl::optional<int> GestureRecognizer::GestureMatcher::Matches() {
     absl::optional<int> match;
-
     if (at == gesture.frames->size()) match = id;
-
+    
     return match;
 }
 }  // namespace jesturepipe

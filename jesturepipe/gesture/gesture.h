@@ -50,7 +50,11 @@ typedef struct GestureFrame {
 class Gesture {
    public:
     static Gesture Stop();
+    static Gesture Pause();
+    static Gesture Prev();
+    static Gesture Next();
     static Gesture SlideLeft();
+    static Gesture SlideRight();
 
     Gesture();
     Gesture(std::vector<GestureFrame>&& frames);

@@ -10,7 +10,7 @@ namespace jesturepipe {
 
 class GestureFrameConstructor {
    public:
-    GestureFrameConstructor(double thresh = 0);
+    GestureFrameConstructor(double thresh = 50);
 
     GestureFrameConstructor(GestureFrameConstructor&);
     GestureFrameConstructor& operator=(GestureFrameConstructor&);
@@ -30,6 +30,7 @@ class GestureFrameConstructor {
     absl::optional<double> init_direction;
     absl::optional<std::tuple<double, double>> init_loc;
     absl::Time init_time;
+    absl::optional<std::tuple<double, double>> init_wrist_landmark;
     bool frame_emitted;
 };
 

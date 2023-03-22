@@ -138,6 +138,54 @@ absl::Status JesturePipe::Stop() {
     return status;
 }
 
+absl::Status JesturePipe::Pause() {
+    using namespace mediapipe;
+
+    absl::Status status = CalculatorGraph::CloseAllInputStreams();
+
+    if (!status.ok()) return status;
+
+    status.Update(CalculatorGraph::CloseAllPacketSources());
+
+    if (!status.ok()) return status;
+
+    status.Update(CalculatorGraph::WaitUntilDone());
+
+    return status;
+}
+
+absl::Status JesturePipe::Prev() {
+    using namespace mediapipe;
+
+    absl::Status status = CalculatorGraph::CloseAllInputStreams();
+
+    if (!status.ok()) return status;
+
+    status.Update(CalculatorGraph::CloseAllPacketSources());
+
+    if (!status.ok()) return status;
+
+    status.Update(CalculatorGraph::WaitUntilDone());
+
+    return status;
+}
+
+absl::Status JesturePipe::Next() {
+    using namespace mediapipe;
+
+    absl::Status status = CalculatorGraph::CloseAllInputStreams();
+
+    if (!status.ok()) return status;
+
+    status.Update(CalculatorGraph::CloseAllPacketSources());
+
+    if (!status.ok()) return status;
+
+    status.Update(CalculatorGraph::WaitUntilDone());
+
+    return status;
+}
+
 absl::Status JesturePipe::OnGestureRecognition(
     std::function<absl::Status(const int&)> packet_callback) {
     using namespace mediapipe;

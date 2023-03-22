@@ -28,6 +28,7 @@ cc_library(
         ":gesture",
         ":library",
         "@com_google_absl//absl/types:optional",
+        ":frame_count",
     ],
 )
 
@@ -49,5 +50,14 @@ cc_library(
         "@com_google_absl//absl/time",
         "@com_google_absl//absl/types:optional",
         "@mediapipe//mediapipe/framework/formats:landmark_cc_proto",
+        ":frame_count",
+    ],
+)
+cc_library(
+    name = "frame_count",
+    srcs = ["frame_count.cc"],
+    hdrs = ["frame_count.h"],
+    deps = [
+        "@com_google_absl//absl/time",
     ],
 )
