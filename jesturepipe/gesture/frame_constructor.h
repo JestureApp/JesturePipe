@@ -28,7 +28,7 @@ class GestureFrameConstructor {
 
     absl::optional<HandShape> init_shape;
     absl::optional<double> init_direction;
-    absl::optional<std::tuple<double, double>> init_loc;
+    absl::optional<std::tuple<double, double>> init_com;
     absl::Time init_time;
     absl::optional<std::tuple<double, double>> init_wrist_landmark;
     bool frame_emitted;

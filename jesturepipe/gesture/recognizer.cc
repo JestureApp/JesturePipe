@@ -47,13 +47,13 @@ absl::optional<int> GestureRecognizer::ProcessFrame(const GestureFrame &frame) {
         matched = matcher.Matches();
         FrameCount &instance = FrameCount::get_instance();
         if (matched.has_value()) {
-            // std::cout << "id: " << *matched << std::endl;
             if (*matched == 1) {
                 instance.slide_left_count++;
-                if (instance.slide_left_count == 3){
+                if (instance.slide_left_count == 2){
                     instance.slide_left_count = 0;
                     instance.cool_down_init_time = absl::Now();
                     instance.should_cool_down = true;
+                    std::cout << "id: " << *matched << std::endl;
                     break;
                 }
                 *matched = -100;
@@ -63,24 +63,26 @@ absl::optional<int> GestureRecognizer::ProcessFrame(const GestureFrame &frame) {
 
             if (*matched == 5) {
                 instance.slide_right_count++;    
-                if (instance.slide_right_count == 3){
+                if (instance.slide_right_count == 2){
                     instance.slide_right_count = 0;
                     instance.cool_down_init_time = absl::Now();
                     instance.should_cool_down = true;
+                    std::cout << "id: " << *matched << std::endl;
                     break;
                 }
                 *matched = -100;
             }        
             else
                 instance.slide_right_count = 0; 
+            
             instance.cool_down_init_time = absl::Now();
             instance.should_cool_down = true;
+            std::cout << "id: " << *matched << std::endl;
             break;
         }
     }
     // If we found a match, remove all matchers
     if (matched.has_value()) matchers.clear();
-
     return matched;
 }
 

@@ -13,7 +13,7 @@ namespace {
 constexpr double CENTER_OF_MASS_THRESH_LOW = 0.055; // 0.055;
 constexpr double CENTER_OF_MASS_THRESH_HIGH = 0.10; 
 constexpr absl::Duration COOL_DOWN_THRESH = absl::Seconds(2);
-
+constexpr double ANGLE_THRESH = 25;
 constexpr double DISPLACEMENT_THRESHOLD_STATIONARY = 0.06;
 // constexpr double DYNAMIC_TIME_THRESHOLD = 
 const absl::Duration STATIONARY_TIME_THRESH = absl::Seconds(0.75); // 0.75
@@ -122,7 +122,7 @@ GestureFrameConstructor& GestureFrameConstructor::operator=(
     if (this != &other) {
         frame_comp = other.frame_comp;
         init_direction = other.init_direction;
-        init_loc = other.init_loc;
+        init_com = other.init_com;
         init_wrist_landmark = other.init_wrist_landmark;
         init_time = other.init_time;
         frame_emitted = other.frame_emitted;
@@ -141,7 +141,7 @@ GestureFrameConstructor& GestureFrameConstructor::operator=(
     if (this != &other) {
         init_shape = std::move(other.init_shape);
         init_direction = std::move(other.init_direction);
-        init_loc = std::move(other.init_loc);
+        init_com = std::move(other.init_com);
         init_wrist_landmark = std::move(other.init_wrist_landmark);
         init_time = std::move(other.init_time);
 
@@ -161,91 +161,196 @@ GestureFrameConstructor::GestureFrameConstructor(
 void GestureFrameConstructor::Reset() {
     init_shape.reset();
     init_direction.reset();
-    init_loc.reset();
+    init_com.reset();
     init_time = absl::UnixEpoch();  // Shouldn't matter what this is set to
     init_wrist_landmark.reset();
     frame_emitted = false;
 }
 
+bool CompareGestureFrame(GestureFrame& a, GestureFrame& b, double angle_thresh) {
+    if ((abs(a.hand_shape.index_direction - b.hand_shape.index_direction) < angle_thresh)
+    && (abs(a.hand_shape.middle_direction - b.hand_shape.middle_direction) < angle_thresh) &&
+        (abs(a.hand_shape.ring_direction - b.hand_shape.ring_direction) < angle_thresh) && (abs(a.hand_shape.pinky_direction - b.hand_shape.pinky_direction) < angle_thresh) &&
+        (abs(a.hand_shape.thumb_direction - b.hand_shape.thumb_direction) < angle_thresh)){
+
+            if ((!a.movement_direction.has_value() && !b.movement_direction.has_value())){
+                return true;
+            } 
+            else if (a.movement_direction.has_value() && b.movement_direction.has_value()){
+                if (a.movement_direction.value() > 270)
+                    a.movement_direction = 360 - a.movement_direction.value();
+    
+                if (b.movement_direction.value() > 270)
+                    b.movement_direction = 360 - b.movement_direction.value();
+                
+                if (abs(a.movement_direction.value() - b.movement_direction.value()) < angle_thresh)
+                    return true;
+            } 
+
+            else {
+                if (a.movement_direction.has_value())
+                    std::cout << "Current: " << a.movement_direction.value() << std::endl;
+                 if (b.movement_direction.has_value())
+                    std::cout << "New Input: " << b.movement_direction.value() << std::endl;
+            }
+    }       
+            
+    //     }
+    // else {
+    //     std::cout << "Hand shape is not the same" << std::endl;
+    // }
+        
+    return false;
+}
+
 absl::optional<GestureFrame> GestureFrameConstructor::OnLandmarks(
     const mediapipe::NormalizedLandmarkList& landmarks, absl::Time time) {
-    absl::optional<GestureFrame> maybe_frame;
-    
-    FrameCount &instance = FrameCount::get_instance();
-    // if (instance.should_cool_down) {
-    //     absl::Duration time_diff = time - instance.cool_down_init_time;
-    //     std::cout << time_diff << std::endl;
-    //     if (time - instance.cool_down_init_time >= COOL_DOWN_THRESH) {
-    //         instance.should_cool_down = false;
-    //     }
-    //     return maybe_frame;
-    // }
-    HandShape new_shape = hand_shape_from_landmarks(landmarks);
-    // gets the center of mass of coordinates
-    auto new_loc = landmarks_loc(landmarks);
-    
-    auto landmark = landmarks.landmark();
-    std::tuple<double, double> new_wrist_landmark;
-    std::get<0>(new_wrist_landmark) = landmark[WRIST].x();
-    std::get<1>(new_wrist_landmark) = landmark[WRIST].y();
+        HandShape input_shape = hand_shape_from_landmarks(landmarks);
+        auto input_com = landmarks_loc(landmarks);
+        absl::optional<GestureFrame> maybe_frame;
 
-    if (!init_shape.has_value()) {
-        init_shape = new_shape;
-        init_direction.reset();
-        init_loc = new_loc;
-        init_time = time;
-        frame_emitted = false;
-        init_wrist_landmark = new_wrist_landmark;
-        // std::cout << "HERE1" << std::endl
-        //returns empty frame
-        return maybe_frame;
-    }
-
-    HandShape curr_shape = init_shape.value();
-    auto curr_loc = init_loc.value();
-    auto curr_wrist_landmark = init_wrist_landmark.value();
-
-    // curr_wrist_landmark -> previous
-    // new_wrist_landmark -> current
-    double displacement = hand_displacement(new_wrist_landmark, curr_wrist_landmark);
-    double dx = std::get<0>(new_loc) - std::get<0>(curr_loc);
-    double dy = std::get<1>(new_loc) - std::get<1>(curr_loc);
-
-    double center = sqrt(dx * dx + dy * dy);
-
-    GestureFrame curr_frame{curr_shape, init_direction};
-
-    // stationary gestures
-    if (center <= CENTER_OF_MASS_THRESH_LOW) {
-        if (!frame_emitted && time - init_time >= STATIONARY_TIME_THRESH) {
-            // std::cout << "HERE2" << std::endl;
-            maybe_frame = curr_frame;
-            frame_emitted = true;
+        // initialize init_shape at the start of each frame
+        if (!init_shape.has_value()){
+            // std::cout << "START of Frame" << std::endl;
+            init_shape = input_shape;
+            init_direction.reset();
+            init_com = input_com;
+            init_time = time;
+            frame_emitted = false;
+            // return empty frame since frame is still being created
+            return maybe_frame;
         }
-        return maybe_frame;
+
+        HandShape curr_shape = init_shape.value();
+        auto curr_com = init_com.value();
+        // creating our 'frame' with shape and null direction
+        // input frame
+        
+        // calculating movement between the two input landmarks
+        double dx = std::get<0>(input_com) - std::get<0>(curr_com);
+        double dy = std::get<1>(input_com) - std::get<1>(curr_com);
+        double direction = get_angle(dx, dy);
+        double center = sqrt(dx * dx + dy * dy);
+
+        // double dx_input = std::get<0>(input_com) - 0;
+        // double dy_input = std::get<1>(input_com) - 0;
+        // double direction_input = get_angle(dx_input, dy_input);
+        // std::cout << "DIRECTION INPUT: " << direction_input << std::endl;
+        
+        // STATIONARY GESTURES 
+        if (center <= CENTER_OF_MASS_THRESH_LOW) {
+            if (!frame_emitted && time - init_time >= STATIONARY_TIME_THRESH) {
+                // init_direction.reset();
+                absl::optional<double> null_direction;
+                null_direction.reset();
+                maybe_frame = GestureFrame{input_shape, null_direction};
+                frame_emitted = true;
+            }
+            return maybe_frame;
+        }
+
+        // if (!init_direction.has_value()) {
+        //     std::cout << "init_direction = direction" << std::endl;
+        //     init_direction = direction;
+        // }
+
+        // static
+        GestureFrame new_frame{input_shape, direction};   
+        // dynamic
+        GestureFrame curr_frame{curr_shape, init_direction}; 
+        // DYNAMIC GESTURES
+        
+        if (!CompareGestureFrame(curr_frame, new_frame, 35)) {
+            // std::cout << "Here" << std::endl;
+            GestureFrame maybe_frame = GestureFrame{curr_shape, direction};
+
+            init_shape = input_shape;
+            // init_direction.reset(); 
+            init_direction = direction;
+            init_com = input_com;
+            init_time = time;
+            frame_emitted = false;
+            return maybe_frame;
+        } 
+        else {
+            if (init_direction.has_value())
+                init_direction = (init_direction.value() + direction) / 2;
+        }
+
+        // std::cout << "Same frame" << std::endl;
+        // return maybe_frame;
     }
-    // //return if its small hand movements
 
-    //dynamic gestures
-    double new_direction = get_angle(dx, dy);
-    GestureFrame new_frame{new_shape, new_direction};
+// absl::optional<GestureFrame> GestureFrameConstructor::OnLandmarks(
+//     const mediapipe::NormalizedLandmarkList& landmarks, absl::Time time) {
+//     absl::optional<GestureFrame> maybe_frame;
+    
+//     FrameCount &instance = FrameCount::get_instance();
+//     HandShape new_shape = hand_shape_from_landmarks(landmarks);
+//     // gets the center of mass of coordinates
+//     auto new_loc = landmarks_loc(landmarks);
+    
+//     auto landmark = landmarks.landmark();
+//     std::tuple<double, double> new_wrist_landmark;
+//     std::get<0>(new_wrist_landmark) = landmark[WRIST].x();
+//     std::get<1>(new_wrist_landmark) = landmark[WRIST].y();
 
-    if (!frame_comp(curr_frame, new_frame)) {
-        // std::cout << "HERE3" << std::endl;
-        maybe_frame = GestureFrame{curr_shape, new_direction};
+//     if (!init_shape.has_value()) {
+//         init_shape = new_shape;
+//         init_direction.reset();
+//         init_com = new_loc;
+//         init_time = time;
+//         frame_emitted = false;
+//         init_wrist_landmark = new_wrist_landmark;
+//         // std::cout << "HERE1" << std::endl
+//         //returns empty frame
+//         return maybe_frame;
+//     }
 
-        init_shape = new_shape;
-        init_direction.reset();
-        init_loc = new_loc;
-        init_time = time;
-        frame_emitted = false;
-    } else if (!frame_emitted) {
-        // std::cout << "HERE4" << std::endl;
-        maybe_frame = GestureFrame{curr_shape, new_direction};
-        frame_emitted = true;
-    }
+//     HandShape curr_shape = init_shape.value();
+//     auto curr_loc = init_com.value();
+//     auto curr_wrist_landmark = init_wrist_landmark.value();
 
-    return maybe_frame;
-}
+//     // curr_wrist_landmark -> previous
+//     // new_wrist_landmark -> current
+//     double displacement = hand_displacement(new_wrist_landmark, curr_wrist_landmark);
+//     double dx = std::get<0>(new_loc) - std::get<0>(curr_loc);
+//     double dy = std::get<1>(new_loc) - std::get<1>(curr_loc);
+
+//     double center = sqrt(dx * dx + dy * dy);
+
+//     GestureFrame curr_frame{curr_shape, init_direction};
+
+//     // stationary gestures
+//     if (center <= CENTER_OF_MASS_THRESH_LOW) {
+//         if (!frame_emitted && time - init_time >= STATIONARY_TIME_THRESH) {
+//             // std::cout << "HERE2" << std::endl;
+//             maybe_frame = curr_frame;
+//             frame_emitted = true;
+//         }
+//         return maybe_frame;
+//     }
+
+//     //dynamic gestures
+//     double new_direction = get_angle(dx, dy);
+//     GestureFrame new_frame{new_shape, new_direction};
+    
+//     if (!frame_comp(curr_frame, new_frame)) {
+//         std::cout << "HERE3" << std::endl;
+//         maybe_frame = GestureFrame{curr_shape, new_direction};
+//         init_shape = new_shape;
+//         init_direction.reset();
+//         init_com = new_loc;
+//         init_time = time;
+//         frame_emitted = false;
+//         return maybe_frame;
+//     } 
+//     else if (!frame_emitted) {
+//         std::cout << "HERE4" << std::endl;
+//         maybe_frame = GestureFrame{curr_shape, new_direction};
+//         frame_emitted = true;
+//     }
+//     return maybe_frame;
+// }
 
 }  // namespace jesturepipe
