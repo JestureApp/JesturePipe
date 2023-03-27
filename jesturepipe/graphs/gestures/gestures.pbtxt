@@ -57,7 +57,7 @@ node {
     options: {
         [mediapipe.ConstantSidePacketCalculatorOptions.ext]: {
             packet { int_value: 1 }
-            packet { double_value: 0.08}
+            packet { double_value: 0.10}
             # 0.056
         }
     }

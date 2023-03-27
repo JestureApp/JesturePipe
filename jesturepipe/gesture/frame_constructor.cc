@@ -17,7 +17,7 @@ constexpr double ANGLE_THRESH = 25;
 constexpr double DISPLACEMENT_THRESHOLD_STATIONARY = 0.06;
 // constexpr double DYNAMIC_TIME_THRESHOLD = 
 const absl::Duration STATIONARY_TIME_THRESH = absl::Seconds(0.75); // 0.75
-const absl::Duration DYNAMIC_TIME_THRESH = absl::Seconds(0.50); // 0.75
+const absl::Duration DYNAMIC_TIME_THRESH = absl::Seconds(1); // 0.75
 
 constexpr int WRIST = 0;
 constexpr int THUMB_CMC = 1;
@@ -190,7 +190,6 @@ bool CompareGestureFrame(GestureFrame& a, GestureFrame& b, double angle_thresh) 
                     return true;
                 // else
                     // std::cout << "FALSE: " << a.movement_direction.value() << std::endl;
-
             } 
 
             else {
@@ -225,20 +224,13 @@ absl::optional<GestureFrame> GestureFrameConstructor::OnLandmarks(
 
         HandShape curr_shape = init_shape.value();
         auto curr_com = init_com.value();
-        // creating our 'frame' with shape and null direction
-        // input frame
         
         // calculating movement between the two input landmarks
         double dx = std::get<0>(input_com) - std::get<0>(curr_com);
         double dy = std::get<1>(input_com) - std::get<1>(curr_com);
         double direction = get_angle(dx, dy);
         double center = sqrt(dx * dx + dy * dy);
-
-        // double dx_input = std::get<0>(input_com) - 0;
-        // double dy_input = std::get<1>(input_com) - 0;
-        // double direction_input = get_angle(dx_input, dy_input);
-        // std::cout << "DIRECTION INPUT: " << direction_input << std::endl;
-        
+ 
         // STATIONARY GESTURES 
         if (center <= CENTER_OF_MASS_THRESH_LOW) {
             // absl::Duration diff_time_static = (time - init_time);
@@ -248,139 +240,38 @@ absl::optional<GestureFrame> GestureFrameConstructor::OnLandmarks(
                 absl::optional<double> null_direction;
                 null_direction.reset();
                 maybe_frame = GestureFrame{input_shape, null_direction};
-                init_time = time;
+                // init_time = time;
                 frame_emitted = true;
             }
             return maybe_frame;
         }
-
-        // if (!init_direction.has_value()) {
-        //     std::cout << "init_direction = direction" << std::endl;
-        //     init_direction = direction;
-        // }
 
         // static
         GestureFrame new_frame{input_shape, direction};   
         // dynamic
         GestureFrame curr_frame{curr_shape, init_direction}; 
         // DYNAMIC GESTURES
-        
         absl::Duration diff_time = (time - init_time);
         bool compGesture = CompareGestureFrame(curr_frame, new_frame, 40);
-        if (!frame_emitted && compGesture) {
+        if (!frame_emitted && compGesture && diff_time > DYNAMIC_TIME_THRESH) {
+            // std::cout << "Time here" << std::endl;
             frame_emitted = true;
+            // std::cout << diff_time << std::endl;
             GestureFrame maybe_frame = GestureFrame{curr_shape, init_direction};
-            // if (init_direction.has_value())
-            //     std::cout << init_direction.value() << std::endl;
-            
             return maybe_frame;
-            // std::cout << "diff time " << diff_time << std::endl;
-            // if(!dynamic_time && diff_time >= DYNAMIC_TIME_THRESH){
-            //     dynamic_time = true;
-            // }
-            // if (init_direction.has_value())
-            //     init_direction = (init_direction.value() + direction) / 2;
         } 
         else if (frame_emitted && compGesture) {
             return empty_frame;
         }
         else if (!compGesture) {
-            std::cout << "Here" << std::endl;
+            // std::cout << "Here" << std::endl;
             init_shape = input_shape;
-            // init_direction.reset();
             init_direction = direction;
             init_com = input_com;
             frame_emitted = false;
             init_time = time;
-
-            // GestureFrame maybe_frame = GestureFrame{curr_shape, direction};
-            // init_shape = input_shape;
-            // // init_direction.reset(); 
-            // init_direction = direction;
-            // init_com = input_com;
-            // frame_emitted = false;
-            // init_time = time;
-            // if (dynamic_time) {
-            //     dynamic_time = false;
-            //     return maybe_frame;
-            // }
-            // return maybe_frame;
         }
-
-        // std::cout << "Same frame" << std::endl;
-        // return maybe_frame;
     }
 
-// absl::optional<GestureFrame> GestureFrameConstructor::OnLandmarks(
-//     const mediapipe::NormalizedLandmarkList& landmarks, absl::Time time) {
-//     absl::optional<GestureFrame> maybe_frame;
-    
-//     FrameCount &instance = FrameCount::get_instance();
-//     HandShape new_shape = hand_shape_from_landmarks(landmarks);
-//     // gets the center of mass of coordinates
-//     auto new_loc = landmarks_loc(landmarks);
-    
-//     auto landmark = landmarks.landmark();
-//     std::tuple<double, double> new_wrist_landmark;
-//     std::get<0>(new_wrist_landmark) = landmark[WRIST].x();
-//     std::get<1>(new_wrist_landmark) = landmark[WRIST].y();
-
-//     if (!init_shape.has_value()) {
-//         init_shape = new_shape;
-//         init_direction.reset();
-//         init_com = new_loc;
-//         init_time = time;
-//         frame_emitted = false;
-//         init_wrist_landmark = new_wrist_landmark;
-//         // std::cout << "HERE1" << std::endl
-//         //returns empty frame
-//         return maybe_frame;
-//     }
-
-//     HandShape curr_shape = init_shape.value();
-//     auto curr_loc = init_com.value();
-//     auto curr_wrist_landmark = init_wrist_landmark.value();
-
-//     // curr_wrist_landmark -> previous
-//     // new_wrist_landmark -> current
-//     double displacement = hand_displacement(new_wrist_landmark, curr_wrist_landmark);
-//     double dx = std::get<0>(new_loc) - std::get<0>(curr_loc);
-//     double dy = std::get<1>(new_loc) - std::get<1>(curr_loc);
-
-//     double center = sqrt(dx * dx + dy * dy);
-
-//     GestureFrame curr_frame{curr_shape, init_direction};
-
-//     // stationary gestures
-//     if (center <= CENTER_OF_MASS_THRESH_LOW) {
-//         if (!frame_emitted && time - init_time >= STATIONARY_TIME_THRESH) {
-//             // std::cout << "HERE2" << std::endl;
-//             maybe_frame = curr_frame;
-//             frame_emitted = true;
-//         }
-//         return maybe_frame;
-//     }
-
-//     //dynamic gestures
-//     double new_direction = get_angle(dx, dy);
-//     GestureFrame new_frame{new_shape, new_direction};
-    
-//     if (!frame_comp(curr_frame, new_frame)) {
-//         std::cout << "HERE3" << std::endl;
-//         maybe_frame = GestureFrame{curr_shape, new_direction};
-//         init_shape = new_shape;
-//         init_direction.reset();
-//         init_com = new_loc;
-//         init_time = time;
-//         frame_emitted = false;
-//         return maybe_frame;
-//     } 
-//     else if (!frame_emitted) {
-//         std::cout << "HERE4" << std::endl;
-//         maybe_frame = GestureFrame{curr_shape, new_direction};
-//         frame_emitted = true;
-//     }
-//     return maybe_frame;
-// }
 
 }  // namespace jesturepipe
