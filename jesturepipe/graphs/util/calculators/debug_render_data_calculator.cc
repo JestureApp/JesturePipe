@@ -38,13 +38,20 @@ class DebugRenderDataCalculator : public api2::Node {
     absl::Status Process(mediapipe::CalculatorContext *cc) override {
         using namespace mediapipe;
 
-        double fps = kFps(cc).IsEmpty() ? 0.0 : kFps(cc)->packet_frequency_hz();
-        std::string hand_presence = *kHandPresence(cc) ? "true" : "false";
+        std::vector<std::string> lines;
 
-        std::vector<std::string> lines{
-            absl::StrFormat("FPS: %2.2f", fps),
-            absl::StrFormat("Hand Present: %s", hand_presence),
-        };
+        if (!kFps(cc).IsEmpty()) {
+            double fps =
+                kFps(cc).IsEmpty() ? 0.0 : kFps(cc)->packet_frequency_hz();
+
+            lines.push_back(absl::StrFormat("FPS: %2.2f", fps));
+        }
+
+        if (kHandPresence(cc).IsConnected() && !kHandPresence(cc).IsEmpty()) {
+            std::string hand_presence = *kHandPresence(cc) ? "true" : "false";
+
+            lines.push_back(absl::StrFormat("Hand Present: %s", hand_presence));
+        }
 
         if (kIsRecording(cc).IsConnected() && !kIsRecording(cc).IsEmpty()) {
             std::string is_recording = *kIsRecording(cc) ? "true" : "false";

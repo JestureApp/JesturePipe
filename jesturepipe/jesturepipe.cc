@@ -1,5 +1,6 @@
 #include "jesturepipe/jesturepipe.h"
 
+#include "absl/status/statusor.h"
 #include "mediapipe/framework/api2/builder.h"
 #include "mediapipe/framework/port/parse_text_proto.h"
 
@@ -139,7 +140,7 @@ absl::Status JesturePipe::Stop() {
 }
 
 absl::Status JesturePipe::OnGestureRecognition(
-    std::function<absl::Status(const int&)> packet_callback) {
+    std::function<absl::Status(int)> packet_callback) {
     using namespace mediapipe;
 
     return CalculatorGraph::ObserveOutputStream(
@@ -149,7 +150,7 @@ absl::Status JesturePipe::OnGestureRecognition(
 }
 
 absl::Status JesturePipe::OnRecordedGesture(
-    std::function<absl::Status(const Gesture&)> packet_callback) {
+    std::function<absl::Status(Gesture)> packet_callback) {
     using namespace mediapipe;
 
     return CalculatorGraph::ObserveOutputStream(
@@ -159,8 +160,7 @@ absl::Status JesturePipe::OnRecordedGesture(
 }
 
 absl::Status JesturePipe::OnLandmarks(
-    std::function<
-        absl::Status(const std::vector<mediapipe::NormalizedLandmarkList>&)>
+    std::function<absl::Status(std::vector<mediapipe::NormalizedLandmarkList>)>
         packet_callback) {
     using namespace mediapipe;
 
@@ -172,16 +172,16 @@ absl::Status JesturePipe::OnLandmarks(
         });
 }
 
-// absl::Status JesturePipe::OnFrame(
-//     std::function<absl::Status(const mediapipe::ImageFrame&)>
-//     packet_callback) { using namespace mediapipe;
+absl::Status JesturePipe::OnAnnotatedFrame(
+    std::function<absl::Status(const mediapipe::Packet&)> packet_callback) {
+    using namespace mediapipe;
 
-//     return CalculatorGraph::ObserveOutputStream(
-//         "annotated_frame", [packet_callback](const mediapipe::Packet& packet)
-//         {
-//             return packet_callback(packet.Get<mediapipe::ImageFrame>());
-//         });
-// }
+    return CalculatorGraph::ObserveOutputStream(
+        "annotated_frame", [packet_callback](const mediapipe::Packet& packet) {
+
+            return packet_callback(packet);
+        });
+}
 
 mediapipe::StatusOrPoller JesturePipe::FramePoller() {
     return mediapipe::CalculatorGraph::AddOutputStreamPoller("annotated_frame");
