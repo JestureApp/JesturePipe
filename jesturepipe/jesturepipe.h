@@ -61,15 +61,18 @@ class JesturePipe : private mediapipe::CalculatorGraph {
     absl::Status Stop();
 
     absl::Status OnGestureRecognition(
-        std::function<absl::Status(const int&)> packet_callback);
+        std::function<absl::Status(int)> packet_callback);
 
     absl::Status OnRecordedGesture(
-        std::function<absl::Status(const Gesture&)> packet_callback);
+        std::function<absl::Status(Gesture)> packet_callback);
 
     absl::Status OnLandmarks(
         std::function<
-            absl::Status(const std::vector<mediapipe::NormalizedLandmarkList>&)>
+            absl::Status(std::vector<mediapipe::NormalizedLandmarkList>)>
             packet_callback);
+
+    absl::Status OnAnnotatedFrame(
+        std::function<absl::Status(const mediapipe::Packet&)> packet_callback);
 
     mediapipe::StatusOrPoller FramePoller();
 
@@ -82,6 +85,9 @@ class JesturePipe : private mediapipe::CalculatorGraph {
     void AddAction(int gesture_id, actions::Action action);
 
    private:
+    // template <typename T>
+    // absl::Status ConsumeOrCopyCallback()
+
     bool recording;
     int recording_ts;
     std::shared_ptr<GestureLibrary> library;
