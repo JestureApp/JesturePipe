@@ -49,7 +49,7 @@ absl::optional<int> GestureRecognizer::ProcessFrame(const GestureFrame &frame) {
         if (matched.has_value()) {
             if (*matched == 1) {
                 instance.slide_left_count++;
-                if (instance.slide_left_count == 2){
+                if (instance.slide_left_count == 1){
                     instance.slide_left_count = 0;
                     instance.cool_down_init_time = absl::Now();
                     instance.should_cool_down = true;
@@ -63,7 +63,7 @@ absl::optional<int> GestureRecognizer::ProcessFrame(const GestureFrame &frame) {
 
             if (*matched == 5) {
                 instance.slide_right_count++;    
-                if (instance.slide_right_count == 2){
+                if (instance.slide_right_count == 1){
                     instance.slide_right_count = 0;
                     instance.cool_down_init_time = absl::Now();
                     instance.should_cool_down = true;

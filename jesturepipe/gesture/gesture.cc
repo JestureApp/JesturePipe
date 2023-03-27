@@ -93,14 +93,23 @@ GestureFrame::Comparator::Comparator(double thresh) noexcept
 bool GestureFrame::Comparator::operator()(const GestureFrame& a,
                                           const GestureFrame& b) {
     double angle_thresh = thresh * 360;
+    GestureFrame tempA = a;
+    GestureFrame tempB = b;
+    if (tempA.movement_direction.has_value())
+        if (tempA.movement_direction.value() > 270)
+            tempA.movement_direction = 360 - tempA.movement_direction.value();
+                
+    if (tempB.movement_direction.has_value()) 
+        if (tempB.movement_direction.value() > 270)
+            tempB.movement_direction = 360 - tempB.movement_direction.value();
 
     return hand_shape_comp(a.hand_shape, b.hand_shape) &&
            ((!a.movement_direction.has_value() &&
              !b.movement_direction.has_value()) ||
             (a.movement_direction.has_value() &&
              b.movement_direction.has_value() &&
-             in_threshold(a.movement_direction.value(),
-                          b.movement_direction.value(), angle_thresh)));
+             in_threshold(tempA.movement_direction.value(),
+                          tempB.movement_direction.value(), angle_thresh)));
 }
 
 Gesture::Gesture() : frames(std::make_shared<std::vector<GestureFrame>>()) {}

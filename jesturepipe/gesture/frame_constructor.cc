@@ -17,6 +17,7 @@ constexpr double ANGLE_THRESH = 25;
 constexpr double DISPLACEMENT_THRESHOLD_STATIONARY = 0.06;
 // constexpr double DYNAMIC_TIME_THRESHOLD = 
 const absl::Duration STATIONARY_TIME_THRESH = absl::Seconds(0.75); // 0.75
+const absl::Duration DYNAMIC_TIME_THRESH = absl::Seconds(0.50); // 0.75
 
 constexpr int WRIST = 0;
 constexpr int THUMB_CMC = 1;
@@ -166,7 +167,7 @@ void GestureFrameConstructor::Reset() {
     init_wrist_landmark.reset();
     frame_emitted = false;
 }
-
+// a -> init_frame, b -> input_frame
 bool CompareGestureFrame(GestureFrame& a, GestureFrame& b, double angle_thresh) {
     if ((abs(a.hand_shape.index_direction - b.hand_shape.index_direction) < angle_thresh)
     && (abs(a.hand_shape.middle_direction - b.hand_shape.middle_direction) < angle_thresh) &&
@@ -179,26 +180,26 @@ bool CompareGestureFrame(GestureFrame& a, GestureFrame& b, double angle_thresh) 
             else if (a.movement_direction.has_value() && b.movement_direction.has_value()){
                 if (a.movement_direction.value() > 270)
                     a.movement_direction = 360 - a.movement_direction.value();
-    
+                // std::cout << "TRUE: " << a.movement_direction.value() << std::endl;
+
                 if (b.movement_direction.value() > 270)
                     b.movement_direction = 360 - b.movement_direction.value();
+                // std::cout << "ANGLE: " << abs(a.movement_direction.value() - b.movement_direction.value()) << std::endl;
                 
                 if (abs(a.movement_direction.value() - b.movement_direction.value()) < angle_thresh)
                     return true;
+                // else
+                    // std::cout << "FALSE: " << a.movement_direction.value() << std::endl;
+
             } 
 
             else {
-                if (a.movement_direction.has_value())
-                    std::cout << "Current: " << a.movement_direction.value() << std::endl;
-                 if (b.movement_direction.has_value())
-                    std::cout << "New Input: " << b.movement_direction.value() << std::endl;
+                // if (a.movement_direction.has_value())
+                //     std::cout << "Current: " << a.movement_direction.value() << std::endl;
+                //  if (b.movement_direction.has_value())
+                //     std::cout << "New Input: " << b.movement_direction.value() << std::endl;
             }
     }       
-            
-    //     }
-    // else {
-    //     std::cout << "Hand shape is not the same" << std::endl;
-    // }
         
     return false;
 }
@@ -208,6 +209,7 @@ absl::optional<GestureFrame> GestureFrameConstructor::OnLandmarks(
         HandShape input_shape = hand_shape_from_landmarks(landmarks);
         auto input_com = landmarks_loc(landmarks);
         absl::optional<GestureFrame> maybe_frame;
+        absl::optional<GestureFrame> empty_frame;
 
         // initialize init_shape at the start of each frame
         if (!init_shape.has_value()){
@@ -239,11 +241,14 @@ absl::optional<GestureFrame> GestureFrameConstructor::OnLandmarks(
         
         // STATIONARY GESTURES 
         if (center <= CENTER_OF_MASS_THRESH_LOW) {
+            // absl::Duration diff_time_static = (time - init_time);
+            // std::cout << "static diff_time: " << diff_time_static << std::endl;
             if (!frame_emitted && time - init_time >= STATIONARY_TIME_THRESH) {
                 // init_direction.reset();
                 absl::optional<double> null_direction;
                 null_direction.reset();
                 maybe_frame = GestureFrame{input_shape, null_direction};
+                init_time = time;
                 frame_emitted = true;
             }
             return maybe_frame;
@@ -260,21 +265,46 @@ absl::optional<GestureFrame> GestureFrameConstructor::OnLandmarks(
         GestureFrame curr_frame{curr_shape, init_direction}; 
         // DYNAMIC GESTURES
         
-        if (!CompareGestureFrame(curr_frame, new_frame, 35)) {
-            // std::cout << "Here" << std::endl;
-            GestureFrame maybe_frame = GestureFrame{curr_shape, direction};
-
+        absl::Duration diff_time = (time - init_time);
+        bool compGesture = CompareGestureFrame(curr_frame, new_frame, 40);
+        if (!frame_emitted && compGesture) {
+            frame_emitted = true;
+            GestureFrame maybe_frame = GestureFrame{curr_shape, init_direction};
+            // if (init_direction.has_value())
+            //     std::cout << init_direction.value() << std::endl;
+            
+            return maybe_frame;
+            // std::cout << "diff time " << diff_time << std::endl;
+            // if(!dynamic_time && diff_time >= DYNAMIC_TIME_THRESH){
+            //     dynamic_time = true;
+            // }
+            // if (init_direction.has_value())
+            //     init_direction = (init_direction.value() + direction) / 2;
+        } 
+        else if (frame_emitted && compGesture) {
+            return empty_frame;
+        }
+        else if (!compGesture) {
+            std::cout << "Here" << std::endl;
             init_shape = input_shape;
-            // init_direction.reset(); 
+            // init_direction.reset();
             init_direction = direction;
             init_com = input_com;
-            init_time = time;
             frame_emitted = false;
-            return maybe_frame;
-        } 
-        else {
-            if (init_direction.has_value())
-                init_direction = (init_direction.value() + direction) / 2;
+            init_time = time;
+
+            // GestureFrame maybe_frame = GestureFrame{curr_shape, direction};
+            // init_shape = input_shape;
+            // // init_direction.reset(); 
+            // init_direction = direction;
+            // init_com = input_com;
+            // frame_emitted = false;
+            // init_time = time;
+            // if (dynamic_time) {
+            //     dynamic_time = false;
+            //     return maybe_frame;
+            // }
+            // return maybe_frame;
         }
 
         // std::cout << "Same frame" << std::endl;
