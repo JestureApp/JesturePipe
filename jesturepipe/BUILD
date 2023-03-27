@@ -14,6 +14,7 @@ cc_library(
         "//jesturepipe/graphs/gestures:is_recording_latch",
         "//jesturepipe/graphs/util:frame_annotator",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
         "@mediapipe//mediapipe/framework:calculator_framework",
         "@mediapipe//mediapipe/framework/api2:builder",
         "@mediapipe//mediapipe/framework/formats:image_frame",
