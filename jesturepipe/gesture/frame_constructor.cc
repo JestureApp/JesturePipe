@@ -62,6 +62,8 @@ HandShape hand_shape_from_landmarks(
     const mediapipe::NormalizedLandmarkList& landmarks) {
     auto landmark = landmarks.landmark();
 
+    // std::cout << landmark[WRIST].z() << std::endl;
+
     double index_direction =
         get_angle(landmark[INDEX_FINGER_PIP], landmark[INDEX_FINGER_TIP]);
 
@@ -209,6 +211,7 @@ absl::optional<GestureFrame> GestureFrameConstructor::OnLandmarks(
         auto input_com = landmarks_loc(landmarks);
         absl::optional<GestureFrame> maybe_frame;
         absl::optional<GestureFrame> empty_frame;
+        std::cout << "FRAME CONST" << std::endl;
 
         // initialize init_shape at the start of each frame
         if (!init_shape.has_value()){
