@@ -1,5 +1,4 @@
 #include "jesturepipe/gesture/frame_constructor.h"
-#include "jesturepipe/gesture/frame_count.h"
 
 #include <assert.h>
 #include <math.h>
@@ -9,15 +8,13 @@
 namespace jesturepipe {
 
 namespace {
-// constexpr double STATIONARY_DIST_THRESH = 0.095;
 constexpr double CENTER_OF_MASS_THRESH_LOW = 0.055; // 0.055;
 constexpr double CENTER_OF_MASS_THRESH_HIGH = 0.10; 
 constexpr absl::Duration COOL_DOWN_THRESH = absl::Seconds(2);
 constexpr double ANGLE_THRESH = 25;
 constexpr double DISPLACEMENT_THRESHOLD_STATIONARY = 0.06;
-// constexpr double DYNAMIC_TIME_THRESHOLD = 
 const absl::Duration STATIONARY_TIME_THRESH = absl::Seconds(0.75); // 0.75
-const absl::Duration DYNAMIC_TIME_THRESH = absl::Seconds(1); // 0.75
+const absl::Duration DYNAMIC_TIME_THRESH = absl::Seconds(0.75); // 0.75
 
 constexpr int WRIST = 0;
 constexpr int THUMB_CMC = 1;
@@ -61,8 +58,6 @@ double get_angle(const mediapipe::NormalizedLandmark& from,
 HandShape hand_shape_from_landmarks(
     const mediapipe::NormalizedLandmarkList& landmarks) {
     auto landmark = landmarks.landmark();
-
-    // std::cout << landmark[WRIST].z() << std::endl;
 
     double index_direction =
         get_angle(landmark[INDEX_FINGER_PIP], landmark[INDEX_FINGER_TIP]);
@@ -182,24 +177,13 @@ bool CompareGestureFrame(GestureFrame& a, GestureFrame& b, double angle_thresh) 
             else if (a.movement_direction.has_value() && b.movement_direction.has_value()){
                 if (a.movement_direction.value() > 270)
                     a.movement_direction = 360 - a.movement_direction.value();
-                // std::cout << "TRUE: " << a.movement_direction.value() << std::endl;
 
                 if (b.movement_direction.value() > 270)
                     b.movement_direction = 360 - b.movement_direction.value();
-                // std::cout << "ANGLE: " << abs(a.movement_direction.value() - b.movement_direction.value()) << std::endl;
                 
                 if (abs(a.movement_direction.value() - b.movement_direction.value()) < angle_thresh)
                     return true;
-                // else
-                    // std::cout << "FALSE: " << a.movement_direction.value() << std::endl;
             } 
-
-            else {
-                // if (a.movement_direction.has_value())
-                //     std::cout << "Current: " << a.movement_direction.value() << std::endl;
-                //  if (b.movement_direction.has_value())
-                //     std::cout << "New Input: " << b.movement_direction.value() << std::endl;
-            }
     }       
         
     return false;
@@ -211,11 +195,9 @@ absl::optional<GestureFrame> GestureFrameConstructor::OnLandmarks(
         auto input_com = landmarks_loc(landmarks);
         absl::optional<GestureFrame> maybe_frame;
         absl::optional<GestureFrame> empty_frame;
-        std::cout << "FRAME CONST" << std::endl;
 
         // initialize init_shape at the start of each frame
         if (!init_shape.has_value()){
-            // std::cout << "START of Frame" << std::endl;
             init_shape = input_shape;
             init_direction.reset();
             init_com = input_com;
@@ -236,30 +218,25 @@ absl::optional<GestureFrame> GestureFrameConstructor::OnLandmarks(
  
         // STATIONARY GESTURES 
         if (center <= CENTER_OF_MASS_THRESH_LOW) {
-            // absl::Duration diff_time_static = (time - init_time);
-            // std::cout << "static diff_time: " << diff_time_static << std::endl;
             if (!frame_emitted && time - init_time >= STATIONARY_TIME_THRESH) {
-                // init_direction.reset();
                 absl::optional<double> null_direction;
                 null_direction.reset();
                 maybe_frame = GestureFrame{input_shape, null_direction};
-                // init_time = time;
                 frame_emitted = true;
             }
             return maybe_frame;
         }
 
-        // static
+
+
         GestureFrame new_frame{input_shape, direction};   
-        // dynamic
         GestureFrame curr_frame{curr_shape, init_direction}; 
+        
         // DYNAMIC GESTURES
         absl::Duration diff_time = (time - init_time);
         bool compGesture = CompareGestureFrame(curr_frame, new_frame, 40);
         if (!frame_emitted && compGesture && diff_time > DYNAMIC_TIME_THRESH) {
-            // std::cout << "Time here" << std::endl;
             frame_emitted = true;
-            // std::cout << diff_time << std::endl;
             GestureFrame maybe_frame = GestureFrame{curr_shape, init_direction};
             return maybe_frame;
         } 
@@ -267,13 +244,13 @@ absl::optional<GestureFrame> GestureFrameConstructor::OnLandmarks(
             return empty_frame;
         }
         else if (!compGesture) {
-            // std::cout << "Here" << std::endl;
             init_shape = input_shape;
             init_direction = direction;
             init_com = input_com;
             frame_emitted = false;
             init_time = time;
         }
+        return empty_frame;
     }
 
 

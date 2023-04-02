@@ -1,5 +1,4 @@
 #include "jesturepipe/gesture/recognizer.h"
-#include "jesturepipe/gesture/frame_count.h"
 #include <ctime>
 namespace jesturepipe {
 GestureRecognizer::GestureRecognizer() : comp(0) {}
@@ -45,39 +44,9 @@ absl::optional<int> GestureRecognizer::ProcessFrame(const GestureFrame &frame) {
     // Check if we've had any matches
     for (auto &matcher : matchers) {
         matched = matcher.Matches();
-        FrameCount &instance = FrameCount::get_instance();
         if (matched.has_value()) {
-            if (*matched == 1) {
-                instance.slide_left_count++;
-                if (instance.slide_left_count == 1){
-                    instance.slide_left_count = 0;
-                    instance.cool_down_init_time = absl::Now();
-                    instance.should_cool_down = true;
-                    std::cout << "id: " << *matched << std::endl;
-                    break;
-                }
-                *matched = -100;
-            }
-            else 
-                instance.slide_left_count = 0;
-
-            if (*matched == 5) {
-                instance.slide_right_count++;    
-                if (instance.slide_right_count == 1){
-                    instance.slide_right_count = 0;
-                    instance.cool_down_init_time = absl::Now();
-                    instance.should_cool_down = true;
-                    std::cout << "id: " << *matched << std::endl;
-                    break;
-                }
-                *matched = -100;
-            }        
-            else
-                instance.slide_right_count = 0; 
-            
-            instance.cool_down_init_time = absl::Now();
-            instance.should_cool_down = true;
-            std::cout << "id: " << *matched << std::endl;
+            // Debug:
+            // std::cout << "id: " << *matched << std::endl;
             break;
         }
     }

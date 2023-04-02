@@ -100,6 +100,7 @@ std::shared_ptr<GestureLibrary> init_library() {
     library->Set(4, Gesture::Next());
     library->Set(1, Gesture::SlideLeft());
     library->Set(5, Gesture::SlideRight());
+    // library->Set(6, Gesture::CustomGesture());
     return library;
 }
 

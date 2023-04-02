@@ -59,18 +59,42 @@ Gesture Gesture::SlideLeft() {
 
 Gesture Gesture::SlideRight() {
     return Gesture(
-        std::vector<GestureFrame>{GestureFrame{.hand_shape =
-                                                   HandShape{
-                                                       .index_direction = 90,
-                                                       .middle_direction = 90,
-                                                       .ring_direction = 90,
-                                                       .pinky_direction = 90,
-                                                       .thumb_direction = 90,
-                                                   },
-                                               .movement_direction = 0}});
+        std::vector<GestureFrame>{
+            GestureFrame{.hand_shape =
+                                    HandShape{
+                                        .index_direction = 90,
+                                        .middle_direction = 90,
+                                        .ring_direction = 90,
+                                        .pinky_direction = 90,
+                                        .thumb_direction = 90,
+                                    },
+                                .movement_direction = 0}});
 }
 
+// Gesture Gesture::CustomGesture() {
+//         return Gesture(
+//         std::vector<GestureFrame>{GestureFrame{.hand_shape =
+//                     HandShape{
+//                     .index_direction = 90,
+//                     .middle_direction = 90,
+//                     .ring_direction = 270,
+//                     .pinky_direction = 270,
+//                     .thumb_direction = 90,
+//             },
+//     .movement_direction = 274.748}, 
+    
+//     GestureFrame{.hand_shape =
+//                     HandShape{
+//                     .index_direction = 90,
+//                     .middle_direction =  90,
+//                     .ring_direction = 90,
+//                     .pinky_direction = 90,
+//                     .thumb_direction = 90,
+//             },
+//     .movement_direction =  81.4746}
+//     });
 
+// }
 constexpr bool in_threshold(double a, double b, double thresh) {
     return abs(a - b) <= thresh;
 }

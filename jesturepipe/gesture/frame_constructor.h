@@ -32,7 +32,6 @@ class GestureFrameConstructor {
     absl::Time init_time;
     absl::optional<std::tuple<double, double>> init_wrist_landmark;
     bool frame_emitted;
-    bool dynamic_time;
 };
 
 }  // namespace jesturepipe

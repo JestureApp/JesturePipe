@@ -53,7 +53,7 @@ class Gesture {
     static Gesture Next();
     static Gesture SlideLeft();
     static Gesture SlideRight();
-
+    // static Gesture CustomGesture();
     Gesture();
     Gesture(std::vector<GestureFrame>&& frames);
 
