@@ -1,5 +1,5 @@
 #include "jesturepipe/gesture/recognizer.h"
-
+#include <ctime>
 namespace jesturepipe {
 GestureRecognizer::GestureRecognizer() : comp(0) {}
 
@@ -25,7 +25,7 @@ void GestureRecognizer::Reset() { matchers.clear(); }
 
 absl::optional<int> GestureRecognizer::ProcessFrame(const GestureFrame &frame) {
     absl::optional<int> matched;
-
+    
     // Check if this is the first frame in any gesture
     {
         // Acquire read lock on library
@@ -44,15 +44,14 @@ absl::optional<int> GestureRecognizer::ProcessFrame(const GestureFrame &frame) {
     // Check if we've had any matches
     for (auto &matcher : matchers) {
         matched = matcher.Matches();
-
         if (matched.has_value()) {
+            // Debug:
+            // std::cout << "id: " << *matched << std::endl;
             break;
         }
     }
-
     // If we found a match, remove all matchers
     if (matched.has_value()) matchers.clear();
-
     return matched;
 }
 
@@ -74,9 +73,8 @@ bool GestureRecognizer::GestureMatcher::Advance(const GestureFrame &frame) {
 
 absl::optional<int> GestureRecognizer::GestureMatcher::Matches() {
     absl::optional<int> match;
-
     if (at == gesture.frames->size()) match = id;
-
+    
     return match;
 }
 }  // namespace jesturepipe

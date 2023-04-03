@@ -20,7 +20,6 @@ class GestureRecorderCalculator : public api2::Node {
     absl::Status Process(mediapipe::CalculatorContext *cc) override {
         if (!kRecReset(cc).IsEmpty()) {
             Gesture gesture = recorder.Finish();
-
             if (gesture.frames->size() > 0) {
                 kGesture(cc).Send(gesture, cc->InputTimestamp());
             }

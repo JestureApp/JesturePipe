@@ -2,7 +2,6 @@
 #define JESTUREPIPE_GESTURE_RECOGNIZER_H
 
 #include <list>
-
 #include "absl/types/optional.h"
 #include "jesturepipe/gesture/gesture.h"
 #include "jesturepipe/gesture/library.h"

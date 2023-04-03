@@ -14,6 +14,36 @@ Gesture Gesture::Stop() {
     }}});
 }
 
+Gesture Gesture::Pause() {
+    return Gesture(std::vector<GestureFrame>{GestureFrame{HandShape{
+        .index_direction = 90,
+        .middle_direction = 90,
+        .ring_direction = 270,
+        .pinky_direction = 270,
+        .thumb_direction = 90,
+    }}});
+}
+
+Gesture Gesture::Prev() {
+    return Gesture(std::vector<GestureFrame>{GestureFrame{HandShape{
+        .index_direction = 0,
+        .middle_direction = 180,
+        .ring_direction = 180,
+        .pinky_direction = 180,
+        .thumb_direction = 90,
+    }}});
+}
+
+Gesture Gesture::Next() {
+    return Gesture(std::vector<GestureFrame>{GestureFrame{HandShape{
+        .index_direction = 180,
+        .middle_direction = 0,
+        .ring_direction = 0,
+        .pinky_direction = 0,
+        .thumb_direction = 90,
+    }}});
+}
+
 Gesture Gesture::SlideLeft() {
     return Gesture(
         std::vector<GestureFrame>{GestureFrame{.hand_shape =
@@ -27,6 +57,44 @@ Gesture Gesture::SlideLeft() {
                                                .movement_direction = 180}});
 }
 
+Gesture Gesture::SlideRight() {
+    return Gesture(
+        std::vector<GestureFrame>{
+            GestureFrame{.hand_shape =
+                                    HandShape{
+                                        .index_direction = 90,
+                                        .middle_direction = 90,
+                                        .ring_direction = 90,
+                                        .pinky_direction = 90,
+                                        .thumb_direction = 90,
+                                    },
+                                .movement_direction = 0}});
+}
+
+// Gesture Gesture::CustomGesture() {
+//         return Gesture(
+//         std::vector<GestureFrame>{GestureFrame{.hand_shape =
+//                     HandShape{
+//                     .index_direction = 90,
+//                     .middle_direction = 90,
+//                     .ring_direction = 270,
+//                     .pinky_direction = 270,
+//                     .thumb_direction = 90,
+//             },
+//     .movement_direction = 274.748}, 
+    
+//     GestureFrame{.hand_shape =
+//                     HandShape{
+//                     .index_direction = 90,
+//                     .middle_direction =  90,
+//                     .ring_direction = 90,
+//                     .pinky_direction = 90,
+//                     .thumb_direction = 90,
+//             },
+//     .movement_direction =  81.4746}
+//     });
+
+// }
 constexpr bool in_threshold(double a, double b, double thresh) {
     return abs(a - b) <= thresh;
 }
@@ -49,14 +117,23 @@ GestureFrame::Comparator::Comparator(double thresh) noexcept
 bool GestureFrame::Comparator::operator()(const GestureFrame& a,
                                           const GestureFrame& b) {
     double angle_thresh = thresh * 360;
+    GestureFrame tempA = a;
+    GestureFrame tempB = b;
+    if (tempA.movement_direction.has_value())
+        if (tempA.movement_direction.value() > 270)
+            tempA.movement_direction = 360 - tempA.movement_direction.value();
+                
+    if (tempB.movement_direction.has_value()) 
+        if (tempB.movement_direction.value() > 270)
+            tempB.movement_direction = 360 - tempB.movement_direction.value();
 
     return hand_shape_comp(a.hand_shape, b.hand_shape) &&
            ((!a.movement_direction.has_value() &&
              !b.movement_direction.has_value()) ||
             (a.movement_direction.has_value() &&
              b.movement_direction.has_value() &&
-             in_threshold(a.movement_direction.value(),
-                          b.movement_direction.value(), angle_thresh)));
+             in_threshold(tempA.movement_direction.value(),
+                          tempB.movement_direction.value(), angle_thresh)));
 }
 
 Gesture::Gesture() : frames(std::make_shared<std::vector<GestureFrame>>()) {}

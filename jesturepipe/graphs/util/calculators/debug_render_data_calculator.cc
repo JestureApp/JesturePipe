@@ -89,8 +89,8 @@ class DebugRenderDataCalculator : public api2::Node {
         for (std::string line : lines) {
             auto *annotation = render_data.add_render_annotations();
 
-            annotation->mutable_color()->set_r(0);
-            annotation->mutable_color()->set_g(255);
+            annotation->mutable_color()->set_r(255);
+            annotation->mutable_color()->set_g(0);
             annotation->mutable_color()->set_b(0);
 
             auto *text = annotation->mutable_text();

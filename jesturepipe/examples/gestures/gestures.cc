@@ -95,10 +95,15 @@ std::shared_ptr<GestureLibrary> init_library() {
         std::make_shared<GestureLibrary>();
 
     library->Set(0, Gesture::Stop());
+    library->Set(2, Gesture::Pause());
+    library->Set(3, Gesture::Prev());
+    library->Set(4, Gesture::Next());
     library->Set(1, Gesture::SlideLeft());
-
+    library->Set(5, Gesture::SlideRight());
+    // library->Set(6, Gesture::CustomGesture());
     return library;
 }
+
 
 absl::Status on_recording(mediapipe::Packet packet) {
     Gesture gesture = packet.Get<Gesture>();

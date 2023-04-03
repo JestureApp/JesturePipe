@@ -48,7 +48,9 @@ class GestureFrameConstructorCalculator : public api2::Node {
             return absl::OkStatus();
         }
 
-        if (!kRecReset(cc).IsEmpty()) frame_constructor.Reset();
+        if (!kRecReset(cc).IsEmpty()) {
+            frame_constructor.Reset();
+        }
 
         mediapipe::NormalizedLandmarkList landmarks = *kLandmarks(cc);
         absl::Time time = *kTimes(cc);

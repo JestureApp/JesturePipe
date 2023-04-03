@@ -36,9 +36,7 @@ typedef struct GestureFrame {
        public:
         Comparator() = delete;
         Comparator(double thresh) noexcept;
-
         bool operator()(const GestureFrame& a, const GestureFrame& b);
-
         double thresh;
         HandShape::Comparator hand_shape_comp;
     };
@@ -50,8 +48,12 @@ typedef struct GestureFrame {
 class Gesture {
    public:
     static Gesture Stop();
+    static Gesture Pause();
+    static Gesture Prev();
+    static Gesture Next();
     static Gesture SlideLeft();
-
+    static Gesture SlideRight();
+    // static Gesture CustomGesture();
     Gesture();
     Gesture(std::vector<GestureFrame>&& frames);
 
