@@ -24,6 +24,7 @@ mediapipe::CalculatorGraphConfig graph_config() {
         output_stream: "gesture_id"
         output_stream: "recorded_gesture"
         output_stream: "multi_hand_landmarks"
+        output_stream: "hand_presence"
 
         node {
           calculator: "IsRecordingLatch"
@@ -94,7 +95,7 @@ absl::Status JesturePipe::Initialize(const JesturePipeConfig& config) {
     return status;
 }
 
-bool JesturePipe::isRunning() { return running; }
+bool JesturePipe::isRunning() const { return running; }
 
 absl::Status JesturePipe::Start(bool use_full) {
     using namespace mediapipe;
@@ -181,7 +182,19 @@ absl::Status JesturePipe::OnLandmarks(
         });
 }
 
-bool JesturePipe::IsRecording() { return recording; }
+absl::Status JesturePipe::OnHandPresence(
+    std::function<absl::Status(bool present, unsigned long timestamp)>
+        packet_callback) {
+    using namespace mediapipe;
+
+    return CalculatorGraph::ObserveOutputStream(
+        "hand_presence", [packet_callback](const mediapipe::Packet& packet) {
+            return packet_callback(packet.Get<bool>(),
+                                   packet.Timestamp().Value());
+        });
+}
+
+bool JesturePipe::IsRecording() const { return recording; }
 
 absl::Status JesturePipe::SetRecording(bool recording) {
     using namespace mediapipe;
@@ -193,17 +206,19 @@ absl::Status JesturePipe::SetRecording(bool recording) {
         MakePacket<bool>(recording).At(Timestamp(recording_ts++)));
 }
 
-void JesturePipe::AddGesture(int id, Gesture&& gesture) {
+void JesturePipe::SetGesture(int id, Gesture gesture) {
     library->Set(id, std::move(gesture));
 }
 
-void JesturePipe::AddAction(int gesture_id, actions::Action action) {
+void JesturePipe::RemoveGesture(int gesture_id) { library->Remove(gesture_id); }
+
+void JesturePipe::SetAction(int gesture_id, actions::Action action) {
     std::unique_lock<std::shared_mutex> lk(actions->mutex);
 
     if (!actions->mapping.contains(gesture_id))
         actions->mapping[gesture_id] = {};
 
-    actions->mapping[gesture_id].push_back(action);
+    actions->mapping[gesture_id] = action;
 }
 
 }  // namespace jesturepipe

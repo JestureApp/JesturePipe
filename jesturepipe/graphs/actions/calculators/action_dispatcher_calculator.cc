@@ -33,11 +33,11 @@ class ActionDispatcherCalculator : public api2::Node {
         int gesture_id = *kGestureId(cc);
 
         if (mapper->mapping.contains(gesture_id)) {
-            for (auto action : mapper->mapping[gesture_id]) {
-                actions.Perform(action, actions::action::target::Focused{})
-                    .get()
-                    .IgnoreError();
-            }
+            auto action = mapper->mapping[gesture_id];
+
+            actions.Perform(action, actions::action::target::Focused{})
+                .get()
+                .IgnoreError();
         }
 
         return absl::OkStatus();

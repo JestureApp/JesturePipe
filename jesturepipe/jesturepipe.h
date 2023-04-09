@@ -59,11 +59,8 @@ class JesturePipe : private mediapipe::CalculatorGraph {
     /// An ok status if the graph stopped successfully or an error status
     /// otherwise.
     absl::Status Stop();
-    absl::Status Pause();
-    absl::Status Next();
-    absl::Status Prev();
 
-    bool isRunning();
+    bool isRunning() const;
 
     absl::Status AddFrame(std::unique_ptr<mediapipe::ImageFrame> frame,
                           unsigned long timestamp);
@@ -82,13 +79,19 @@ class JesturePipe : private mediapipe::CalculatorGraph {
             unsigned long timestamp)>
             packet_callback);
 
-    bool IsRecording();
+    absl::Status OnHandPresence(
+        std::function<absl::Status(bool present, unsigned long timestamp)>
+            packet_callback);
+
+    bool IsRecording() const;
 
     absl::Status SetRecording(bool);
 
-    void AddGesture(int gesture_id, Gesture&& gesture);
+    void SetGesture(int gesture_id, Gesture gesture);
 
-    void AddAction(int gesture_id, actions::Action action);
+    void RemoveGesture(int gesture_id);
+
+    void SetAction(int gesture_id, actions::Action action);
 
    private:
     // template <typename T>
