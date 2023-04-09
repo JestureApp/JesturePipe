@@ -17,20 +17,13 @@ mediapipe::CalculatorGraphConfig graph_config() {
         input_side_packet: "action_mapper"
 
         input_side_packet: "use_full"
-        input_side_packet: "camera_index"
 
+        input_stream: "frame"
         input_stream: "is_recording"
 
         output_stream: "gesture_id"
         output_stream: "recorded_gesture"
         output_stream: "multi_hand_landmarks"
-        output_stream: "annotated_frame"
-
-        node {
-          calculator: "CameraCalculator"
-          input_side_packet: "CAMERA_INDEX:camera_index"
-          output_stream: "FRAME:frame"
-        }
 
         node {
           calculator: "IsRecordingLatch"
@@ -62,22 +55,13 @@ mediapipe::CalculatorGraphConfig graph_config() {
           input_side_packet: "ACTION_MAPPER:action_mapper"
           input_stream: "GESTURE_ID:actionable_gesture_id"
         }
-
-        node {
-          calculator: "FrameAnnotator"
-          input_stream: "FRAME:frame"
-          input_stream: "NORM_LANDMARKS:multi_hand_landmarks"
-          input_stream: "HAND_PRESENCE:hand_presence"
-          input_stream: "GESTURE_FRAME:gesture_frame"
-          input_stream: "GESTURE_ID:gesture_id"
-          input_stream: "IS_REC:frame_is_rec"
-          output_stream: "FRAME:annotated_frame"
-        }
     )pb");
 }
 
 JesturePipe::JesturePipe()
     : mediapipe::CalculatorGraph(),
+      running(false),
+      recording(false),
       library(std::make_shared<GestureLibrary>()),
       actions(std::make_shared<ActionMapper>()) {}
 
@@ -110,15 +94,20 @@ absl::Status JesturePipe::Initialize(const JesturePipeConfig& config) {
     return status;
 }
 
-absl::Status JesturePipe::Start(int camera_index, bool use_full) {
+bool JesturePipe::isRunning() { return running; }
+
+absl::Status JesturePipe::Start(bool use_full) {
     using namespace mediapipe;
+
+    if (running) return absl::OkStatus();
 
     std::map<std::string, Packet> side_packets;
 
-    side_packets["camera_index"] = MakePacket<int>(camera_index);
     side_packets["use_full"] = MakePacket<bool>(use_full);
 
     absl::Status status = CalculatorGraph::StartRun(side_packets);
+
+    running = true;
 
     return status;
 }
@@ -126,6 +115,8 @@ absl::Status JesturePipe::Start(int camera_index, bool use_full) {
 absl::Status JesturePipe::Stop() {
     using namespace mediapipe;
 
+    if (!running) return absl::OkStatus();
+
     absl::Status status = CalculatorGraph::CloseAllInputStreams();
 
     if (!status.ok()) return status;
@@ -135,80 +126,49 @@ absl::Status JesturePipe::Stop() {
     if (!status.ok()) return status;
 
     status.Update(CalculatorGraph::WaitUntilDone());
+
+    running = false;
 
     return status;
 }
 
-absl::Status JesturePipe::Pause() {
+absl::Status JesturePipe::AddFrame(std::unique_ptr<mediapipe::ImageFrame> frame,
+                                   unsigned long timestamp) {
     using namespace mediapipe;
 
-    absl::Status status = CalculatorGraph::CloseAllInputStreams();
-
-    if (!status.ok()) return status;
-
-    status.Update(CalculatorGraph::CloseAllPacketSources());
-
-    if (!status.ok()) return status;
-
-    status.Update(CalculatorGraph::WaitUntilDone());
-
-    return status;
-}
-
-absl::Status JesturePipe::Prev() {
-    using namespace mediapipe;
-
-    absl::Status status = CalculatorGraph::CloseAllInputStreams();
-
-    if (!status.ok()) return status;
-
-    status.Update(CalculatorGraph::CloseAllPacketSources());
-
-    if (!status.ok()) return status;
-
-    status.Update(CalculatorGraph::WaitUntilDone());
-
-    return status;
-}
-
-absl::Status JesturePipe::Next() {
-    using namespace mediapipe;
-
-    absl::Status status = CalculatorGraph::CloseAllInputStreams();
-
-    if (!status.ok()) return status;
-
-    status.Update(CalculatorGraph::CloseAllPacketSources());
-
-    if (!status.ok()) return status;
-
-    status.Update(CalculatorGraph::WaitUntilDone());
-
-    return status;
+    return CalculatorGraph::AddPacketToInputStream(
+        "frame",
+        mediapipe::Adopt(frame.release()).At(mediapipe::Timestamp(timestamp)));
 }
 
 absl::Status JesturePipe::OnGestureRecognition(
-    std::function<absl::Status(int)> packet_callback) {
+    std::function<absl::Status(int gesture_id, unsigned long timestamp)>
+        packet_callback) {
     using namespace mediapipe;
 
     return CalculatorGraph::ObserveOutputStream(
         "gesture_id", [packet_callback](const mediapipe::Packet& packet) {
-            return packet_callback(packet.Get<int>());
+            return packet_callback(packet.Get<int>(),
+                                   packet.Timestamp().Value());
         });
 }
 
 absl::Status JesturePipe::OnRecordedGesture(
-    std::function<absl::Status(Gesture)> packet_callback) {
+    std::function<absl::Status(Gesture gesture, unsigned long timestamp)>
+        packet_callback) {
     using namespace mediapipe;
 
     return CalculatorGraph::ObserveOutputStream(
         "recorded_gesture", [packet_callback](const mediapipe::Packet& packet) {
-            return packet_callback(packet.Get<Gesture>());
+            return packet_callback(packet.Get<Gesture>(),
+                                   packet.Timestamp().Value());
         });
 }
 
 absl::Status JesturePipe::OnLandmarks(
-    std::function<absl::Status(std::vector<mediapipe::NormalizedLandmarkList>)>
+    std::function<absl::Status(
+        std::vector<mediapipe::NormalizedLandmarkList> multi_hand_landmarks,
+        unsigned long timestamp)>
         packet_callback) {
     using namespace mediapipe;
 
@@ -216,23 +176,9 @@ absl::Status JesturePipe::OnLandmarks(
         "multi_hand_landmarks",
         [packet_callback](const mediapipe::Packet& packet) {
             return packet_callback(
-                packet.Get<std::vector<mediapipe::NormalizedLandmarkList>>());
+                packet.Get<std::vector<mediapipe::NormalizedLandmarkList>>(),
+                packet.Timestamp().Value());
         });
-}
-
-absl::Status JesturePipe::OnAnnotatedFrame(
-    std::function<absl::Status(const mediapipe::Packet&)> packet_callback) {
-    using namespace mediapipe;
-
-    return CalculatorGraph::ObserveOutputStream(
-        "annotated_frame", [packet_callback](const mediapipe::Packet& packet) {
-
-            return packet_callback(packet);
-        });
-}
-
-mediapipe::StatusOrPoller JesturePipe::FramePoller() {
-    return mediapipe::CalculatorGraph::AddOutputStreamPoller("annotated_frame");
 }
 
 bool JesturePipe::IsRecording() { return recording; }
