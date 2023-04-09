@@ -18,6 +18,7 @@ class GestureLibrary {
 
     void Set(int id, Gesture&& gesture);
     void Remove(int id);
+    void Clear();
 
     absl::optional<Gesture> Get(int id);
 

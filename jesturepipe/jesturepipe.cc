@@ -212,6 +212,8 @@ void JesturePipe::SetGesture(int id, Gesture gesture) {
 
 void JesturePipe::RemoveGesture(int gesture_id) { library->Remove(gesture_id); }
 
+void JesturePipe::ClearGestures() { library->Clear(); }
+
 void JesturePipe::SetAction(int gesture_id, actions::Action action) {
     std::unique_lock<std::shared_mutex> lk(actions->mutex);
 
