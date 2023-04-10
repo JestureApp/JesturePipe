@@ -1,6 +1,7 @@
 #ifndef JESTUREPIPE_GESTURE_GESTURE_H
 #define JESTUREPIPE_GESTURE_GESTURE_H
 
+#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -43,6 +44,9 @@ typedef struct GestureFrame {
 
     HandShape hand_shape;
     absl::optional<double> movement_direction;
+
+    friend std::ostream& operator<<(std::ostream& out,
+                                    GestureFrame const& frame);
 } GestureFrame;
 
 class Gesture {
@@ -64,6 +68,8 @@ class Gesture {
     Gesture& operator=(Gesture&& other) noexcept;
 
     std::shared_ptr<std::vector<GestureFrame>> frames;
+
+    friend std::ostream& operator<<(std::ostream& out, Gesture const& gesture);
 };
 
 }  // namespace jesturepipe

@@ -22,6 +22,12 @@ void GestureLibrary::Remove(int id) {
     gestures.erase(id);
 }
 
+void GestureLibrary::Clear() {
+    auto lk = WLock();
+
+    gestures.clear();
+}
+
 absl::optional<Gesture> GestureLibrary::Get(int id) {
     auto lk = RLock();
     absl::optional<Gesture> gesture;

@@ -1,6 +1,7 @@
 #include "jesturepipe/jesturepipe.h"
 
 #include "absl/status/statusor.h"
+#include "glog/logging.h"
 #include "mediapipe/framework/api2/builder.h"
 #include "mediapipe/framework/port/parse_text_proto.h"
 
@@ -24,6 +25,7 @@ mediapipe::CalculatorGraphConfig graph_config() {
         output_stream: "gesture_id"
         output_stream: "recorded_gesture"
         output_stream: "multi_hand_landmarks"
+        output_stream: "hand_presence"
 
         node {
           calculator: "IsRecordingLatch"
@@ -88,13 +90,15 @@ absl::Status JesturePipe::Initialize(const JesturePipeConfig& config) {
     side_packets["action_mapper"] =
         MakePacket<std::shared_ptr<ActionMapper>>(actions);
 
+    LOG(INFO) << "Initializing JesturePipe";
+
     absl::Status status =
         CalculatorGraph::Initialize(graph_config(), side_packets);
 
     return status;
 }
 
-bool JesturePipe::isRunning() { return running; }
+bool JesturePipe::isRunning() const { return running; }
 
 absl::Status JesturePipe::Start(bool use_full) {
     using namespace mediapipe;
@@ -104,6 +108,8 @@ absl::Status JesturePipe::Start(bool use_full) {
     std::map<std::string, Packet> side_packets;
 
     side_packets["use_full"] = MakePacket<bool>(use_full);
+
+    LOG(INFO) << "Starting JesturePipe with (use_full=" << use_full << ")";
 
     absl::Status status = CalculatorGraph::StartRun(side_packets);
 
@@ -116,6 +122,8 @@ absl::Status JesturePipe::Stop() {
     using namespace mediapipe;
 
     if (!running) return absl::OkStatus();
+
+    LOG(INFO) << "Stopping JesturePipe";
 
     absl::Status status = CalculatorGraph::CloseAllInputStreams();
 
@@ -181,7 +189,19 @@ absl::Status JesturePipe::OnLandmarks(
         });
 }
 
-bool JesturePipe::IsRecording() { return recording; }
+absl::Status JesturePipe::OnHandPresence(
+    std::function<absl::Status(bool present, unsigned long timestamp)>
+        packet_callback) {
+    using namespace mediapipe;
+
+    return CalculatorGraph::ObserveOutputStream(
+        "hand_presence", [packet_callback](const mediapipe::Packet& packet) {
+            return packet_callback(packet.Get<bool>(),
+                                   packet.Timestamp().Value());
+        });
+}
+
+bool JesturePipe::IsRecording() const { return recording; }
 
 absl::Status JesturePipe::SetRecording(bool recording) {
     using namespace mediapipe;
@@ -193,17 +213,22 @@ absl::Status JesturePipe::SetRecording(bool recording) {
         MakePacket<bool>(recording).At(Timestamp(recording_ts++)));
 }
 
-void JesturePipe::AddGesture(int id, Gesture&& gesture) {
+void JesturePipe::SetGesture(int id, Gesture gesture) {
+    LOG(INFO) << "Added gesture with id " << id << " and frames " << gesture;
     library->Set(id, std::move(gesture));
 }
 
-void JesturePipe::AddAction(int gesture_id, actions::Action action) {
+void JesturePipe::RemoveGesture(int gesture_id) { library->Remove(gesture_id); }
+
+void JesturePipe::ClearGestures() { library->Clear(); }
+
+void JesturePipe::SetAction(int gesture_id, actions::Action action) {
     std::unique_lock<std::shared_mutex> lk(actions->mutex);
 
     if (!actions->mapping.contains(gesture_id))
         actions->mapping[gesture_id] = {};
 
-    actions->mapping[gesture_id].push_back(action);
+    actions->mapping[gesture_id] = action;
 }
 
 }  // namespace jesturepipe
