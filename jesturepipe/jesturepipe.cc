@@ -1,6 +1,7 @@
 #include "jesturepipe/jesturepipe.h"
 
 #include "absl/status/statusor.h"
+#include "glog/logging.h"
 #include "mediapipe/framework/api2/builder.h"
 #include "mediapipe/framework/port/parse_text_proto.h"
 
@@ -89,6 +90,8 @@ absl::Status JesturePipe::Initialize(const JesturePipeConfig& config) {
     side_packets["action_mapper"] =
         MakePacket<std::shared_ptr<ActionMapper>>(actions);
 
+    LOG(INFO) << "Initializing JesturePipe";
+
     absl::Status status =
         CalculatorGraph::Initialize(graph_config(), side_packets);
 
@@ -106,6 +109,8 @@ absl::Status JesturePipe::Start(bool use_full) {
 
     side_packets["use_full"] = MakePacket<bool>(use_full);
 
+    LOG(INFO) << "Starting JesturePipe with (use_full=" << use_full << ")";
+
     absl::Status status = CalculatorGraph::StartRun(side_packets);
 
     running = true;
@@ -117,6 +122,8 @@ absl::Status JesturePipe::Stop() {
     using namespace mediapipe;
 
     if (!running) return absl::OkStatus();
+
+    LOG(INFO) << "Stopping JesturePipe";
 
     absl::Status status = CalculatorGraph::CloseAllInputStreams();
 
@@ -207,6 +214,7 @@ absl::Status JesturePipe::SetRecording(bool recording) {
 }
 
 void JesturePipe::SetGesture(int id, Gesture gesture) {
+    LOG(INFO) << "Added gesture with id " << id << " and frames " << gesture;
     library->Set(id, std::move(gesture));
 }
 

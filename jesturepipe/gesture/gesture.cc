@@ -2,6 +2,8 @@
 
 #include <math.h>
 
+#include <iomanip>
+
 namespace jesturepipe {
 
 Gesture Gesture::Stop() {
@@ -59,16 +61,15 @@ Gesture Gesture::SlideLeft() {
 
 Gesture Gesture::SlideRight() {
     return Gesture(
-        std::vector<GestureFrame>{
-            GestureFrame{.hand_shape =
-                                    HandShape{
-                                        .index_direction = 90,
-                                        .middle_direction = 90,
-                                        .ring_direction = 90,
-                                        .pinky_direction = 90,
-                                        .thumb_direction = 90,
-                                    },
-                                .movement_direction = 0}});
+        std::vector<GestureFrame>{GestureFrame{.hand_shape =
+                                                   HandShape{
+                                                       .index_direction = 90,
+                                                       .middle_direction = 90,
+                                                       .ring_direction = 90,
+                                                       .pinky_direction = 90,
+                                                       .thumb_direction = 90,
+                                                   },
+                                               .movement_direction = 0}});
 }
 
 // Gesture Gesture::CustomGesture() {
@@ -81,8 +82,8 @@ Gesture Gesture::SlideRight() {
 //                     .pinky_direction = 270,
 //                     .thumb_direction = 90,
 //             },
-//     .movement_direction = 274.748}, 
-    
+//     .movement_direction = 274.748},
+
 //     GestureFrame{.hand_shape =
 //                     HandShape{
 //                     .index_direction = 90,
@@ -122,8 +123,8 @@ bool GestureFrame::Comparator::operator()(const GestureFrame& a,
     if (tempA.movement_direction.has_value())
         if (tempA.movement_direction.value() > 270)
             tempA.movement_direction = 360 - tempA.movement_direction.value();
-                
-    if (tempB.movement_direction.has_value()) 
+
+    if (tempB.movement_direction.has_value())
         if (tempB.movement_direction.value() > 270)
             tempB.movement_direction = 360 - tempB.movement_direction.value();
 
@@ -134,6 +135,31 @@ bool GestureFrame::Comparator::operator()(const GestureFrame& a,
              b.movement_direction.has_value() &&
              in_threshold(tempA.movement_direction.value(),
                           tempB.movement_direction.value(), angle_thresh)));
+}
+
+std::ostream& operator<<(std::ostream& out, GestureFrame const& frame) {
+    auto default_precision = out.precision();
+
+    out << std::setprecision(3);
+
+    out << "{";
+
+    if (frame.movement_direction.has_value()) {
+        out << "movement_direction = " << frame.movement_direction.value()
+            << ", ";
+    }
+
+    out << "index_direction = " << frame.hand_shape.index_direction << ", ";
+    out << "middle_direction = " << frame.hand_shape.middle_direction << ", ";
+    out << "ring_direction = " << frame.hand_shape.ring_direction << ", ";
+    out << "pinky_direction = " << frame.hand_shape.pinky_direction << ", ";
+    out << "thumb_direction = " << frame.hand_shape.thumb_direction;
+
+    out << "}";
+
+    out << std::setprecision(default_precision);
+
+    return out;
 }
 
 Gesture::Gesture() : frames(std::make_shared<std::vector<GestureFrame>>()) {}
@@ -159,6 +185,18 @@ Gesture& Gesture::operator=(Gesture&& other) noexcept {
     }
 
     return *this;
+}
+
+std::ostream& operator<<(std::ostream& out, Gesture const& gesture) {
+    out << "[";
+
+    for (auto frame : *gesture.frames) {
+        out << frame;
+    }
+
+    out << "]";
+
+    return out;
 }
 
 }  // namespace jesturepipe
