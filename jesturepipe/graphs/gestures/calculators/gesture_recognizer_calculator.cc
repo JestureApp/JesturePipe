@@ -37,7 +37,7 @@ class GestureRecognizerCalculator : public api2::Node {
 
     absl::Status Process(mediapipe::CalculatorContext *cc) override {
         if (kFrames(cc).IsEmpty()) {
-            recognizer.Reset();
+            // recognizer.Reset();
             return absl::OkStatus();
         }
 
