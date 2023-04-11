@@ -65,7 +65,7 @@ absl::optional<int> GestureRecognizer::ProcessFrame(const GestureFrame &frame) {
     }
     // If we found a match, remove all matchers
     if (matched.has_value()) {
-        std::cout << "CLEAR MATCHER" << std::endl
+        // std::cout << "CLEAR MATCHER" << std::endl
         matchers.clear();
     }
     return matched;
