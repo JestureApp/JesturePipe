@@ -11,7 +11,6 @@ namespace {
 constexpr double CENTER_OF_MASS_THRESH_LOW = 0.055; // 0.055;
 constexpr double CENTER_OF_MASS_THRESH_HIGH = 0.10; 
 constexpr absl::Duration COOL_DOWN_THRESH = absl::Seconds(2);
-constexpr double ANGLE_THRESH = 25;
 constexpr double DISPLACEMENT_THRESHOLD_STATIONARY = 0.06;
 const absl::Duration STATIONARY_TIME_THRESH = absl::Seconds(0.75); // 0.75
 const absl::Duration DYNAMIC_TIME_THRESH = absl::Seconds(0.75); // 0.75
@@ -183,6 +182,8 @@ bool CompareGestureFrame(GestureFrame& a, GestureFrame& b, double angle_thresh) 
                 
                 if (abs(a.movement_direction.value() - b.movement_direction.value()) < angle_thresh)
                     return true;
+                // else
+                //     std::cout << abs(a.movement_direction.value() - b.movement_direction.value()) << std::endl;
             } 
     }       
         
@@ -227,8 +228,6 @@ absl::optional<GestureFrame> GestureFrameConstructor::OnLandmarks(
             return maybe_frame;
         }
 
-
-
         GestureFrame new_frame{input_shape, direction};   
         GestureFrame curr_frame{curr_shape, init_direction}; 
         
@@ -238,10 +237,33 @@ absl::optional<GestureFrame> GestureFrameConstructor::OnLandmarks(
         if (!frame_emitted && compGesture && diff_time > DYNAMIC_TIME_THRESH) {
             frame_emitted = true;
             GestureFrame maybe_frame = GestureFrame{curr_shape, init_direction};
-            return maybe_frame;
+        //     std::cout << "Dynamic frame generated" << std::endl;
+
+        // std::cout << "Recorded gesture with frames:" << std::endl;
+        // std::cout << "GestureFrame{" << std::endl;
+        // std::cout << "\tHandShape{" << std::endl;
+        // std::cout << "\t\tindex_direction: " << maybe_frame.hand_shape.index_direction
+        //         << std::endl;
+        // std::cout << "\t\tmiddle_direction: "
+        //         << maybe_frame.hand_shape.middle_direction << std::endl;
+        // std::cout << "\t\tring_direction: " << maybe_frame.hand_shape.ring_direction
+        //         << std::endl;
+        // std::cout << "\t\tpinky_direction: " << maybe_frame.hand_shape.pinky_direction
+        //         << std::endl;
+        // std::cout << "\t\tthumb_direction: " << maybe_frame.hand_shape.thumb_direction
+        //         << std::endl;
+        // std::cout << "\t}" << std::endl;
+
+        // if (maybe_frame.movement_direction.has_value())
+        //     std::cout << "movement_direction: "
+        //             << maybe_frame.movement_direction.value() << std::endl;
+                    
+        // std::cout << "}" << std::endl;
+        
+        return maybe_frame;
         } 
         else if (frame_emitted && compGesture) {
-            return empty_frame;
+            // return empty_frame;
         }
         else if (!compGesture) {
             init_shape = input_shape;
@@ -249,9 +271,9 @@ absl::optional<GestureFrame> GestureFrameConstructor::OnLandmarks(
             init_com = input_com;
             frame_emitted = false;
             init_time = time;
+            // return empty_frame;
         }
         return empty_frame;
     }
-
 
 }  // namespace jesturepipe
