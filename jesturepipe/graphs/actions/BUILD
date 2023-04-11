@@ -10,6 +10,7 @@ mediapipe_simple_subgraph(
     graph = "actions.pbtxt",
     register_as = "Actions",
     deps = [
+        "//jesturepipe/calculators:get_vector_item_calculator",
         "//jesturepipe/graphs/actions/calculators:action_dispatcher_calculator",
     ],
 )

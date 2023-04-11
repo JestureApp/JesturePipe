@@ -151,6 +151,6 @@ def jesturepipe_repositories():
         name = "actions",
         remote = "git@capstone-cs.eng.utah.edu:jesture/actions.git",
         # tag = "v0.1.1",
-        commit = "4f30d2215b2861533e62162f06b4ab0854a13b4a",
+        commit = "81a1fc11b6ac9e7bfa039e05499739b58164f9c1",
         shallow_since = "1681110432 +0000",
     )

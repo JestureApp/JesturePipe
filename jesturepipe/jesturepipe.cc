@@ -56,6 +56,7 @@ mediapipe::CalculatorGraphConfig graph_config() {
           calculator: "Actions"
           input_side_packet: "ACTION_MAPPER:action_mapper"
           input_stream: "GESTURE_ID:actionable_gesture_id"
+          input_stream: "NORM_LANDMARKS:multi_hand_landmarks"
         }
     )pb");
 }
@@ -220,15 +221,23 @@ void JesturePipe::SetGesture(int id, Gesture gesture) {
 
 void JesturePipe::RemoveGesture(int gesture_id) { library->Remove(gesture_id); }
 
-void JesturePipe::ClearGestures() { library->Clear(); }
+void JesturePipe::ClearGestures() {
+    library->Clear();
 
-void JesturePipe::SetAction(int gesture_id, actions::Action action) {
+    std::unique_lock<std::shared_mutex> lk(actions->mutex);
+    actions->mapping.clear();
+}
+
+void JesturePipe::SetAction(int gesture_id, Action action) {
     std::unique_lock<std::shared_mutex> lk(actions->mutex);
 
-    if (!actions->mapping.contains(gesture_id))
-        actions->mapping[gesture_id] = {};
-
     actions->mapping[gesture_id] = action;
+}
+
+void JesturePipe::RemoveAction(int gesture_id) {
+    std::unique_lock<std::shared_mutex> lk(actions->mutex);
+
+    actions->mapping.erase(gesture_id);
 }
 
 }  // namespace jesturepipe

@@ -44,7 +44,7 @@ class GestureFrameConstructorCalculator : public api2::Node {
     // CHECKME: Do I need to update output timestamp bounds
     absl::Status Process(mediapipe::CalculatorContext *cc) override {
         if (kLandmarks(cc).IsEmpty()) {
-            frame_constructor.Reset();
+            // frame_constructor.Reset();
             return absl::OkStatus();
         }
 

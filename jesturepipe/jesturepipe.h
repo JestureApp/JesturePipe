@@ -93,7 +93,9 @@ class JesturePipe : private mediapipe::CalculatorGraph {
 
     void ClearGestures();
 
-    void SetAction(int gesture_id, actions::Action action);
+    void SetAction(int gesture_id, Action action);
+
+    void RemoveAction(int gesture_id);
 
    private:
     // template <typename T>
