@@ -183,10 +183,21 @@ bool CompareGestureFrame(GestureFrame& a, GestureFrame& b,
             return true;
         } else if (a.movement_direction.has_value() &&
                    b.movement_direction.has_value()) {
-            if (a.movement_direction.value() > 270)
+            if (a.movement_direction.value() > 300)
                 a.movement_direction = 360 - a.movement_direction.value();
 
-            if (b.movement_direction.value() > 270)
+            if (b.movement_direction.value() > 300)
+                b.movement_direction = 360 - b.movement_direction.value();
+
+            if (abs(a.movement_direction.value() -
+                    b.movement_direction.value()) < angle_thresh)
+                return true;
+        } else if (a.movement_direction.has_value() &&
+                   b.movement_direction.has_value()) {
+            if (a.movement_direction.value() > 300)
+                a.movement_direction = 360 - a.movement_direction.value();
+
+            if (b.movement_direction.value() > 300)
                 b.movement_direction = 360 - b.movement_direction.value();
 
             if (abs(a.movement_direction.value() -
@@ -250,12 +261,6 @@ absl::optional<GestureFrame> GestureFrameConstructor::OnLandmarks(
 
     } else if (frame_emitted && compGesture) {
         return empty_frame;
-    } else if (!compGesture) {
-        init_shape = input_shape;
-        init_direction = direction;
-        init_com = input_com;
-        frame_emitted = false;
-        init_time = time;
     }
     return empty_frame;
 }
