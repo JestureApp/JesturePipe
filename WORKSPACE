@@ -32,11 +32,11 @@ hedron_compile_commands_setup()
 # Workspace Setup
 ################################################################################
 
-new_local_repository(
-    name = "macos_opencv",
-    build_file = "@jesturepipe//third_party:opencv_macos.BUILD",
-    path = "/usr/local",
-)
+# new_local_repository(
+#     name = "macos_opencv",
+#     build_file = "@jesturepipe//third_party:opencv_macos.BUILD",
+#     path = "/usr/local",
+# )
 
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
