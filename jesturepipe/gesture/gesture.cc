@@ -46,6 +46,42 @@ Gesture Gesture::Next() {
     }}});
 }
 
+// Gesture Gesture::SlideFistAcross() {
+//     return Gesture(
+//         std::vector<GestureFrame>{GestureFrame{.hand_shape =
+//                                                    HandShape{
+//                                                        .index_direction = 315,
+//                                                        .middle_direction = 315,
+//                                                        .ring_direction = 315,
+//                                                        .pinky_direction = 315,
+//                                                        .thumb_direction = 135,
+//                                                    },
+//                                                .movement_direction = 315}});
+// }
+
+// Gesture Gesture::SlideSingleUp() {
+//     return Gesture(std::vector<GestureFrame>{GestureFrame{HandShape{
+//         .index_direction = 180,
+//         .middle_direction = 0,
+//         .ring_direction = 0,
+//         .pinky_direction = 0,
+//         .thumb_direction = 180,
+//     },
+//     .movement_direction = 90}});
+// }
+
+
+// Gesture Gesture::SlideSingleDown() {
+//     return Gesture(std::vector<GestureFrame>{GestureFrame{HandShape{
+//         .index_direction = 180,
+//         .middle_direction = 0,
+//         .ring_direction = 0,
+//         .pinky_direction = 0,
+//         .thumb_direction = 180,
+//     },
+//     .movement_direction = 270}});
+// }
+
 Gesture Gesture::SlideLeft() {
     return Gesture(
         std::vector<GestureFrame>{GestureFrame{.hand_shape =
@@ -78,12 +114,12 @@ Gesture Gesture::SlideRight() {
 //                     HandShape{
 //                     .index_direction = 90,
 //                     .middle_direction = 90,
-//                     .ring_direction = 270,
-//                     .pinky_direction = 270,
+//                     .ring_direction = 90,
+//                     .pinky_direction = 90,
 //                     .thumb_direction = 90,
 //             },
-//     .movement_direction = 274.748},
-
+//     .movement_direction = 180}, 
+    
 //     GestureFrame{.hand_shape =
 //                     HandShape{
 //                     .index_direction = 90,
@@ -92,7 +128,7 @@ Gesture Gesture::SlideRight() {
 //                     .pinky_direction = 90,
 //                     .thumb_direction = 90,
 //             },
-//     .movement_direction =  81.4746}
+//     .movement_direction =  0}
 //     });
 
 // }

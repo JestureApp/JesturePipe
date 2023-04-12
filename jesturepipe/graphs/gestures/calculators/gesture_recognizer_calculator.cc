@@ -2,6 +2,7 @@
 #include "jesturepipe/gesture/recognizer.h"
 #include "mediapipe/framework/api2/node.h"
 #include "mediapipe/framework/calculator_framework.h"
+#include <iostream>
 
 namespace jesturepipe {
 
@@ -37,6 +38,7 @@ class GestureRecognizerCalculator : public api2::Node {
 
     absl::Status Process(mediapipe::CalculatorContext *cc) override {
         if (kFrames(cc).IsEmpty()) {
+            // std::cout << "Reset WTF" << std::endl;
             // recognizer.Reset();
             return absl::OkStatus();
         }

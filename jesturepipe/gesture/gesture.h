@@ -57,7 +57,11 @@ class Gesture {
     static Gesture Next();
     static Gesture SlideLeft();
     static Gesture SlideRight();
-    // static Gesture CustomGesture();
+    // static Gesture SlideFistAcross(); //For closing window potentially
+    // static Gesture SlideSingleUp(); //For scrolling up
+    // static Gesture SlideSingleDown(); //For scrolling down
+    static Gesture CustomGesture();
+
     Gesture();
     Gesture(std::vector<GestureFrame>&& frames);
 

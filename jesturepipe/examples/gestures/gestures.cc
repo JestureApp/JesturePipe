@@ -105,7 +105,7 @@ std::shared_ptr<GestureLibrary> init_library() {
 }
 
 absl::Status on_recording(mediapipe::Packet packet) {
-    Gesture gesture = packet.Get<Gesture>();
+    Gesture gesture = packet.Get<Gesture>(); 
 
     std::cout << "Recorded gesture with frames:" << std::endl;
 
