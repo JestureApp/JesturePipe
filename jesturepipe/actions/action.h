@@ -6,14 +6,14 @@
 
 namespace jesturepipe {
 
-using ActionType = actions::Action;
-
 typedef enum CursorControl { None, Grab, Release, Toggle } CursorControl;
 
-typedef struct Action {
-    ActionType type;
+using actions::Action;
+
+typedef struct ActionList {
+    std::vector<Action> actions;
     CursorControl cursor_control = None;
-} Action;
+} ActionList;
 
 }  // namespace jesturepipe
 

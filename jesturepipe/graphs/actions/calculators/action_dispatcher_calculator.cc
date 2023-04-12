@@ -36,17 +36,17 @@ class ActionDispatcherCalculator : public api2::Node {
         if (!kGestureId(cc).IsEmpty() &&
             mapper->mapping.contains(*kGestureId(cc))) {
             auto gesture_id = *kGestureId(cc);
-            auto action = mapper->mapping[gesture_id];
+            auto action_list = mapper->mapping[gesture_id];
 
-            if (action.cursor_control == CursorControl::Grab ||
-                (action.cursor_control == CursorControl::Toggle &&
+            if (action_list.cursor_control == CursorControl::Grab ||
+                (action_list.cursor_control == CursorControl::Toggle &&
                  !cursor_tracking)) {
                 LOG(INFO) << "Grabbing cursor";
 
                 init_tracking = true;
                 cursor_tracking = true;
-            } else if (action.cursor_control == CursorControl::Release ||
-                       (action.cursor_control == CursorControl::Toggle &&
+            } else if (action_list.cursor_control == CursorControl::Release ||
+                       (action_list.cursor_control == CursorControl::Toggle &&
                         cursor_tracking)) {
                 LOG(INFO) << "Releasing cursor";
 
@@ -55,9 +55,13 @@ class ActionDispatcherCalculator : public api2::Node {
 
             LOG(INFO) << "Performing action for gesture " << gesture_id;
 
-            return actions
-                .Perform(action.type, actions::action::target::Focused{})
-                .get();
+            for (auto action : action_list.actions) {
+                absl::Status status =
+                    actions.Perform(action, actions::action::target::Focused{})
+                        .get();
+
+                if (!status.ok()) return status;
+            }
         }
 
         if (cursor_tracking && !kLandmarks(cc).IsEmpty()) {

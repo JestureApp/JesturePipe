@@ -228,7 +228,7 @@ void JesturePipe::ClearGestures() {
     actions->mapping.clear();
 }
 
-void JesturePipe::SetAction(int gesture_id, Action action) {
+void JesturePipe::SetAction(int gesture_id, ActionList action) {
     std::unique_lock<std::shared_mutex> lk(actions->mutex);
 
     actions->mapping[gesture_id] = action;
