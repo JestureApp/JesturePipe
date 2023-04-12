@@ -53,10 +53,29 @@ load("//:repositories.bzl", "jesturepipe_repositories")
 
 jesturepipe_repositories()
 
-load("//:setup0.bzl", "jesturepipe_setup0")
+# SETUP STAGE 1
+load("@rules_foreign_cc//:workspace_definitions.bzl", "rules_foreign_cc_dependencies")
+load("@org_tensorflow//tensorflow:workspace3.bzl", "tf_workspace3")
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+load("@actions//:repositories.bzl", "actions_repositories")
 
-jesturepipe_setup0()
+rules_foreign_cc_dependencies()
 
-load("//:setup1.bzl", "jesturepipe_setup1")
+protobuf_deps()
 
-jesturepipe_setup1()
+tf_workspace3()
+
+actions_repositories()
+
+# SETUP SAGE 2
+load("@actions//display:display_configure.bzl", "display_configure")
+
+display_configure()
+
+# SETUP SAGE 3
+load("@org_tensorflow//tensorflow:workspace2.bzl", "tf_workspace2")
+load("@display//:local_display.bzl", "display_repositories")
+
+tf_workspace2()
+
+display_repositories()

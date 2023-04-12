@@ -51,7 +51,7 @@ class JesturePipe : private mediapipe::CalculatorGraph {
     /// \return A status indicating the success of starting the graph.
     /// An ok status if the graph started successfully or an error status
     /// otherwise.
-    absl::Status Start(int camera_index = 0, bool use_full = false);
+    absl::Status Start(bool use_full = false);
 
     /// \brief Stops the pipeline. This method will block until the pipeline has
     /// exited.
@@ -59,38 +59,49 @@ class JesturePipe : private mediapipe::CalculatorGraph {
     /// An ok status if the graph stopped successfully or an error status
     /// otherwise.
     absl::Status Stop();
-    absl::Status Pause();
-    absl::Status Next();
-    absl::Status Prev();
+
+    bool isRunning() const;
+
+    absl::Status AddFrame(std::unique_ptr<mediapipe::ImageFrame> frame,
+                          unsigned long timestamp);
 
     absl::Status OnGestureRecognition(
-        std::function<absl::Status(int)> packet_callback);
-
-    absl::Status OnRecordedGesture(
-        std::function<absl::Status(Gesture)> packet_callback);
-
-    absl::Status OnLandmarks(
-        std::function<
-            absl::Status(std::vector<mediapipe::NormalizedLandmarkList>)>
+        std::function<absl::Status(int gesture_id, unsigned long timestamp)>
             packet_callback);
 
-    absl::Status OnAnnotatedFrame(
-        std::function<absl::Status(const mediapipe::Packet&)> packet_callback);
+    absl::Status OnRecordedGesture(
+        std::function<absl::Status(Gesture gesture, unsigned long timestamp)>
+            packet_callback);
 
-    mediapipe::StatusOrPoller FramePoller();
+    absl::Status OnLandmarks(
+        std::function<absl::Status(
+            std::vector<mediapipe::NormalizedLandmarkList> multi_hand_landmarks,
+            unsigned long timestamp)>
+            packet_callback);
 
-    bool IsRecording();
+    absl::Status OnHandPresence(
+        std::function<absl::Status(bool present, unsigned long timestamp)>
+            packet_callback);
+
+    bool IsRecording() const;
 
     absl::Status SetRecording(bool);
 
-    void AddGesture(int gesture_id, Gesture&& gesture);
+    void SetGesture(int gesture_id, Gesture gesture);
 
-    void AddAction(int gesture_id, actions::Action action);
+    void RemoveGesture(int gesture_id);
+
+    void ClearGestures();
+
+    void SetAction(int gesture_id, Action action);
+
+    void RemoveAction(int gesture_id);
 
    private:
     // template <typename T>
     // absl::Status ConsumeOrCopyCallback()
 
+    bool running;
     bool recording;
     int recording_ts;
     std::shared_ptr<GestureLibrary> library;

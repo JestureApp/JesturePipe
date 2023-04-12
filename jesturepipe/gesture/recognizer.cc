@@ -1,5 +1,9 @@
 #include "jesturepipe/gesture/recognizer.h"
+
 #include <ctime>
+
+#include "glog/logging.h"
+
 namespace jesturepipe {
 GestureRecognizer::GestureRecognizer() : comp(0) {}
 
@@ -25,7 +29,7 @@ void GestureRecognizer::Reset() { matchers.clear(); }
 
 absl::optional<int> GestureRecognizer::ProcessFrame(const GestureFrame &frame) {
     absl::optional<int> matched;
-    
+
     // Check if this is the first frame in any gesture
     {
         // Acquire read lock on library
@@ -98,7 +102,7 @@ bool GestureRecognizer::GestureMatcher::Advance(const GestureFrame &frame) {
 absl::optional<int> GestureRecognizer::GestureMatcher::Matches() {
     absl::optional<int> match;
     if (at == gesture.frames->size()) match = id;
-    
+
     return match;
 }
 }  // namespace jesturepipe

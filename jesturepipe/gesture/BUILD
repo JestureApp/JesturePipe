@@ -27,6 +27,7 @@ cc_library(
     deps = [
         ":gesture",
         ":library",
+        "@com_github_google_glog//:glog",
         "@com_google_absl//absl/types:optional",
     ],
 )
@@ -37,6 +38,7 @@ cc_library(
     hdrs = ["recorder.h"],
     deps = [
         ":gesture",
+        "@com_github_google_glog//:glog",
     ],
 )
 
@@ -46,6 +48,7 @@ cc_library(
     hdrs = ["frame_constructor.h"],
     deps = [
         ":gesture",
+        "@com_github_google_glog//:glog",
         "@com_google_absl//absl/time",
         "@com_google_absl//absl/types:optional",
         "@mediapipe//mediapipe/framework/formats:landmark_cc_proto",

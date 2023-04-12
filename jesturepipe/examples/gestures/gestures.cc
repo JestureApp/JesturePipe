@@ -104,7 +104,6 @@ std::shared_ptr<GestureLibrary> init_library() {
     return library;
 }
 
-
 absl::Status on_recording(mediapipe::Packet packet) {
     Gesture gesture = packet.Get<Gesture>(); 
 
@@ -216,6 +215,7 @@ int main(int argc, char** argv) {
     bool use_full = false;
 
     google::InitGoogleLogging(argv[0]);
+    FLAGS_alsologtostderr = 1;
 
     std::string error;
     Runfiles* runfiles = Runfiles::Create(argv[0], &error);
