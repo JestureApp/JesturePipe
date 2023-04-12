@@ -6,16 +6,6 @@
 
 namespace jesturepipe {
 
-Gesture Gesture::Stop() {
-    return Gesture(std::vector<GestureFrame>{GestureFrame{HandShape{
-        .index_direction = 90,
-        .middle_direction = 90,
-        .ring_direction = 90,
-        .pinky_direction = 90,
-        .thumb_direction = 90,
-    }}});
-}
-
 Gesture Gesture::Pause() {
     return Gesture(std::vector<GestureFrame>{GestureFrame{HandShape{
         .index_direction = 90,
@@ -26,9 +16,9 @@ Gesture Gesture::Pause() {
     }}});
 }
 
-Gesture Gesture::Prev() {
+Gesture Gesture::ThumbsUp() {
     return Gesture(std::vector<GestureFrame>{GestureFrame{HandShape{
-        .index_direction = 0,
+        .index_direction = 180,
         .middle_direction = 180,
         .ring_direction = 180,
         .pinky_direction = 180,
@@ -36,51 +26,25 @@ Gesture Gesture::Prev() {
     }}});
 }
 
-Gesture Gesture::Next() {
+Gesture Gesture::GrabMouse() {
     return Gesture(std::vector<GestureFrame>{GestureFrame{HandShape{
-        .index_direction = 180,
-        .middle_direction = 0,
-        .ring_direction = 0,
-        .pinky_direction = 0,
+        .index_direction = 270,
+        .middle_direction = 270,
+        .ring_direction = 270,
+        .pinky_direction = 270,
         .thumb_direction = 90,
     }}});
 }
 
-// Gesture Gesture::SlideFistAcross() {
-//     return Gesture(
-//         std::vector<GestureFrame>{GestureFrame{.hand_shape =
-//                                                    HandShape{
-//                                                        .index_direction = 315,
-//                                                        .middle_direction = 315,
-//                                                        .ring_direction = 315,
-//                                                        .pinky_direction = 315,
-//                                                        .thumb_direction = 135,
-//                                                    },
-//                                                .movement_direction = 315}});
-// }
-
-// Gesture Gesture::SlideSingleUp() {
-//     return Gesture(std::vector<GestureFrame>{GestureFrame{HandShape{
-//         .index_direction = 180,
-//         .middle_direction = 0,
-//         .ring_direction = 0,
-//         .pinky_direction = 0,
-//         .thumb_direction = 180,
-//     },
-//     .movement_direction = 90}});
-// }
-
-
-// Gesture Gesture::SlideSingleDown() {
-//     return Gesture(std::vector<GestureFrame>{GestureFrame{HandShape{
-//         .index_direction = 180,
-//         .middle_direction = 0,
-//         .ring_direction = 0,
-//         .pinky_direction = 0,
-//         .thumb_direction = 180,
-//     },
-//     .movement_direction = 270}});
-// }
+Gesture Gesture::LeaveMouse() {
+    return Gesture(std::vector<GestureFrame>{GestureFrame{HandShape{
+        .index_direction = 90,
+        .middle_direction = 90,
+        .ring_direction = 90,
+        .pinky_direction = 90,
+        .thumb_direction = 90,
+    }}});
+}
 
 Gesture Gesture::SlideLeft() {
     return Gesture(
@@ -108,30 +72,33 @@ Gesture Gesture::SlideRight() {
                                                .movement_direction = 0}});
 }
 
-// Gesture Gesture::CustomGesture() {
-//         return Gesture(
-//         std::vector<GestureFrame>{GestureFrame{.hand_shape =
-//                     HandShape{
-//                     .index_direction = 90,
-//                     .middle_direction = 90,
-//                     .ring_direction = 90,
-//                     .pinky_direction = 90,
-//                     .thumb_direction = 90,
-//             },
-//     .movement_direction = 180}, 
-    
-//     GestureFrame{.hand_shape =
-//                     HandShape{
-//                     .index_direction = 90,
-//                     .middle_direction =  90,
-//                     .ring_direction = 90,
-//                     .pinky_direction = 90,
-//                     .thumb_direction = 90,
-//             },
-//     .movement_direction =  0}
-//     });
+Gesture Gesture::SlideUp() {
+    return Gesture(
+        std::vector<GestureFrame>{GestureFrame{.hand_shape =
+                                                   HandShape{
+                                                       .index_direction = 180,
+                                                       .middle_direction = 180,
+                                                       .ring_direction = 180,
+                                                       .pinky_direction = 180,
+                                                       .thumb_direction = 180,
+                                                   },
+                                               .movement_direction = 90}});
+}
 
-// }
+Gesture Gesture::SlideDown() {
+    return Gesture(
+        std::vector<GestureFrame>{GestureFrame{.hand_shape =
+                                                   HandShape{
+                                                       .index_direction = 180,
+                                                       .middle_direction = 180,
+                                                       .ring_direction = 180,
+                                                       .pinky_direction = 180,
+                                                       .thumb_direction = 180,
+                                                   },
+                                               .movement_direction = 270}});
+}
+
+
 constexpr bool in_threshold(double a, double b, double thresh) {
     return abs(a - b) <= thresh;
 }
@@ -157,11 +124,11 @@ bool GestureFrame::Comparator::operator()(const GestureFrame& a,
     GestureFrame tempA = a;
     GestureFrame tempB = b;
     if (tempA.movement_direction.has_value())
-        if (tempA.movement_direction.value() > 270)
+        if (tempA.movement_direction.value() > 300)
             tempA.movement_direction = 360 - tempA.movement_direction.value();
 
     if (tempB.movement_direction.has_value())
-        if (tempB.movement_direction.value() > 270)
+        if (tempB.movement_direction.value() > 300)
             tempB.movement_direction = 360 - tempB.movement_direction.value();
 
     return hand_shape_comp(a.hand_shape, b.hand_shape) &&
