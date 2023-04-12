@@ -55,8 +55,9 @@ absl::optional<int> GestureRecognizer::ProcessFrame(const GestureFrame &frame) {
         }
     }
     // If we found a match, remove all matchers
-    if (matched.has_value()) matchers.clear();
-
+    if (matched.has_value()) {
+        matchers.clear();
+    }
     return matched;
 }
 
@@ -65,7 +66,11 @@ GestureRecognizer::GestureMatcher::GestureMatcher(
     : at(0), id(id), gesture(gesture), comp(comp) {}
 
 bool GestureRecognizer::GestureMatcher::Advance(const GestureFrame &frame) {
-    if (at < 0 || at >= gesture.frames->size()) return false;
+    std::cout << "Enter Frame No. " << at << std::endl;
+    if (at < 0 || at >= gesture.frames->size()) {
+        std::cout << "FLUSH" << std::endl;
+        return false;
+    }
 
     if ((*comp)(gesture.frames->at(at), frame)) {
         LOG(INFO) << "Saw frame " << at << " of gesture " << id;
