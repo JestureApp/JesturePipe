@@ -9,7 +9,7 @@
 namespace jesturepipe {
 typedef struct ActionMapper {
     std::shared_mutex mutex;
-    absl::flat_hash_map<int, Action> mapping;
+    absl::flat_hash_map<int, ActionList> mapping;
 } ActionMapper;
 }  // namespace jesturepipe
 
