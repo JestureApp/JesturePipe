@@ -1,16 +1,36 @@
-# A graph implementing the JesturePipe pipeline
+type: "Actions"
 
 ################################################################################
-# Input Packets
+# Side Packets
 ################################################################################
 
-input_stream: "GESTURE:gesture"
+input_side_packet: "ACTION_MAPPER:action_mapper"
 
 ################################################################################
-# Graph
+# Streams
+################################################################################
+
+input_stream: "GESTURE_ID:gesture_id"
+input_stream: "NORM_LANDMARKS:multi_hand_landmarks"
+
+################################################################################
+# Nodes
 ################################################################################
 
 node {
-    calculator: "ActionsCalculator"
-    input_stream: "GESTURE:gesture"
+    calculator: "GetNormalizedLandmarkListVectorItemCalculator"
+    input_stream: "VECTOR:multi_hand_landmarks"
+    output_stream: "ITEM:hand_landmarks"
+    options {
+        [mediapipe.GetVectorItemCalculatorOptions.ext] {
+            item_index: 0
+        }
+    }
+}
+
+node {
+    calculator: "ActionDispatcherCalculator"
+    input_side_packet: "MAPPER:action_mapper"
+    input_stream: "GESTURE_ID:gesture_id"
+    input_stream: "LANDMARKS:hand_landmarks"
 }

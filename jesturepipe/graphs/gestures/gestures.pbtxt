@@ -1,0 +1,155 @@
+type: "Gestures"
+
+################################################################################
+# Side Packets
+################################################################################
+
+# Model paths
+input_side_packet: "PALM_FULL_MODEL_PATH:palm_full_model_path"
+input_side_packet: "PALM_LITE_MODEL_PATH:palm_lite_model_path"
+input_side_packet: "HAND_LANDMARK_FULL_MODEL_PATH:hand_landmark_full_model_path"
+input_side_packet: "HAND_LANDMARK_LITE_MODEL_PATH:hand_landmark_lite_model_path"
+
+input_side_packet: "LIBRARY:gesture_library"
+
+# Whether or not to use full or lite models
+# (bool)
+input_side_packet: "USE_FULL:use_full"
+
+################################################################################
+# Streams
+################################################################################
+
+# The frame to generate hand landmarks for
+# (ImageFrame)
+input_stream: "IMAGE:frame"
+
+# (bool)
+input_stream: "FRAME_IS_REC:frame_is_rec"
+
+# Collection of normalized hand landmarks
+# (std::vector<NormalizedLandmarkList>)
+output_stream: "NORM_LANDMARKS:multi_hand_landmarks"
+
+# (bool)
+output_stream: "HAND_PRESENCE:hand_presence"
+
+# (GestureFrame)
+output_stream: "GESTURE_FRAME:gesture_frame"
+
+# (int)
+output_stream: "GESTURE_ID:gesture_id"
+
+# (int)
+output_stream: "ACTIONABLE_GESTURE_ID:actionable_gesture_id"
+
+# (Gesture)
+output_stream: "RECORDED_GESTURE:recorded_gesture"
+
+################################################################################
+# Initialization Nodes
+################################################################################
+
+node {
+    calculator: "ConstantSidePacketCalculator"
+    output_side_packet: "PACKET:0:num_hands"
+    output_side_packet: "PACKET:1:thresh"
+    options: {
+        [mediapipe.ConstantSidePacketCalculatorOptions.ext]: {
+            packet { int_value: 2 }
+            packet { double_value: 0.10}
+            # 0.056
+        }
+    }
+}
+
+################################################################################
+# Primary Nodes
+################################################################################
+
+node {
+    calculator: "StateChangeCalculator"
+    input_stream: "STATE:frame_is_rec"
+    output_stream: "STATE_CHANGE:rec_reset"
+}
+
+node {
+    calculator: "FlowLimiterCalculator"
+    input_stream: "frame"
+    input_stream: "FINISHED:hand_presence"
+    input_stream_info: {
+        tag_index: "FINISHED"
+        back_edge: true
+    }
+    output_stream: "limited_frames"
+}
+
+node {
+    calculator: "Hands"
+    input_side_packet: "PALM_FULL_MODEL_PATH:palm_full_model_path"
+    input_side_packet: "PALM_LITE_MODEL_PATH:palm_lite_model_path"
+    input_side_packet: "HAND_LANDMARK_FULL_MODEL_PATH:hand_landmark_full_model_path"
+    input_side_packet: "HAND_LANDMARK_LITE_MODEL_PATH:hand_landmark_lite_model_path"
+    input_side_packet: "USE_FULL:use_full"
+    input_side_packet: "NUM_HANDS:num_hands"
+    input_stream: "IMAGE:limited_frames"
+    output_stream: "NORM_LANDMARKS:multi_hand_landmarks"
+    output_stream: "HAND_PRESENCE:hand_presence"
+}
+
+node {
+    calculator: "GetNormalizedLandmarkListVectorItemCalculator"
+    input_stream: "VECTOR:multi_hand_landmarks"
+    output_stream: "ITEM:hand_landmarks"
+    options {
+        [mediapipe.GetVectorItemCalculatorOptions.ext] {
+            item_index: 0
+        }
+    }
+}
+
+node {
+    calculator: "ClockTimestampCalculator"
+    input_stream: "hand_landmarks"
+    output_stream: "hand_landmarks_time"
+}
+
+node {
+    calculator: "GestureFrameConstructorCalculator"
+    input_side_packet: "THRESH:thresh"
+    input_stream: "LANDMARKS:hand_landmarks"
+    input_stream: "TIMES:hand_landmarks_time"
+    input_stream: "REC_RESET:rec_reset"
+    output_stream: "GESTURE_FRAME:gesture_frame"
+}
+
+
+node {
+    calculator: "GestureRecognizerCalculator"
+    input_side_packet: "THRESH:thresh"
+    input_side_packet: "LIBRARY:gesture_library"
+    input_stream: "GESTURE_FRAME:gesture_frame"
+    input_stream: "REC_RESET:rec_reset"
+    output_stream: "GESTURE_ID:gesture_id"
+}
+
+node {
+    calculator: "GateCalculator"
+    input_stream: "ALLOW:frame_is_rec"
+    input_stream: "gesture_frame"
+    output_stream: "recordable_gesture_frame"
+}
+
+node {
+    calculator: "GestureRecorderCalculator"
+    input_stream: "GESTURE_FRAME:recordable_gesture_frame"
+    input_stream: "REC_RESET:rec_reset"
+    output_stream: "GESTURE:recorded_gesture"
+}
+
+node {
+    calculator: "GateCalculator"
+    input_stream: "DISALLOW:frame_is_rec"
+    input_stream: "gesture_id"
+    output_stream: "actionable_gesture_id"
+}

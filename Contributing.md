@@ -17,5 +17,6 @@ code base easier.
 * Build all (debug)
 * Refresh compile_commands.json
 
-### Debugging
-* JesturePipe Demo
+# More
+For more information please see the following
+* [Gesture](jesturepipe/gesture/README.md)

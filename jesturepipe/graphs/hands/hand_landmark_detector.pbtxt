@@ -1,36 +1,47 @@
-# Graph that takes a image frame and a RPI and produces hand landmarks.
-
 type: "HandLandmarkDetector"
 
 ################################################################################
-# Configuration (Input side packets)
+# Side Packets
 ################################################################################
 
-# The path to the hand landmaker detection model.
+# The path to the hand landmark model
 input_side_packet: "MODEL_PATH:model_path"
 
 ################################################################################
-# Inputs
+# Streams
 ################################################################################
 
-# The image frame to find hand landmarks in. (ImageFrame)
+# The image to detect hand landmarks in.
 input_stream: "IMAGE:frame"
 
 # ROI (region of interest) within the given image where a palm/hand is located.
 # (NormalizedRect)
 input_stream: "ROI:hand_rect"
 
-################################################################################
-# Outputs
-################################################################################
+# The landmarks detected in the frame normalized to the ROI
+output_stream: "NORM_LANDMARKS:hand_landmarks"
 
-output_stream: "LANDMARKS:hand_landmarks"
+# The landmarks detected in the frame
 output_stream: "WORLD_LANDMARKS:hand_world_landmarks"
+
+# The corresponding handedness for each set of landmarks
 output_stream: "HANDEDNESS:handedness"
 
 ################################################################################
-# Graph
+# Initialization Nodes
 ################################################################################
+
+# Loads the hand landmark TF Lite model.
+node {
+    calculator: "ModelLoader"
+    input_side_packet: "MODEL_PATH:model_path"
+    output_side_packet: "MODEL:model"
+}
+
+################################################################################
+# Primary Nodes
+################################################################################
+
 
 # Transforms a region of image into a 224x224 tensor while keeping the aspect
 # ratio, and therefore may result in potential letterboxing.
@@ -38,7 +49,7 @@ node {
   calculator: "ImageToTensorCalculator"
   input_stream: "IMAGE:frame"
   input_stream: "NORM_RECT:hand_rect"
-  output_stream: "TENSORS:input_tensor"
+  output_stream: "TENSORS:frame_tensor"
   output_stream: "LETTERBOX_PADDING:letterbox_padding"
   options: {
     [mediapipe.ImageToTensorCalculatorOptions.ext] {
@@ -53,12 +64,6 @@ node {
   }
 }
 
-# Loads the hand landmark TF Lite model.
-node {
-    calculator: "ModelLoader"
-    input_side_packet: "MODEL_PATH:model_path"
-    output_side_packet: "MODEL:model"
-}
 
 # Runs a TensorFlow Lite model on CPU that takes an image tensor and outputs a
 # vector of tensors representing, for instance, detection boxes/keypoints and
@@ -66,7 +71,7 @@ node {
 node {
   calculator: "InferenceCalculator"
   input_side_packet: "MODEL:model"
-  input_stream: "TENSORS:input_tensor"
+  input_stream: "TENSORS:frame_tensor"
   output_stream: "TENSORS:output_tensors"
   options: {
     [mediapipe.InferenceCalculatorOptions.ext] {
@@ -76,6 +81,7 @@ node {
     }
   }
 }
+
 
 # Splits a vector of tensors to multiple vectors according to the ranges
 # specified in option.
@@ -95,6 +101,7 @@ node {
     }
   }
 }
+
 
 # Converts the hand-flag tensor into a float that represents the confidence
 # score of hand presence.
@@ -124,6 +131,7 @@ node {
   input_stream: "ALLOW:hand_presence"
   output_stream: "ensured_handedness_tensor"
 }
+
 
 # Converts the handedness tensor into a float that represents the classification
 # score of handedness.
@@ -163,6 +171,7 @@ node {
   input_stream: "ALLOW:hand_presence"
   output_stream: "ensured_landmark_tensors"
 }
+
 
 # Decodes the landmark tensors into a list of landmarks, where the landmark
 # coordinates are normalized by the size of the input image to the model.
