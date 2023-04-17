@@ -6,7 +6,15 @@ JesturePipe is the backend pipeline for the Jesture application.
 
 ## Bazel Workspace Setup
 ```starlark
-load("//:repositories.bzl", "jesturepipe_repositories")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "jesturepipe",
+    strip_prefix = "JesturePipe-1.0.0",
+    url = "https://github.com/JestureApp/JesturePipe/archive/refs/tags/v1.0.0.zip",
+)
+
+load("@jesturepipe//:repositories.bzl", "jesturepipe_repositories")
 
 jesturepipe_repositories()
 
