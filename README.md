@@ -33,9 +33,17 @@ tf_workspace3()
 actions_repositories()
 
 # SETUP SAGE 2
+load("@actions//display:display_configure.bzl", "display_configure")
+
+display_configure()
+
+# SETUP SAGE 3
 load("@org_tensorflow//tensorflow:workspace2.bzl", "tf_workspace2")
+load("@display//:local_display.bzl", "display_repositories")
 
 tf_workspace2()
+
+display_repositories()
 ```
 
 ## Contributing
