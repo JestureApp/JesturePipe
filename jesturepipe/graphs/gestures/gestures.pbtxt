@@ -56,8 +56,8 @@ node {
     output_side_packet: "PACKET:1:thresh"
     options: {
         [mediapipe.ConstantSidePacketCalculatorOptions.ext]: {
-            packet { int_value: 2 }
-            packet { double_value: 0.10}
+            packet { int_value: 1 }
+            packet { double_value: 0.15}
             # 0.056
         }
     }
