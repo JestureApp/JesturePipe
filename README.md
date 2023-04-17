@@ -1,4 +1,8 @@
-# Jesture Pipe
+# JesturePipe
+JesturePipe is the backend pipeline for the Jesture application. 
+
+## Prerequisites
+* OpenCV
 
 ## Bazel Workspace Setup
 ```starlark

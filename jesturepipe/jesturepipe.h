@@ -62,39 +62,51 @@ class JesturePipe : private mediapipe::CalculatorGraph {
 
     bool isRunning() const;
 
+    /// \brief Adds a frame to the pipeline at the given timestamp
     absl::Status AddFrame(std::unique_ptr<mediapipe::ImageFrame> frame,
                           unsigned long timestamp);
 
+    /// \brief Adds a callback for gesture recognition
     absl::Status OnGestureRecognition(
         std::function<absl::Status(int gesture_id, unsigned long timestamp)>
             packet_callback);
 
+    /// \brief Adds a callback for gesture recordings
     absl::Status OnRecordedGesture(
         std::function<absl::Status(Gesture gesture, unsigned long timestamp)>
             packet_callback);
 
+    /// \brief Adds a callback for hand landmarks
     absl::Status OnLandmarks(
         std::function<absl::Status(
             std::vector<mediapipe::NormalizedLandmarkList> multi_hand_landmarks,
             unsigned long timestamp)>
             packet_callback);
 
+    /// \brief Adds a callback for hand presences
     absl::Status OnHandPresence(
         std::function<absl::Status(bool present, unsigned long timestamp)>
             packet_callback);
 
+    /// \brief Checks whether or not the pipeline is currently recording
     bool IsRecording() const;
 
+    /// \brief Sets the recording mode for the pipeline
     absl::Status SetRecording(bool);
 
+    /// \brief Sets the gesture associated with the given id
     void SetGesture(int gesture_id, Gesture gesture);
 
+    /// \brief Removes the gesture associated with the given id
     void RemoveGesture(int gesture_id);
 
+    /// \brief Removes all gestures
     void ClearGestures();
 
+    /// \brief Sets the action associated with the given gesture id
     void SetAction(int gesture_id, ActionList actions);
 
+    /// \brief Removes the action associated with the given gesture id
     void RemoveAction(int gesture_id);
 
    private:

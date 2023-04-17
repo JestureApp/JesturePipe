@@ -146,11 +146,16 @@ def jesturepipe_repositories():
         path = "/opt/homebrew",
     )
 
-    maybe(
-        git_repository,
+    # maybe(
+    #     git_repository,
+    #     name = "actions",
+    #     remote = "git@capstone-cs.eng.utah.edu:jesture/actions.git",
+    #     # tag = "v0.1.1",
+    #     commit = "81a1fc11b6ac9e7bfa039e05499739b58164f9c1",
+    #     shallow_since = "1681110432 +0000",
+    # )
+    http_archive(
         name = "actions",
-        remote = "git@capstone-cs.eng.utah.edu:jesture/actions.git",
-        # tag = "v0.1.1",
-        commit = "81a1fc11b6ac9e7bfa039e05499739b58164f9c1",
-        shallow_since = "1681110432 +0000",
+        strip_prefix = "Actions-1.0.0",
+        url = "https://github.com/JestureApp/Actions/archive/refs/tags/v1.0.0.zip",
     )
